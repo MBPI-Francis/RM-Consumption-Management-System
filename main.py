@@ -16,7 +16,7 @@ class UserBase(BaseModel):
     is_superuser: bool = Field(default=False)  # Default value for superuser flag
     is_reguser: bool = Field(default=True)      # Default value for regular user flag
     is_active: bool = Field(default=True)       # Default value for active status
-    department:
+    department: List[DepartmentBase]    # List of department
 
 class DepartmentBase(BaseModel):
     department: str = Field(min_length=5, max_length=150) # Username, with a maximum length of 50
