@@ -18,7 +18,7 @@ class Department(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 
     # Relationship with User
-    # users = relationship("User", back_populates="department")
+    users = relationship("User", back_populates="department")
 
 
 
