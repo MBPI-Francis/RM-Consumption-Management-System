@@ -29,6 +29,8 @@ class User(Base):
     # Relationship with Department
     department = relationship("Department", back_populates="users")
 
+
+
     # Relationships for created_by, deactivated_by and updated_by
     created_by = relationship("User", remote_side=[id], foreign_keys=[created_by_id], backref="created_users")
     updated_by = relationship("User", remote_side=[id], foreign_keys=[updated_by_id], backref="updated_users")
