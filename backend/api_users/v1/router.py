@@ -1,35 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_warehouses.v1.schemas import WarehouseCreate, WarehouseUpdate, WarehouseResponse
-from backend.api_warehouses.v1.service import WarehouseService
+from backend.api_users.v1.schemas import UserCreate, UserUpdate, UserResponse
+from backend.api_users.v1.service import UserService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/warehouses/v1")
+router = APIRouter(prefix="/api/users/v1")
 
-@router.post("/create/", response_model=WarehouseResponse)
-async def create_warehouse(department: WarehouseCreate, db: get_db = Depends()):
-    result = WarehouseService(db).create_warehouse(department)
+@router.post("/create/", response_model=UserResponse)
+async def create_user(department: UserCreate, db: get_db = Depends()):
+    result = UserService(db).create_user(department)
     return result
 
-@router.get("/list/", response_model=list[WarehouseResponse])
-async def read_warehouse(db: get_db = Depends()):
-    result = WarehouseService(db).get_warehouse()
+@router.get("/list/", response_model=list[UserResponse])
+async def read_user(db: get_db = Depends()):
+    result = UserService(db).get_user()
     return result
 
-@router.put("/update/{warehouse_id}/", response_model=WarehouseResponse)
-async def update_warehouse(warehouse_id: UUID, user_update: WarehouseUpdate, db: get_db = Depends()):
-    result = WarehouseService(db).update_warehouse(warehouse_id, user_update)
-    return result
-
-
-@router.put("/restore/{warehouse_id}/", response_model=WarehouseResponse)
-async def restore_warehouse(warehouse_id: UUID,  db: get_db = Depends()):
-    result = WarehouseService(db).restore_warehouse(warehouse_id)
+@router.put("/update/{user_id}/", response_model=UserResponse)
+async def update_user(user_id: UUID, user_update: UserUpdate, db: get_db = Depends()):
+    result = UserService(db).update_user(user_id, user_update)
     return result
 
 
-@router.delete("/delete/{warehouse_id}/", response_model=WarehouseResponse)
-async def deactivate_warehouse(warehouse_id: UUID, db: get_db = Depends()):
-    result = WarehouseService(db).deactivate_warehouse(warehouse_id)
+@router.put("/restore/{user_id}/", response_model=UserResponse)
+async def restore_user(user_id: UUID,  db: get_db = Depends()):
+    result = UserService(db).restore_user(user_id)
+    return result
+
+
+@router.delete("/delete/{user_id}/", response_model=UserResponse)
+async def deactivate_user(user_id: UUID, db: get_db = Depends()):
+    result = UserService(db).deactivate_user(user_id)
     return result
