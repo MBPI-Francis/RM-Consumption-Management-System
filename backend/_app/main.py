@@ -6,7 +6,7 @@ from backend.settings.database import engine, Base
 app = FastAPI(title="Backend API with Versioning")
 
 # Include department router
-app.include_router(department_router)
+app.include_router(department_router.router)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

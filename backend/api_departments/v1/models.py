@@ -8,16 +8,17 @@ from backend.settings.database import Base  # Assuming Base is imported from you
 
 # Parent Model: Department
 class Department(Base):
-    __tablename__ = "departments"
+    __tablename__ = "tbl_departments"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     name = Column(String(150), nullable=False, unique=True)
+    description = Column(String(300), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
 
     # Relationship with User
-    users = relationship("User", back_populates="department")
+    # users = relationship("User", back_populates="department")
 
 
 

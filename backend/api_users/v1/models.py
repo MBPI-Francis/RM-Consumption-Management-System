@@ -23,4 +23,4 @@ class User(Base):
     department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False)
 
     # Relationship with Department
-    department = relationship("Department", back_populates="users")
+    # department = relationship("Department", back_populates="users")
