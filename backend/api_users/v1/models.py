@@ -9,18 +9,28 @@ from backend.settings.database import Base  # Assuming Base is imported from you
 
 # Child Model: User
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "tbl_users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
+    user_name = Column(String(50), nullable=False, unique=True, index=True)
     password = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
+    updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
+    deavtivated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
 
     # Foreign Key to Department
-    department_id = Column(UUID(as_uuid=True), ForeignKey("tbl_departments.id"), nullable=False)
+    department_id = Column(UUID(as_uuid=True), ForeignKey("tbl_departments.id"), nullable=True)
 
     # Relationship with Department
     department = relationship("Department", back_populates="users")
+
+    # Relationships for created_by, deactivated_by and updated_by
+    created_by = relationship("User", remote_side=[id], foreign_keys=[created_by_id], backref="created_users")
+    updated_by = relationship("User", remote_side=[id], foreign_keys=[updated_by_id], backref="updated_users")
+    deactivated_by = relationship("User", remote_side=[id], foreign_keys=[deavtivated_by_id], backref="deactivated_users")
+
