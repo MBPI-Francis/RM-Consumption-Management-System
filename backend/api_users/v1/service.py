@@ -27,7 +27,7 @@ class UserCRUD(AppCRUD):
         return None
 
 
-    def update_department(self, user_id: UUID, user_update: UserUpdate):
+    def update_user(self, user_id: UUID, user_update: UserUpdate):
         try:
             user = self.db.query(User).filter(User.id == user_id).first()
             if not user or not user.is_active:
@@ -45,8 +45,8 @@ class UserCRUD(AppCRUD):
     def deactivate_user(self, user_id: UUID):
         try:
             user = self.db.query(User).filter(User.id == user_id).first()
-            if not user or not user.is_active:
-                raise UserNotFoundException(detail="User not found or deactivated.")
+            if not user or user.is_active:
+                raise UserNotFoundException(detail="User not found or already deactivated.")
 
             user.is_active = False
             self.db.commit()
@@ -60,8 +60,8 @@ class UserCRUD(AppCRUD):
     def restore_user(self, user_id: UUID):
         try:
             user = self.db.query(User).filter(User.id == user_id).first()
-            if not user or not user.is_active:
-                raise UserNotFoundException(detail="User not found or deactivated.")
+            if not user or user.is_active:
+                raise UserNotFoundException(detail="User not found or already in active state.")
 
             user.is_active = True
             self.db.commit()
@@ -105,5 +105,5 @@ class UserService(AppService):
 
     # This is the service/business logic in soft restoring the department.
     def restore_user(self, user_id: UUID):
-        user = UserCRUD(self.db).restore_usert(user_id)
+        user = UserCRUD(self.db).restore_user(user_id)
         return user
