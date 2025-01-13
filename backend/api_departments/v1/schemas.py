@@ -18,9 +18,11 @@ class DepartmentCreate(DepartmentBase):
 class DepartmentUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    is_deleted: Optional[bool]
+
 
 class DepartmentResponse(DepartmentBase):
-    id: UUID
+    pass
 
     class Config:
         from_attributes = True

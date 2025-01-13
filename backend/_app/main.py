@@ -5,7 +5,7 @@ from backend.settings.database import engine, Base
 # Initialize FastAPI app
 app = FastAPI(title="Backend API with Versioning")
 
-# Include department router
+# These code includes all the routers/endpoint of the api_departments
 app.include_router(department_router.router)
 
 # Create database tables
@@ -13,5 +13,4 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Backend API"}
-
+    return {"message": "Welcome to the Backend API Hello HAHAHAHA"}
