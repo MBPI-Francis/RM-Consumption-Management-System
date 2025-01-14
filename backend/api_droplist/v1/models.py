@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, SmallInteger, event
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.settings.database import Base  # Assuming Base is imported from your database setup
 from backend.api_users.v1.models import User
 
@@ -16,8 +16,9 @@ class DropList(Base):
     name = Column(String(150), nullable=False, unique=True)
     description = Column(String(300), nullable=True)
     is_deleted = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc), nullable=True)
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)

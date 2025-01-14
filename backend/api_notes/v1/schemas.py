@@ -5,25 +5,24 @@ from uuid import UUID
 from typing import Optional
 from datetime import datetime
 
-class StockOnHandBase(BaseModel):
-    rm_code_id: UUID
-    rm_soh : float
+class NotesBase(BaseModel):
+    product_code: str = Field(max_length=80, description="The name of the department")
+    lot_number: str = Field(None, max_length=80, description="A brief description of the department")
+    product_kind_id: str = Field(None, max_length=10, description="A brief description of the department")
 
 
-class StockOnHandCreate(StockOnHandBase):
+class NotesCreate(NotesBase):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
-    description: Optional[str] = None
+
     
-class StockOnHandUpdate(StockOnHandBase):
-    rm_soh: Optional[str] = None
-    description: Optional[str] = None
+class NotesUpdate(NotesBase):
+    pass
 
 
-class StockOnHandResponse(StockOnHandBase):
+class NotesResponse(NotesBase):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
-    description: Optional[str] = None
 
     class Config:
         from_attributes = True

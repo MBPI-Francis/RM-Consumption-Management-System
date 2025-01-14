@@ -8,13 +8,13 @@ from backend.api_users.v1.models import User
 
 
 # Parent Model: Department
-class StockOnHand(Base):
-    __tablename__ = "tbl_stock_on_hand"
+class Notes(Base):
+    __tablename__ = "tbl_notes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
-    rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
-    rm_soh = Column(Numeric(10, 2), nullable=False)
-    description = Column(String(300), nullable=True)
+    product_code = Column(String(80), nullable=False)
+    lot_number = Column(String(80), nullable=False)
+    product_kind_id = Column(String(10),  ForeignKey("tbl_product_kind.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
     stock_change_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
@@ -27,7 +27,8 @@ class StockOnHand(Base):
     created_by = relationship("User", foreign_keys=[created_by_id], backref="created_soh")
     updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_soh")
     deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_soh")
-    rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_soh")
+    product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_productkind")
+
 
 
 
