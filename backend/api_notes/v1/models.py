@@ -24,10 +24,10 @@ class Notes(Base):
 
 
     # Relationships for created_by, updated_by, and deleted_by
-    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_soh")
-    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_soh")
-    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_soh")
-    product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_productkind")
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_notes")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_notes")
+    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_notes")
+    product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_notes")
 
 
 
