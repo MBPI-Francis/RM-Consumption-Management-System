@@ -9,6 +9,10 @@ from backend.api_product_kinds.v1 import router as product_kind_router
 from backend.api_auth_users.v1 import router as auth_router
 from backend.api_notes.v1 import router as notes_router
 from backend.api_receiving_report.v1 import router as receiving_report_router
+from backend.api_outgoing_report.v1 import router as outgoing_report_router
+from backend.api_transfer_form.v1 import router as transfer_form_router
+from backend.api_preparation_form.v1 import router as preparation_form_router
+from backend.api_held_form.v1 import router as held_form_router
 from backend.settings.database import engine, Base
 
 # Initialize FastAPI app
@@ -44,6 +48,18 @@ app.include_router(auth_router.router)
 
 # These code includes all the routers/endpoint of the api_receiving_report
 app.include_router(receiving_report_router.router)
+
+# These code includes all the routers/endpoint of the api_outgoing_report
+app.include_router(outgoing_report_router.router)
+
+# These code includes all the routers/endpoint of the api_transfer_form
+app.include_router(transfer_form_router.router)
+
+# These code includes all the routers/endpoint of the api_preparation_form
+app.include_router(preparation_form_router.router)
+
+# These code includes all the routers/endpoint of the api_held_form
+app.include_router(held_form_router.router)
 
 # Code for Creating database tables
 Base.metadata.create_all(bind=engine)

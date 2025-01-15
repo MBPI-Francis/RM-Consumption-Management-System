@@ -6,22 +6,23 @@ from typing import Optional
 from datetime import date
 
 
-class OutgoingReport(BaseModel):
+class TransferForm(BaseModel):
     rm_code_id: UUID
-    warehouse_id: UUID
+    from_warehouse_id: UUID
+    to_warehouse_id: UUID
     rm_soh_id: UUID
-    ref_number: str = Field(max_length=50, description="The reference number of the Outgoing Report")
-    outgoing_date: date
+    ref_number: str = Field(max_length=50, description="The reference number of the Transfer Form")
+    transfer_date: date
     qty_kg: float
 
-class OutgoingReportCreate(OutgoingReport):
+class TransferFormCreate(TransferForm):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
-class OutgoingReportUpdate(OutgoingReport):
+class TransferFormUpdate(TransferForm):
     pass
 
-class OutgoingReportResponse(OutgoingReport):
+class TransferFormResponse(TransferForm):
     pass
 
     class Config:

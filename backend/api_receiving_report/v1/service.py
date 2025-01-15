@@ -1,8 +1,8 @@
-from backend.api_outgoing_report.v1.exceptions import ReceivingReportCreateException, ReceivingReportNotFoundException, \
+from backend.api_receiving_report.v1.exceptions import ReceivingReportCreateException, ReceivingReportNotFoundException, \
     ReceivingReportUpdateException, ReceivingReportSoftDeleteException, ReceivingReportRestoreException
-from backend.api_outgoing_report.v1.main import AppCRUD, AppService
-from backend.api_outgoing_report.v1.models import ReceivingReport
-from backend.api_outgoing_report.v1.schemas import ReceivingReportCreate, ReceivingReportUpdate
+from backend.api_receiving_report.v1.main import AppCRUD, AppService
+from backend.api_receiving_report.v1.models import ReceivingReport
+from backend.api_receiving_report.v1.schemas import ReceivingReportCreate, ReceivingReportUpdate
 from uuid import UUID
 
 
