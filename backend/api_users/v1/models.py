@@ -17,6 +17,8 @@ class User(Base):
     user_name = Column(String(50), nullable=False, unique=True, index=True)
     password = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    is_reguser = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc), nullable=True)
