@@ -10,6 +10,8 @@ class UserBase(BaseModel):
     first_name: str = Field(min_length=3, max_length=50, description="The first name of the user")
     last_name: str = Field(min_length=3, max_length=50, description="The last name of the user")
     password: str = Field(min_length=8, max_length=50, description="The password of the user")
+    is_superuser: bool
+    is_reguser: bool
     department_id: Optional[UUID] = None
 
 
