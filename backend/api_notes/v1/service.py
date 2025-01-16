@@ -11,7 +11,8 @@ class NotesCRUD(AppCRUD):
     def create_notes(self, notes: NotesCreate):
         notes_item = Notes(product_code=notes.product_code,
                                   lot_number=notes.lot_number,
-                                   product_kind_id=notes.product_kind_id,
+                                    product_kind_id=notes.product_kind_id,
+                                    stock_change_date=notes.stock_change_date,
                                    updated_by_id=notes.updated_by_id,
                                    created_by_id=notes.created_by_id)
         self.db.add(notes_item)

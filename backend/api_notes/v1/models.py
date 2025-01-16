@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -16,8 +16,11 @@ class Notes(Base):
     lot_number = Column(String(80), nullable=False)
     product_kind_id = Column(String(10),  ForeignKey("tbl_product_kind.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
-    stock_change_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    
+    stock_change_date = Column(Date, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+                        onupdate=lambda: datetime.now(timezone.utc), nullable=True)
+
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)

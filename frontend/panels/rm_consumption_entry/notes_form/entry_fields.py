@@ -3,6 +3,8 @@ from ttkbootstrap.constants import *
 import requests
 from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
+from ttkbootstrap.dialogs.dialogs import Messagebox
+from datetime import datetime as d_datetime
 import datetime
 
 def entry_fields(note_form_tab):
@@ -13,10 +15,42 @@ def entry_fields(note_form_tab):
         selected_id = name_to_id.get(selected_name)  # Get the corresponding ID
         if selected_id:
             print(f"Selected: ID={selected_id}, Name={selected_name}")
+            return selected_id
         else:
             print("No selection made.")
 
+        # Function to send POST request
 
+    def submit_data():
+        # Collect the form data
+        product_code = product_code_entry.get()
+        lot_number = lot_number_entry.get()
+        product_kind_id = get_selected_product_kind_id()
+        print("THE ID: ", product_kind_id)
+        consumption_date = date_entry.get()
+        # Convert it from MM/DD/YYYY to YYYY-MM-DD
+        consumption_date = d_datetime.strptime(consumption_date, "%m/%d/%Y").strftime("%Y-%m-%d")
+
+        # Create a dictionary with the data
+        data = {
+            "product_code": product_code,
+            "lot_number": lot_number,
+            "product_kind_id": product_kind_id,
+            "stock_change_date": consumption_date
+        }
+
+        print(data)
+        # Send a POST request to the API
+        try:
+            response = requests.post(f"{server_ip}/api/notes/v1/create/", json=data)  # Adjust the URL
+            if response.status_code == 200:  # Successfully created
+
+                Messagebox.show_info("Success", "Data added successfully!")  # Success message
+
+            else:
+                Messagebox.show_error("Error", f"Failed to add data. {response.status_code}")  # Error message
+        except requests.exceptions.RequestException as e:
+            Messagebox.show_error("Error", f"An error occurred: {e}")  # Error message
 
     # Create a frame for the form inputs
     form_frame = ttk.Frame(note_form_tab)
@@ -88,7 +122,7 @@ def entry_fields(note_form_tab):
     btn_get_selected = ttk.Button(
         form_frame,
         text="+ Add",
-        command=get_selected_product_kind_id,
+        command=submit_data,  # Call the function to submit the data,
     )
     # btn_get_selected.pack(pady=10)
     btn_get_selected.grid(row=1, column=6, columnspan=2, pady=10)
@@ -105,6 +139,8 @@ def get_product_kinds_api():
         return data
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
+
+
 
 
 
