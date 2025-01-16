@@ -4,7 +4,7 @@ from ttkbootstrap.constants import *
 
 class Sidebar(ttk.Frame):
     def __init__(self, parent, navigate_callback):
-        super().__init__(parent, width=200, padding=10, style="Sidebar.TFrame")
+        super().__init__(parent, width=300, padding=20, style="Sidebar.TFrame")
 
         # Custom Style for Sidebar
         style = ttk.Style()
@@ -16,7 +16,7 @@ class Sidebar(ttk.Frame):
             text="Warehouse",
             command=lambda: navigate_callback("warehouse"),
             bootstyle=PRIMARY,
-            width=15,
+            width=18,
         ).pack(pady=10)
 
         ttk.Button(
@@ -24,7 +24,7 @@ class Sidebar(ttk.Frame):
             text="Department",
             command=lambda: navigate_callback("department"),
             bootstyle=SUCCESS,
-            width=15,
+            width=18,
         ).pack(pady=10)
 
         ttk.Button(
@@ -32,7 +32,7 @@ class Sidebar(ttk.Frame):
             text="User",
             command=lambda: navigate_callback("user"),
             bootstyle=INFO,
-            width=15,
+            width=18,
         ).pack(pady=10)
 
         ttk.Button(
@@ -40,7 +40,7 @@ class Sidebar(ttk.Frame):
             text="Raw Material",
             command=lambda: navigate_callback("raw_material"),
             bootstyle=INFO,
-            width=15,
+            width=18,
         ).pack(pady=10)
 
         ttk.Button(
@@ -48,5 +48,5 @@ class Sidebar(ttk.Frame):
             text="Consumption Entry",
             command=lambda: navigate_callback("consumption_entry"),
             bootstyle=INFO,
-            width=15,
+            width=18,
         ).pack(pady=10)

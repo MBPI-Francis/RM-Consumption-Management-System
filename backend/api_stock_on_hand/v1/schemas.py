@@ -7,6 +7,7 @@ from datetime import datetime
 
 class StockOnHandBase(BaseModel):
     rm_code_id: UUID
+    warehouse_id: UUID
     rm_soh : float
 
 

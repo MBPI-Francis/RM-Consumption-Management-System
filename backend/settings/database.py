@@ -28,3 +28,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+server_ip = "http://127.0.0.1:8000"

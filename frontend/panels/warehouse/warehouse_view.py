@@ -9,21 +9,14 @@ class WarehouseView:
 
     def show(self):
         """Display the Warehouse content."""
-        label = ttk.Label(
-            self.parent,
-            text="Warehouse Content",
-            font=("Helvetica", 18),
-            bootstyle=PRIMARY,
-        )
-        label.pack(pady=20)
+        # Use grid layout for the frame inside the content area
+        warehouse_frame = ttk.Frame(self.parent)
+        warehouse_frame.grid(row=0, column=0, sticky=N + S + E + W)
 
-        # Example ScrolledFrame content for Warehouse
-        scroll_frame = ScrolledFrame(self.parent)
-        scroll_frame.pack(fill=BOTH, expand=YES, pady=10)
+        # Add widgets inside the warehouse_frame
+        label = ttk.Label(warehouse_frame, text="Warehouse Content")
+        label.grid(row=0, column=0, sticky="nsew")
 
-        for i in range(20):  # Add example items
-            ttk.Label(
-                scroll_frame,
-                text=f"Warehouse Item {i + 1}",
-                bootstyle=SECONDARY,
-            ).pack(pady=5)
+        # Ensure the content frame can expand
+        warehouse_frame.grid_rowconfigure(0, weight=1)
+        warehouse_frame.grid_columnconfigure(0, weight=1)
