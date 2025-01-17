@@ -1,9 +1,7 @@
-from backend.api_preparation_form.temp.exceptions import PreparationFormCreateException, PreparationFormNotFoundException, \
-    PreparationFormUpdateException, PreparationFormSoftDeleteException, PreparationFormRestoreException
-from backend.api_preparation_form.temp.main import AppCRUD, AppService
-from backend.api_preparation_form.temp.models import PreparationForm
-from backend.api_preparation_form.temp.schemas import PreparationFormCreate, PreparationFormUpdate
-from uuid import UUID
+from backend.api_preparation_form.main.exceptions import PreparationFormCreateException, PreparationFormNotFoundException
+from backend.api_preparation_form.main.main import AppCRUD, AppService
+from backend.api_preparation_form.main.models import PreparationForm
+from backend.api_preparation_form.main.schemas import PreparationFormCreate
 
 
 # These are the code for the app to communicate to the database
@@ -13,6 +11,7 @@ class PreparationFormCRUD(AppCRUD):
                                                 warehouse_id=preparation_form.warehouse_id,
                                                 rm_soh_id=preparation_form.rm_soh_id,
                                                 ref_number=preparation_form.ref_number,
+                                                computed_detail_id=preparation_form.computed_detai_id,
                                                 preparation_date=preparation_form.preparation_date,
                                                 qty_prepared=preparation_form.qty_prepared,
                                                 qty_return=preparation_form.qty_return
@@ -29,49 +28,7 @@ class PreparationFormCRUD(AppCRUD):
         return None
 
 
-    def update_preparation_form(self, preparation_form_id: UUID, preparation_form_update: PreparationFormUpdate):
-        try:
-            preparation_form = self.db.query(PreparationForm).filter(PreparationForm.id == preparation_form_id).first()
-            if not preparation_form or preparation_form.is_deleted:
-                raise PreparationFormNotFoundException(detail="Preparation Form not found or already deleted.")
 
-            for key, value in preparation_form_update.dict(exclude_unset=True).items():
-                setattr(preparation_form, key, value)
-            self.db.commit()
-            self.db.refresh(preparation_form)
-            return preparation_form
-
-        except Exception as e:
-            raise PreparationFormUpdateException(detail=f"Error: {str(e)}")
-
-    def soft_delete_preparation_form(self, preparation_form_id: UUID):
-        try:
-            preparation_form = self.db.query(PreparationForm).filter(PreparationForm.id == preparation_form_id).first()
-            if not preparation_form or preparation_form.is_deleted:
-                raise PreparationFormNotFoundException(detail="Preparation Form not found or already deleted.")
-
-            preparation_form.is_deleted = True
-            self.db.commit()
-            self.db.refresh(preparation_form)
-            return preparation_form
-
-        except Exception as e:
-            raise PreparationFormSoftDeleteException(detail=f"Error: {str(e)}")
-
-
-    def restore_preparation_form(self, preparation_form_id: UUID):
-        try:
-            preparation_form = self.db.query(PreparationForm).filter(PreparationForm.id == preparation_form_id).first()
-            if not preparation_form or not preparation_form.is_deleted:
-                raise PreparationFormNotFoundException(detail="Preparation Form not found or already restored.")
-
-            preparation_form.is_deleted = False
-            self.db.commit()
-            self.db.refresh(preparation_form)
-            return preparation_form
-
-        except Exception as e:
-            raise PreparationFormRestoreException(detail=f"Error: {str(e)}")
 
 
 # These are the code for the business logic like calculation etc.
@@ -93,24 +50,6 @@ class PreparationFormService(AppService):
         except Exception as e:
             raise PreparationFormNotFoundException(detail=f"Error: {str(e)}")
         return preparation_form_item
-
-    # This is the service/business logic in updating the preparation_form.
-    def update_preparation_form(self, preparation_form_id: UUID, preparation_form_update: PreparationFormUpdate):
-        preparation_form = PreparationFormCRUD(self.db).update_preparation_form(preparation_form_id, preparation_form_update)
-        return preparation_form
-
-    # This is the service/business logic in soft deleting the preparation_form.
-    def soft_delete_preparation_form(self, preparation_form_id: UUID):
-        preparation_form = PreparationFormCRUD(self.db).soft_delete_preparation_form(preparation_form_id)
-        return preparation_form
-
-
-    # This is the service/business logic in soft restoring the preparation_form.
-    def restore_preparation_form(self, preparation_form_id: UUID):
-        preparation_form = PreparationFormCRUD(self.db).restore_preparation_form(preparation_form_id)
-        return preparation_form
-
-
 
 
 

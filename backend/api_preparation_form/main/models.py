@@ -15,8 +15,9 @@ class PreparationForm(Base):
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
     rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
+    computed_detail_id = Column(UUID(as_uuid=True), ForeignKey("tbl_computed_details.id"), nullable=False)
 
-    ref_number = Column(String(50), nullable=False, unique=True)
+    ref_number = Column(String(50), nullable=False, unique=False)
     preparation_date = Column(Date,nullable=False)
     qty_prepared = Column(Numeric(10, 2), nullable=False)
     qty_return = Column(Numeric(10, 2), nullable=False)
@@ -37,6 +38,7 @@ class PreparationForm(Base):
     rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_preparation_form")
     rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_preparation_form")
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_preparation_form")
+    computed_detail = relationship("ComputedDetail", foreign_keys=[computed_detail_id], backref="compdetail_preparation_form")
 
 
 

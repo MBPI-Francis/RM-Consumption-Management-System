@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import date
 
 
-class PreparationForm(BaseModel):
+class TempPreparationForm(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
     rm_soh_id: UUID
@@ -15,14 +15,14 @@ class PreparationForm(BaseModel):
     qty_prepared: float
     qty_return: float
 
-class PreparationFormCreate(PreparationForm):
+class TempPreparationFormCreate(TempPreparationForm):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
-class PreparationFormUpdate(PreparationForm):
+class TempPreparationFormUpdate(TempPreparationForm):
     pass
 
-class PreparationFormResponse(PreparationForm):
+class TempPreparationFormResponse(TempPreparationForm):
     pass
 
     class Config:

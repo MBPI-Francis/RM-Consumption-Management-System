@@ -53,6 +53,9 @@ app.include_router(soh_router.router)
 # These code includes all the routers/endpoint of the api_product_kind
 app.include_router(product_kind_router.router)
 
+# These code includes all the routers/endpoint of the api_computed_details
+app.include_router(computed_detail_router.router)
+
 # These code includes all the routers/endpoint of the api_notes_temp
 app.include_router(notes_router_temp.router)
 
@@ -81,8 +84,7 @@ app.include_router(main_preparation_form_router.router)
 # These code includes all the routers/endpoint of the api_held_form
 app.include_router(held_form_router.router)
 
-# These code includes all the routers/endpoint of the api_computed_details
-app.include_router(computed_detail_router.router)
+
 
 # Code for Creating database tables
 Base.metadata.create_all(bind=engine)
