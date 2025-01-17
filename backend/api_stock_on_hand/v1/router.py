@@ -5,7 +5,7 @@ from backend.api_stock_on_hand.v1.service import StockOnHandService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/rm_stock_on_hand/v1")
+router = APIRouter(prefix="/api/rm_stock_on_hand/temp")
 
 @router.post("/create/", response_model=StockOnHandResponse)
 async def create_rm_soh(rm_soh: StockOnHandCreate, db: get_db = Depends()):

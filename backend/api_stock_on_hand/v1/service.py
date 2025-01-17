@@ -10,6 +10,7 @@ from uuid import UUID
 class StockOnHandCRUD(AppCRUD):
     def create_rm_soh(self, rm_soh: StockOnHandCreate):
         rm_soh_item = StockOnHand(rm_code_id=rm_soh.rm_code_id,
+                                  warehouse_id=rm_soh.warehouse_id,
                                   rm_soh=rm_soh.rm_soh,
                                    description=rm_soh.description,
                                    updated_by_id=rm_soh.updated_by_id,

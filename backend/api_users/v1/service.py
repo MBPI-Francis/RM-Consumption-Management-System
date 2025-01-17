@@ -13,7 +13,9 @@ class UserCRUD(AppCRUD):
                                password=user.password,
                                department_id=user.department_id,
                                created_by_id = user.created_by_id,
-                               updated_by_id = user.updated_by_id
+                               updated_by_id = user.updated_by_id,
+                                is_superuser=user.is_superuser,
+                                is_reguser=user.is_reguser
                                  )
         self.db.add(user_item)
         self.db.commit()
