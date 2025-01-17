@@ -9,7 +9,7 @@ from datetime import datetime
 def table(note_form_tab):
     # Define column and row data
     coldata = [
-        {"text": "Product Code", "stretch": True},
+        {"text": "Product Code", "stretch": True, "anchor": "w"},
         {"text": "Lot No.", "stretch": True},
         {"text": "Product Kind", "stretch": True},
         {"text": "Consumption Date", "stretch": True},
@@ -28,7 +28,6 @@ def table(note_form_tab):
         bootstyle=PRIMARY,
 
     )
-
 
     # Pack the Tableview
     dt.pack(fill=BOTH, expand=YES, padx=10, pady=10)
