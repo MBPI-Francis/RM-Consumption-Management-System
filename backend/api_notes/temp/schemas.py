@@ -6,9 +6,9 @@ from typing import Optional
 from datetime import datetime, date
 
 class NotesBase(BaseModel):
-    product_code: str = Field(max_length=80, description="The name of the department")
-    lot_number: str = Field(None, max_length=80, description="A brief description of the department")
-    product_kind_id: str = Field(None, max_length=10, description="A brief description of the department")
+    product_code: str = Field(max_length=80, description="The product code of the notes record")
+    lot_number: str = Field(None, max_length=80, description="The lot number of the notes record")
+    product_kind_id: str = Field(None, max_length=10, description="The product kind of the notes record")
     stock_change_date: date
 
 class NotesCreate(NotesBase):

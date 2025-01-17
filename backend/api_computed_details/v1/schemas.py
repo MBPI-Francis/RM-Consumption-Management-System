@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import datetime
+from datetime import date
 
 class ComputedDetailBase(BaseModel):
     computed_by_id: Optional[UUID] = None
@@ -14,8 +14,7 @@ class ComputedDetailCreate(ComputedDetailBase):
 class ComputedDetailResponse(BaseModel):
     id: UUID
     computed_by_id: UUID
-    date_computed: datetime
-
+    date_computed: date
 
     class Config:
         from_attributes = True

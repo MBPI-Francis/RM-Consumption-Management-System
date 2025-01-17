@@ -8,7 +8,7 @@ from backend.api_users.v1.models import User
 
 
 # Parent Model: Department
-class Notes(Base):
+class TempNotes(Base):
     __tablename__ = "tbl_notes_temp"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
@@ -27,10 +27,10 @@ class Notes(Base):
 
 
     # Relationships for created_by, updated_by, and deleted_by
-    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_notes")
-    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_notes")
-    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_notes")
-    product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_notes")
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_tempnotes")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_tempnotes")
+    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_tempnotes")
+    product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_tempnotes")
 
 
 

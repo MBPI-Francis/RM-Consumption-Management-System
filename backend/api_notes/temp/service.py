@@ -1,15 +1,15 @@
 from backend.api_notes.temp.exceptions import NotesCreateException, NotesNotFoundException, \
     NotesUpdateException, NotesSoftDeleteException, NotesRestoreException
 from backend.api_notes.temp.main import AppCRUD, AppService
-from backend.api_notes.temp.models import Notes
+from backend.api_notes.temp.models import TempNotes
 from backend.api_notes.temp.schemas import NotesCreate, NotesUpdate
 from uuid import UUID
 
 
 # These are the code for the app to communicate to the database
-class NotesCRUD(AppCRUD):
+class TempNotesCRUD(AppCRUD):
     def create_notes(self, notes: NotesCreate):
-        notes_item = Notes(product_code=notes.product_code,
+        notes_item = TempNotes(product_code=notes.product_code,
                                   lot_number=notes.lot_number,
                                     product_kind_id=notes.product_kind_id,
                                     stock_change_date=notes.stock_change_date,
@@ -21,7 +21,7 @@ class NotesCRUD(AppCRUD):
         return notes_item
 
     def get_notes(self):
-        notes_item = self.db.query(Notes).all()
+        notes_item = self.db.query(TempNotes).all()
         if notes_item:
             return notes_item
         return None
@@ -29,7 +29,7 @@ class NotesCRUD(AppCRUD):
 
     def update_notes(self, notes_id: UUID, notes_update: NotesUpdate):
         try:
-            notes = self.db.query(Notes).filter(Notes.id == notes_id).first()
+            notes = self.db.query(TempNotes).filter(TempNotes.id == notes_id).first()
             if not notes or notes.is_deleted:
                 raise NotesNotFoundException(detail="Notes not found or already deleted.")
 
@@ -44,7 +44,7 @@ class NotesCRUD(AppCRUD):
 
     def soft_delete_notes(self, notes_id: UUID):
         try:
-            notes = self.db.query(Notes).filter(Notes.id == notes_id).first()
+            notes = self.db.query(TempNotes).filter(TempNotes.id == notes_id).first()
             if not notes or notes.is_deleted:
                 raise NotesNotFoundException(detail="Notes not found or already deleted.")
 
@@ -59,7 +59,7 @@ class NotesCRUD(AppCRUD):
 
     def restore_notes(self, notes_id: UUID):
         try:
-            notes = self.db.query(Notes).filter(Notes.id == notes_id).first()
+            notes = self.db.query(TempNotes).filter(TempNotes.id == notes_id).first()
             if not notes or not notes.is_deleted:
                 raise NotesNotFoundException(detail="Notes not found or already restored.")
 
@@ -76,7 +76,7 @@ class NotesCRUD(AppCRUD):
 class NotesService(AppService):
     def create_notes(self, item: NotesCreate):
         try:
-            notes_item = NotesCRUD(self.db).create_notes(item)
+            notes_item = TempNotesCRUD(self.db).create_notes(item)
 
         except Exception as e:
             raise NotesCreateException(detail=f"Error: {str(e)}")
@@ -85,7 +85,7 @@ class NotesService(AppService):
 
     def get_notes(self):
         try:
-            notes_item = NotesCRUD(self.db).get_notes()
+            notes_item = TempNotesCRUD(self.db).get_notes()
 
         except Exception as e:
             raise NotesNotFoundException(detail=f"Error: {str(e)}")
@@ -93,18 +93,18 @@ class NotesService(AppService):
 
     # This is the service/business logic in updating the notes.
     def update_notes(self, notes_id: UUID, notes_update: NotesUpdate):
-        notes = NotesCRUD(self.db).update_notes(notes_id, notes_update)
+        notes = TempNotesCRUD(self.db).update_notes(notes_id, notes_update)
         return notes
 
     # This is the service/business logic in soft deleting the notes.
     def soft_delete_notes(self, notes_id: UUID):
-        notes = NotesCRUD(self.db).soft_delete_notes(notes_id)
+        notes = TempNotesCRUD(self.db).soft_delete_notes(notes_id)
         return notes
 
 
     # This is the service/business logic in soft restoring the notes.
     def restore_notes(self, notes_id: UUID):
-        notes = NotesCRUD(self.db).restore_notes(notes_id)
+        notes = TempNotesCRUD(self.db).restore_notes(notes_id)
         return notes
 
 

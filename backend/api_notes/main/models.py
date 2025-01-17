@@ -15,6 +15,7 @@ class Notes(Base):
     product_code = Column(String(80), nullable=False)
     lot_number = Column(String(80), nullable=False)
     product_kind_id = Column(String(10),  ForeignKey("tbl_product_kind.id"), nullable=False)
+    computed_detail_id = Column(UUID(as_uuid=True), ForeignKey("tbl_computed_details.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)
     stock_change_date = Column(Date, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
@@ -31,6 +32,7 @@ class Notes(Base):
     updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_notes")
     deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_notes")
     product_kind = relationship("ProductKind", foreign_keys=[product_kind_id], backref="relationship_notes")
+    computed_detail = relationship("ComputedDetail", foreign_keys=[computed_detail_id], backref="compdetails_notes")
 
 
 

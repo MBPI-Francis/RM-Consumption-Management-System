@@ -5,7 +5,7 @@ from backend.api_droplist.v1.service import DropListService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/droplist/temp")
+router = APIRouter(prefix="/api/droplist")
 
 @router.post("/create/", response_model=DropListResponse)
 async def create_droplist(droplist: DropListCreate, db: get_db = Depends()):

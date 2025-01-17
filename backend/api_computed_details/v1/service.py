@@ -3,7 +3,7 @@ from backend.api_computed_details.v1.main import AppCRUD, AppService
 from backend.api_computed_details.v1.models import ComputedDetail
 from backend.api_computed_details.v1.schemas import ComputedDetailCreate
 from uuid import UUID
-from datetime import datetime
+from datetime import date
 
 
 # These are the code for the app to communicate to the database
@@ -22,13 +22,14 @@ class ComputedDetailCRUD(AppCRUD):
         return None
 
     def get_computed_detail(self, computed_date, computed_by_id):
+
         computed_detail_item = (
             self.db.query(ComputedDetail).filter(
                 ComputedDetail.date_computed == computed_date, ComputedDetail.computed_by_id == computed_by_id
             ).first()
         )
-        if not computed_detail_item:
-            raise ComputedDetailNotFoundException(detail="Computed Details not found.")
+        if computed_detail_item:
+            return computed_detail_item
         return None
 
 
@@ -53,7 +54,8 @@ class ComputedDetailService(AppService):
         return computed_detail_item
 
 
-    def get_computed_detail(self, computed_date: datetime, computed_by_id: UUID):
+    def get_computed_detail(self, computed_date: date, computed_by_id: UUID):
+
         try:
             computed_detail_item = ComputedDetailCRUD(self.db).get_computed_detail(computed_date, computed_by_id)
         except Exception as e:

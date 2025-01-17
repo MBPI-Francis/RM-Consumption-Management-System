@@ -6,17 +6,16 @@ from typing import Optional
 from datetime import datetime, date
 
 class NotesBase(BaseModel):
-    product_code: str = Field(max_length=80, description="The name of the department")
-    lot_number: str = Field(None, max_length=80, description="A brief description of the department")
-    product_kind_id: str = Field(None, max_length=10, description="A brief description of the department")
+    product_code: str = Field(max_length=80, description="The product code")
+    lot_number: str = Field(None, max_length=80, description="The lot number")
+    product_kind_id: str = Field(None, max_length=10, description="The product kind of the note")
+    computed_detail_id: UUID
     stock_change_date: date
 
 class NotesCreate(NotesBase):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
-class NotesUpdate(NotesBase):
-    pass
 
 class NotesResponse(NotesBase):
     created_at: datetime
