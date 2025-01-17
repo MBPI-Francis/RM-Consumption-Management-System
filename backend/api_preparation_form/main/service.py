@@ -1,8 +1,8 @@
-from backend.api_preparation_form.v1.exceptions import PreparationFormCreateException, PreparationFormNotFoundException, \
+from backend.api_preparation_form.temp.exceptions import PreparationFormCreateException, PreparationFormNotFoundException, \
     PreparationFormUpdateException, PreparationFormSoftDeleteException, PreparationFormRestoreException
-from backend.api_preparation_form.v1.main import AppCRUD, AppService
-from backend.api_preparation_form.v1.models import PreparationForm
-from backend.api_preparation_form.v1.schemas import PreparationFormCreate, PreparationFormUpdate
+from backend.api_preparation_form.temp.main import AppCRUD, AppService
+from backend.api_preparation_form.temp.models import PreparationForm
+from backend.api_preparation_form.temp.schemas import PreparationFormCreate, PreparationFormUpdate
 from uuid import UUID
 
 

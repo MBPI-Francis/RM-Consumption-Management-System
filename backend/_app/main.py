@@ -19,9 +19,12 @@ from backend.api_receiving_report.main import router as main_receiving_report_ro
 from backend.api_outgoing_report.temp import router as temp_outgoing_report_router
 from backend.api_outgoing_report.main import router as main_outgoing_report_router
 
+from backend.api_transfer_form.temp import router as temp_transfer_form_router
+from backend.api_transfer_form.main import router as main_form_router
 
-from backend.api_transfer_form.temp import router as transfer_form_router
-from backend.api_preparation_form.v1 import router as preparation_form_router
+from backend.api_preparation_form.temp import router as temp_preparation_form_router
+from backend.api_preparation_form.main import router as main_preparation_form_router
+
 from backend.api_held_form.v1 import router as held_form_router
 from backend.settings.database import engine, Base
 
@@ -68,10 +71,12 @@ app.include_router(temp_outgoing_report_router.router)
 app.include_router(main_outgoing_report_router.router)
 
 # These code includes all the routers/endpoint of the api_transfer_form
-app.include_router(transfer_form_router.router)
+app.include_router(temp_transfer_form_router.router)
+app.include_router(main_form_router.router)
 
 # These code includes all the routers/endpoint of the api_preparation_form
-app.include_router(preparation_form_router.router)
+app.include_router(temp_preparation_form_router.router)
+app.include_router(main_preparation_form_router.router)
 
 # These code includes all the routers/endpoint of the api_held_form
 app.include_router(held_form_router.router)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_preparation_form.v1.schemas import PreparationFormCreate, PreparationFormUpdate, PreparationFormResponse
-from backend.api_preparation_form.v1.service import PreparationFormService
+from backend.api_preparation_form.temp.schemas import PreparationFormCreate, PreparationFormUpdate, PreparationFormResponse
+from backend.api_preparation_form.temp.service import PreparationFormService
 from backend.settings.database import get_db
 from uuid import UUID
 

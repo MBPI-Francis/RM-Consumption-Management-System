@@ -1,24 +1,24 @@
 from fastapi import HTTPException
 
 
-class TransferFormCreateException(HTTPException):
+class TempTransferFormCreateException(HTTPException):
     def __init__(self, detail="Transfer Form creation failed"):
         super().__init__(status_code=500, detail=detail)
 
-class TransferFormNotFoundException(HTTPException):
+class TempTransferFormNotFoundException(HTTPException):
     def __init__(self, detail="Transfer Form not found"):
         super().__init__(status_code=404, detail=detail)
 
-class TransferFormUpdateException(HTTPException):
+class TempTransferFormUpdateException(HTTPException):
     def __init__(self, detail: str = "Transfer Form update failed"):
         super().__init__(status_code=400, detail=detail)
 
 
-class TransferFormSoftDeleteException(HTTPException):
+class TempTransferFormSoftDeleteException(HTTPException):
     def __init__(self, detail: str = "Transfer Form soft delete failed"):
         super().__init__(status_code=400, detail=detail)
 
 
-class TransferFormRestoreException(HTTPException):
+class TempTransferFormRestoreException(HTTPException):
     def __init__(self, detail: str = "Transfer Form restore failed"):
         super().__init__(status_code=400, detail=detail)

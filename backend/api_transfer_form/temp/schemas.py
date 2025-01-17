@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import date
 
 
-class TransferForm(BaseModel):
+class TempTransferForm(BaseModel):
     rm_code_id: UUID
     from_warehouse_id: UUID
     to_warehouse_id: UUID
@@ -15,14 +15,14 @@ class TransferForm(BaseModel):
     transfer_date: date
     qty_kg: float
 
-class TransferFormCreate(TransferForm):
+class TempTransferFormCreate(TempTransferForm):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
-class TransferFormUpdate(TransferForm):
+class TempTransferFormUpdate(TempTransferForm):
     pass
 
-class TransferFormResponse(TransferForm):
+class TempTransferFormResponse(TempTransferForm):
     pass
 
     class Config:

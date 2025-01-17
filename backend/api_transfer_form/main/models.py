@@ -16,6 +16,7 @@ class TransferForm(Base):
     from_warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
     to_warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
     rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
+    computed_detail_id = Column(UUID(as_uuid=True), ForeignKey("tbl_computed_details.id"), nullable=False)
 
     ref_number = Column(String(50), nullable=False, unique=True)
     transfer_date = Column(Date,nullable=False)
@@ -38,6 +39,8 @@ class TransferForm(Base):
     rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_transfer_form")
     from_warehouse = relationship("Warehouse", foreign_keys=[from_warehouse_id], backref="from_warehouse_transfer_form")
     to_warehouse = relationship("Warehouse", foreign_keys=[to_warehouse_id], backref="to_warehouse_transfer_form")
+    computed_detail = relationship("ComputedDetail", foreign_keys=[computed_detail_id],
+                                   backref="compdetails_transfer_form")
 
 
 

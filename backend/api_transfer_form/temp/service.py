@@ -1,15 +1,15 @@
-from backend.api_transfer_form.temp.exceptions import TransferFormCreateException, TransferFormNotFoundException, \
-    TransferFormUpdateException, TransferFormSoftDeleteException, TransferFormRestoreException
+from backend.api_transfer_form.temp.exceptions import TempTransferFormCreateException, TempTransferFormNotFoundException, \
+    TempTransferFormUpdateException, TempTransferFormSoftDeleteException, TempTransferFormRestoreException
 from backend.api_transfer_form.temp.main import AppCRUD, AppService
-from backend.api_transfer_form.temp.models import TransferForm
-from backend.api_transfer_form.temp.schemas import TransferFormCreate, TransferFormUpdate
+from backend.api_transfer_form.temp.models import TempTransferForm
+from backend.api_transfer_form.temp.schemas import TempTransferFormCreate, TempTransferFormUpdate
 from uuid import UUID
 
 
 # These are the code for the app to communicate to the database
-class TransferFormCRUD(AppCRUD):
-    def create_transfer_form(self, transfer_form: TransferFormCreate):
-        transfer_form_item = TransferForm(rm_code_id=transfer_form.rm_code_id,
+class TempTransferFormCRUD(AppCRUD):
+    def create_transfer_form(self, transfer_form: TempTransferFormCreate):
+        transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
                                                 from_warehouse_id=transfer_form.from_warehouse_id,
                                                 to_warehouse_id=transfer_form.to_warehouse_id,
                                                 rm_soh_id=transfer_form.rm_soh_id,
@@ -23,17 +23,17 @@ class TransferFormCRUD(AppCRUD):
         return transfer_form_item
 
     def get_transfer_form(self):
-        transfer_form_item = self.db.query(TransferForm).all()
+        transfer_form_item = self.db.query(TempTransferForm).all()
         if transfer_form_item:
             return transfer_form_item
         return None
 
 
-    def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TransferFormUpdate):
+    def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TempTransferFormUpdate):
         try:
-            transfer_form = self.db.query(TransferForm).filter(TransferForm.id == transfer_form_id).first()
+            transfer_form = self.db.query(TempTransferForm).filter(TempTransferForm.id == transfer_form_id).first()
             if not transfer_form or transfer_form.is_deleted:
-                raise TransferFormNotFoundException(detail="Transfer Form not found or already deleted.")
+                raise TempTransferFormNotFoundException(detail="Transfer Form not found or already deleted.")
 
             for key, value in transfer_form_update.dict(exclude_unset=True).items():
                 setattr(transfer_form, key, value)
@@ -42,13 +42,13 @@ class TransferFormCRUD(AppCRUD):
             return transfer_form
 
         except Exception as e:
-            raise TransferFormUpdateException(detail=f"Error: {str(e)}")
+            raise TempTransferFormUpdateException(detail=f"Error: {str(e)}")
 
     def soft_delete_transfer_form(self, transfer_form_id: UUID):
         try:
-            transfer_form = self.db.query(TransferForm).filter(TransferForm.id == transfer_form_id).first()
+            transfer_form = self.db.query(TempTransferForm).filter(TempTransferForm.id == transfer_form_id).first()
             if not transfer_form or transfer_form.is_deleted:
-                raise TransferFormNotFoundException(detail="Transfer Form not found or already deleted.")
+                raise TempTransferFormNotFoundException(detail="Transfer Form not found or already deleted.")
 
             transfer_form.is_deleted = True
             self.db.commit()
@@ -56,14 +56,14 @@ class TransferFormCRUD(AppCRUD):
             return transfer_form
 
         except Exception as e:
-            raise TransferFormSoftDeleteException(detail=f"Error: {str(e)}")
+            raise TempTransferFormSoftDeleteException(detail=f"Error: {str(e)}")
 
 
     def restore_transfer_form(self, transfer_form_id: UUID):
         try:
-            transfer_form = self.db.query(TransferForm).filter(TransferForm.id == transfer_form_id).first()
+            transfer_form = self.db.query(TempTransferForm).filter(TempTransferForm.id == transfer_form_id).first()
             if not transfer_form or not transfer_form.is_deleted:
-                raise TransferFormNotFoundException(detail="Transfer Form not found or already restored.")
+                raise TempTransferFormNotFoundException(detail="Transfer Form not found or already restored.")
 
             transfer_form.is_deleted = False
             self.db.commit()
@@ -71,43 +71,43 @@ class TransferFormCRUD(AppCRUD):
             return transfer_form
 
         except Exception as e:
-            raise TransferFormRestoreException(detail=f"Error: {str(e)}")
+            raise TempTransferFormRestoreException(detail=f"Error: {str(e)}")
 
 
 # These are the code for the business logic like calculation etc.
-class TransferFormService(AppService):
-    def create_transfer_form(self, item: TransferFormCreate):
+class TempTransferFormService(AppService):
+    def create_transfer_form(self, item: TempTransferFormCreate):
         try:
-            transfer_form_item = TransferFormCRUD(self.db).create_transfer_form(item)
+            transfer_form_item = TempTransferFormCRUD(self.db).create_transfer_form(item)
 
         except Exception as e:
-            raise TransferFormCreateException(detail=f"Error: {str(e)}")
+            raise TempTransferFormCreateException(detail=f"Error: {str(e)}")
 
 
         return transfer_form_item
 
     def get_transfer_form(self):
         try:
-            transfer_form_item = TransferFormCRUD(self.db).get_transfer_form()
+            transfer_form_item = TempTransferFormCRUD(self.db).get_transfer_form()
 
         except Exception as e:
-            raise TransferFormNotFoundException(detail=f"Error: {str(e)}")
+            raise TempTransferFormNotFoundException(detail=f"Error: {str(e)}")
         return transfer_form_item
 
     # This is the service/business logic in updating the transfer_form.
-    def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TransferFormUpdate):
-        transfer_form = TransferFormCRUD(self.db).update_transfer_form(transfer_form_id, transfer_form_update)
+    def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TempTransferFormUpdate):
+        transfer_form = TempTransferFormCRUD(self.db).update_transfer_form(transfer_form_id, transfer_form_update)
         return transfer_form
 
     # This is the service/business logic in soft deleting the transfer_form.
     def soft_delete_transfer_form(self, transfer_form_id: UUID):
-        transfer_form = TransferFormCRUD(self.db).soft_delete_transfer_form(transfer_form_id)
+        transfer_form = TempTransferFormCRUD(self.db).soft_delete_transfer_form(transfer_form_id)
         return transfer_form
 
 
     # This is the service/business logic in soft restoring the transfer_form.
     def restore_transfer_form(self, transfer_form_id: UUID):
-        transfer_form = TransferFormCRUD(self.db).restore_transfer_form(transfer_form_id)
+        transfer_form = TempTransferFormCRUD(self.db).restore_transfer_form(transfer_form_id)
         return transfer_form
 
 
