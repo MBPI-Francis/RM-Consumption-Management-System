@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import date
 
 
-class HeldForm(BaseModel):
+class TempHeldForm(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
     rm_soh_id: UUID
@@ -15,14 +15,14 @@ class HeldForm(BaseModel):
     qty_kg: float
 
 
-class HeldFormCreate(HeldForm):
+class TempHeldFormCreate(TempHeldForm):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
-class HeldFormUpdate(HeldForm):
+class TempHeldFormUpdate(TempHeldForm):
     pass
 
-class HeldFormResponse(HeldForm):
+class TempHeldFormResponse(TempHeldForm):
     pass
 
     class Config:
