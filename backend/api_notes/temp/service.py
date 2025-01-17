@@ -1,8 +1,8 @@
-from backend.api_notes.v1.exceptions import NotesCreateException, NotesNotFoundException, \
+from backend.api_notes.temp.exceptions import NotesCreateException, NotesNotFoundException, \
     NotesUpdateException, NotesSoftDeleteException, NotesRestoreException
-from backend.api_notes.v1.main import AppCRUD, AppService
-from backend.api_notes.v1.models import Notes
-from backend.api_notes.v1.schemas import NotesCreate, NotesUpdate
+from backend.api_notes.temp.main import AppCRUD, AppService
+from backend.api_notes.temp.models import Notes
+from backend.api_notes.temp.schemas import NotesCreate, NotesUpdate
 from uuid import UUID
 
 

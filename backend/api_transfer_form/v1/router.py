@@ -5,7 +5,7 @@ from backend.api_transfer_form.v1.service import TransferFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/transfer_forms/v1")
+router = APIRouter(prefix="/api/transfer_forms/temp")
 
 @router.post("/create/", response_model=TransferFormResponse)
 async def create_transfer_form(transfer_form: TransferFormCreate, db: get_db = Depends()):

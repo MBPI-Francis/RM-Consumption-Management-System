@@ -3,7 +3,7 @@ from backend.api_auth_users.v1.schemas import AuthUserResponse
 from backend.api_auth_users.v1.service import AuthUserService
 from backend.settings.database import get_db
 
-router = APIRouter(prefix="/api/auth_users/v1")
+router = APIRouter(prefix="/api/auth_users/temp")
 
 
 @router.get("/{user_name}/{password}/", response_model=AuthUserResponse)

@@ -7,7 +7,8 @@ from backend.api_droplist.v1 import router as droplist_router
 from backend.api_stock_on_hand.v1 import router as soh_router
 from backend.api_product_kinds.v1 import router as product_kind_router
 from backend.api_auth_users.v1 import router as auth_router
-from backend.api_notes.v1 import router as notes_router
+from backend.api_notes.temp import router as notes_router_temp
+from backend.api_computed_details.v1 import router as computed_detail_router
 from backend.api_receiving_report.v1 import router as receiving_report_router
 from backend.api_outgoing_report.v1 import router as outgoing_report_router
 from backend.api_transfer_form.v1 import router as transfer_form_router
@@ -41,7 +42,7 @@ app.include_router(soh_router.router)
 app.include_router(product_kind_router.router)
 
 # These code includes all the routers/endpoint of the api_notes
-app.include_router(notes_router.router)
+app.include_router(notes_router_temp.router)
 
 # These code includes all the routers/endpoint of the api_auth_users
 app.include_router(auth_router.router)
@@ -60,6 +61,9 @@ app.include_router(preparation_form_router.router)
 
 # These code includes all the routers/endpoint of the api_held_form
 app.include_router(held_form_router.router)
+
+# These code includes all the routers/endpoint of the api_computed_details
+app.include_router(computed_detail_router.router)
 
 # Code for Creating database tables
 Base.metadata.create_all(bind=engine)

@@ -5,7 +5,7 @@ from backend.api_held_form.v1.service import HeldFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/held_forms/v1")
+router = APIRouter(prefix="/api/held_forms/temp")
 
 @router.post("/create/", response_model=HeldFormResponse)
 async def create_held_form(held_form: HeldFormCreate, db: get_db = Depends()):

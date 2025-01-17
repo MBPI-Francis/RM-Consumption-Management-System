@@ -5,7 +5,7 @@ from backend.api_receiving_report.v1.service import ReceivingReportService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/receiving_reports/v1")
+router = APIRouter(prefix="/api/receiving_reports/temp")
 
 @router.post("/create/", response_model=ReceivingReportResponse)
 async def create_receiving_report(receiving_report: ReceivingReportCreate, db: get_db = Depends()):

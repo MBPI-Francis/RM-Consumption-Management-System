@@ -42,7 +42,7 @@ def entry_fields(note_form_tab):
         print(data)
         # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/notes/v1/create/", json=data)  # Adjust the URL
+            response = requests.post(f"{server_ip}/api/notes/temp/create/", json=data)  # Adjust the URL
             if response.status_code == 200:  # Successfully created
 
                 Messagebox.show_info("Success", "Data added successfully!")  # Success message
@@ -128,7 +128,7 @@ def entry_fields(note_form_tab):
     btn_get_selected.grid(row=1, column=6, columnspan=2, pady=10)
 
 def get_product_kinds_api():
-    url = server_ip+"/api/product_kinds/v1/list/"
+    url = server_ip+"/api/product_kinds/temp/list/"
     response = requests.get(url)
 
     # Check if the request was successful

@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_notes.v1.schemas import NotesCreate, NotesUpdate, NotesResponse
-from backend.api_notes.v1.service import NotesService
+from backend.api_notes.temp.schemas import NotesCreate, NotesUpdate, NotesResponse
+from backend.api_notes.temp.service import NotesService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/notes/v1")
+router = APIRouter(prefix="/api/notes_temp/temp")
 
 @router.post("/create/", response_model=NotesResponse)
 async def create_notes(notes: NotesCreate, db: get_db = Depends()):

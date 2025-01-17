@@ -36,7 +36,7 @@ def table(note_form_tab):
 
 def get_notes_data_api():
     # API endpoint
-    url = server_ip + "/api/notes/v1/list/"
+    url = server_ip + "/api/notes/temp/list/"
 
     try:
         response = requests.get(url)
