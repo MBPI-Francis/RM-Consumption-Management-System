@@ -31,12 +31,12 @@ class TempPreparationForm(Base):
 
 
     # Relationships
-    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_preparation_form")
-    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_preparation_form")
-    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_preparation_form")
-    rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_preparation_form")
-    rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_preparation_form")
-    warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_preparation_form")
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_preparation_form_temp")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_preparation_form_temp")
+    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_preparation_form_temp")
+    rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_preparation_form_temp")
+    rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_preparation_form_temp")
+    warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_preparation_form_temp")
 
 
 

@@ -10,8 +10,8 @@ class PreparationFormCRUD(AppCRUD):
         preparation_form_item = PreparationForm(rm_code_id=preparation_form.rm_code_id,
                                                 warehouse_id=preparation_form.warehouse_id,
                                                 rm_soh_id=preparation_form.rm_soh_id,
+                                                computed_detail_id=preparation_form.computed_detail_id,
                                                 ref_number=preparation_form.ref_number,
-                                                computed_detail_id=preparation_form.computed_detai_id,
                                                 preparation_date=preparation_form.preparation_date,
                                                 qty_prepared=preparation_form.qty_prepared,
                                                 qty_return=preparation_form.qty_return

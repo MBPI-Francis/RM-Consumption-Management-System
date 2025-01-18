@@ -26,7 +26,7 @@ class TransferFormCRUD(AppCRUD):
         transfer_form_item = self.db.query(TransferForm).all()
         if transfer_form_item:
             return transfer_form_item
-        return None
+        return []
 
 
 # These are the code for the business logic like calculation etc.

@@ -26,7 +26,7 @@ class TempTransferFormCRUD(AppCRUD):
         transfer_form_item = self.db.query(TempTransferForm).all()
         if transfer_form_item:
             return transfer_form_item
-        return None
+        return []
 
 
     def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TempTransferFormUpdate):

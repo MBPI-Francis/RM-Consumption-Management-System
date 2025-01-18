@@ -14,6 +14,7 @@ async def create_transfer_form(transfer_form: TransferFormCreate, db: get_db = D
 @router.get("/list/", response_model=list[TransferFormResponse])
 async def read_transfer_form(db: get_db = Depends()):
     result = TransferFormService(db).get_transfer_form()
+    print("This is the result: ",bool(result))
     return result
 
 
