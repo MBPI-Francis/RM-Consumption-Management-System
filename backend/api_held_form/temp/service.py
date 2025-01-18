@@ -25,7 +25,7 @@ class TempHeldFormCRUD(AppCRUD):
         held_form_item = self.db.query(TempHeldForm).all()
         if held_form_item:
             return held_form_item
-        return None
+        return []
 
 
     def update_held_form(self, held_form_id: UUID, held_form_update: TempHeldFormUpdate):

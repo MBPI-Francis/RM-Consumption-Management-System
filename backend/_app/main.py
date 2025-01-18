@@ -25,7 +25,9 @@ from backend.api_transfer_form.main import router as main_form_router
 from backend.api_preparation_form.temp import router as temp_preparation_form_router
 from backend.api_preparation_form.main import router as main_preparation_form_router
 
-from backend.api_held_form.temp import router as held_form_router
+from backend.api_held_form.temp import router as temp_held_form_router
+from backend.api_held_form.main import router as main_held_form_router
+
 from backend.settings.database import engine, Base
 
 # Initialize FastAPI app
@@ -82,7 +84,8 @@ app.include_router(temp_preparation_form_router.router)
 app.include_router(main_preparation_form_router.router)
 
 # These code includes all the routers/endpoint of the api_held_form
-app.include_router(held_form_router.router)
+app.include_router(temp_held_form_router.router)
+app.include_router(main_held_form_router.router)
 
 
 # Code for Creating database tables

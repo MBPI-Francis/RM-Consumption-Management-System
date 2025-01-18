@@ -24,7 +24,7 @@ class HeldFormCRUD(AppCRUD):
         held_form_item = self.db.query(HeldForm).all()
         if held_form_item:
             return held_form_item
-        return None
+        return []
 
 
 # These are the code for the business logic like calculation etc.
