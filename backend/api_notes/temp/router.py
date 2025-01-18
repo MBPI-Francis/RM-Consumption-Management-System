@@ -12,6 +12,7 @@ async def create_notes(notes: NotesCreate, db: get_db = Depends()):
     result = NotesService(db).create_notes(notes)
     return result
 
+
 @router.get("/list/", response_model=list[NotesResponse])
 async def read_notes(db: get_db = Depends()):
     result = NotesService(db).get_notes()

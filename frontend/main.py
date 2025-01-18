@@ -11,7 +11,7 @@ class App(ttk.Window):
     def __init__(self):
         super().__init__(themename="cosmo")  # Choose the ttkbootstrap theme
         self.title("TTKBootstrap Sidebar Navigation")
-        self.geometry("1000x700")
+        self.geometry("1300x700")
 
         # Configure row/column for responsiveness of the main window
         self.rowconfigure(0, weight=1)

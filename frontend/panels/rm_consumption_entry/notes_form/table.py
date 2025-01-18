@@ -1,5 +1,5 @@
 import ttkbootstrap as ttk
-from ttkbootstrap.tableview import Tableview
+from ttkbootstrap.tableview import *
 from ttkbootstrap.constants import *
 import requests
 from backend.settings.database import server_ip
@@ -26,8 +26,13 @@ def table(note_form_tab):
         paginated=True,
         searchable=True,
         bootstyle=PRIMARY,
+        pagesize=20,
+        autofit=True,  # Auto-size columns
+        autoalign=False,  # Auto-align columns based on data
+
 
     )
+
 
     # Pack the Tableview
     dt.pack(fill=BOTH, expand=YES, padx=10, pady=10)
@@ -35,7 +40,7 @@ def table(note_form_tab):
 
 def get_notes_data_api():
     # API endpoint
-    url = server_ip + "/api/notes/temp/list/"
+    url = server_ip + "/api/notes/temp/ws/notes/"
 
     try:
         response = requests.get(url)
