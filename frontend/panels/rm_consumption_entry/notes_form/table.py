@@ -40,7 +40,7 @@ def table(note_form_tab):
 
 def get_notes_data_api():
     # API endpoint
-    url = server_ip + "/api/notes/temp/ws/notes/"
+    url = server_ip + "/api/notes/temp/"
 
     try:
         response = requests.get(url)
