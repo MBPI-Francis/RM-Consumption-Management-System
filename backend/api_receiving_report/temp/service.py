@@ -25,7 +25,7 @@ class TempReceivingReportCRUD(AppCRUD):
         receiving_report_item = self.db.query(TempReceivingReport).all()
         if receiving_report_item:
             return receiving_report_item
-        return None
+        return []
 
 
     def update_receiving_report(self, receiving_report_id: UUID, receiving_report_update: TempReceivingReportUpdate):

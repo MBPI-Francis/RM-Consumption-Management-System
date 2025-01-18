@@ -24,7 +24,7 @@ class NotesCRUD(AppCRUD):
         notes_item = self.db.query(Notes).all()
         if notes_item:
             return notes_item
-        return None
+        return []
 
 # These are the code for the business logic like calculation etc.
 class NotesService(AppService):

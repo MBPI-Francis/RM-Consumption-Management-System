@@ -24,7 +24,7 @@ class TempNotesCRUD(AppCRUD):
         notes_item = self.db.query(TempNotes).all()
         if notes_item:
             return notes_item
-        return None
+        return []
 
 
     def update_notes(self, notes_id: UUID, notes_update: NotesUpdate):

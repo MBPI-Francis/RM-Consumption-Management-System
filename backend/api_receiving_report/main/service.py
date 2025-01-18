@@ -23,7 +23,7 @@ class ReceivingReportCRUD(AppCRUD):
         receiving_report_item = self.db.query(ReceivingReport).all()
         if receiving_report_item:
             return receiving_report_item
-        return None
+        return []
 
 
 

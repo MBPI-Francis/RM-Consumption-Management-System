@@ -23,7 +23,7 @@ class WarehouseCRUD(AppCRUD):
         warehouse_item = self.db.query(Warehouse).all()
         if warehouse_item:
             return warehouse_item
-        return None
+        return []
 
 
     def update_warehouse(self, warehouse_id: UUID, warehouse_update: WarehouseUpdate):

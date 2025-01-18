@@ -25,7 +25,7 @@ class PreparationFormCRUD(AppCRUD):
         preparation_form_item = self.db.query(PreparationForm).all()
         if preparation_form_item:
             return preparation_form_item
-        return None
+        return []
 
 
 

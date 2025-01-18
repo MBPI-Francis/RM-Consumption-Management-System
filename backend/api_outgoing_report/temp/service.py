@@ -25,7 +25,7 @@ class TempOutgoingReportCRUD(AppCRUD):
         outgoing_report_item = self.db.query(TempOutgoingReport).all()
         if outgoing_report_item:
             return outgoing_report_item
-        return None
+        return []
 
 
     def update_outgoing_report(self, outgoing_report_id: UUID, outgoing_report_update: TempOutgoingReportUpdate):

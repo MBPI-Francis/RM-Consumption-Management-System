@@ -24,7 +24,7 @@ class StockOnHandCRUD(AppCRUD):
         rm_soh_item = self.db.query(StockOnHand).all()
         if rm_soh_item:
             return rm_soh_item
-        return None
+        return []
 
 
     def update_rm_soh(self, rm_soh_id: UUID, rm_soh_update: StockOnHandUpdate):

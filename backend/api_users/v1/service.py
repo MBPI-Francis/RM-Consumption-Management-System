@@ -26,7 +26,7 @@ class UserCRUD(AppCRUD):
         user_item = self.db.query(User).all()
         if user_item:
             return user_item
-        return None
+        return []
 
 
     def update_user(self, user_id: UUID, user_update: UserUpdate):

@@ -26,7 +26,7 @@ class TempPreparationFormCRUD(AppCRUD):
         preparation_form_item = self.db.query(TempPreparationForm).all()
         if preparation_form_item:
             return preparation_form_item
-        return None
+        return []
 
 
     def update_preparation_form(self, preparation_form_id: UUID, preparation_form_update: TempPreparationFormUpdate):

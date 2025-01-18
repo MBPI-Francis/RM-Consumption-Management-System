@@ -23,7 +23,7 @@ class RawMaterialCRUD(AppCRUD):
         raw_material_item = self.db.query(RawMaterial).all()
         if raw_material_item:
             return raw_material_item
-        return None
+        return []
 
 
     def update_raw_material(self, rm_id: UUID, raw_material_update: RawMaterialUpdate):

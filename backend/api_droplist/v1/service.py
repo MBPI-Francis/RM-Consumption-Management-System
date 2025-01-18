@@ -22,7 +22,7 @@ class DropListCRUD(AppCRUD):
         droplist_item = self.db.query(DropList).all()
         if droplist_item:
             return droplist_item
-        return None
+        return []
 
 
     def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):

@@ -25,7 +25,7 @@ class OutgoingReportCRUD(AppCRUD):
         outgoing_report_item = self.db.query(OutgoingReport).all()
         if outgoing_report_item:
             return outgoing_report_item
-        return None
+        return []
 
 
 
