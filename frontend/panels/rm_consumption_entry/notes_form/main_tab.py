@@ -5,7 +5,7 @@ from .table import table
 from .entry_fields import entry_fields
 
 
-def notes_form_tab(notebook):
+def notes_form_tab(notebook, flag=None):
     note_form_tab = ttk.Frame(notebook)
     notebook.add(note_form_tab, text="Notes Form")
     # Populate the Raw Materials Tab
@@ -21,4 +21,7 @@ def notes_form_tab(notebook):
     entry_fields(note_form_tab)
 
     # Call the table function to show the table
-    table(note_form_tab)
+    dt = table(note_form_tab)
+
+    # Below is the code for Packing the Tableview and show it in the frontend
+    dt.pack(fill=BOTH, expand=YES, padx=10, pady=10)

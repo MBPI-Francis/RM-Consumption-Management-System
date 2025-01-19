@@ -57,7 +57,6 @@ class App(ttk.Window):
         if view_name in self.views:
             self.views[view_name].show()
 
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()
