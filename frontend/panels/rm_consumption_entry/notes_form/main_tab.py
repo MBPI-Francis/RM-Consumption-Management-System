@@ -1,11 +1,11 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .table import table
+from .table import NoteTable
 from .entry_fields import entry_fields
 
 
-def notes_form_tab(notebook, flag=None):
+def notes_form_tab(notebook):
     note_form_tab = ttk.Frame(notebook)
     notebook.add(note_form_tab, text="Notes Form")
     # Populate the Raw Materials Tab
@@ -21,7 +21,9 @@ def notes_form_tab(notebook, flag=None):
     entry_fields(note_form_tab)
 
     # Call the table function to show the table
-    dt = table(note_form_tab)
+    # NoteTable(note_form_tab)
+    # table(note_form_tab)
+
+
 
     # Below is the code for Packing the Tableview and show it in the frontend
-    dt.pack(fill=BOTH, expand=YES, padx=10, pady=10)

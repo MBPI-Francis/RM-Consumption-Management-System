@@ -6,6 +6,48 @@ from backend.settings.database import server_ip
 from datetime import datetime
 
 
+class NoteTable:
+
+    def __init__(self, root):
+        self.note_form_tab = root
+
+        self.coldata = [
+            {"text": "Product Code", "stretch": True, "anchor": "w"},
+            {"text": "Lot No.", "stretch": True},
+            {"text": "Product Kind", "stretch": True},
+            {"text": "Consumption Date", "stretch": True},
+            {"text": "Entry Date", "stretch": True},
+        ]
+        self.rowdata = get_notes_data_api()
+
+        # Create Tableview
+        self.table = Tableview(
+            master=self.note_form_tab,
+            coldata=self.coldata,
+            rowdata=self.rowdata,
+            paginated=True,
+            searchable=True,
+            bootstyle=PRIMARY,
+            pagesize=20,
+            autofit=True,  # Auto-size columns
+            autoalign=False,  # Auto-align columns based on data
+
+        )
+
+        self.table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+    # def refresh_table(self):
+    #     self.rowdata = get_notes_data_api()  # Fetch updated data
+    #     self.table.build_table_data(coldata=self.coldata, rowdata=self.rowdata)  # Rebuild table data
+    #     self.table.reset_table()  # Reset table to reflect new data
+
+    def refresh_table(self):
+        self.rowdata = get_notes_data_api()  # Fetch updated data
+        self.table.build_table_data(
+            coldata=self.coldata,
+            rowdata=self.rowdata)  # Auto-align columns based on data)  # Rebuild table data
+        self.table.goto_last_page()
+
 def get_notes_data_api():
     # API endpoint
     url = server_ip + "/api/notes/temp/list/"
@@ -35,34 +77,34 @@ def get_notes_data_api():
         print(f"Error fetching data from API: {e}")
         return []  # Return an empty list if there's an error
 
-def table(note_form_tab):
-    # Define column and row data
-    coldata = [
-        {"text": "Product Code", "stretch": True, "anchor": "w"},
-        {"text": "Lot No.", "stretch": True},
-        {"text": "Product Kind", "stretch": True},
-        {"text": "Consumption Date", "stretch": True},
-        {"text": "Entry Date", "stretch": True},
-    ]
-
-    rowdata = get_notes_data_api()
-
-    # Create Tableview
-    dt = Tableview(
-        master=note_form_tab,
-        coldata=coldata,
-        rowdata=rowdata,
-        paginated=True,
-        searchable=True,
-        bootstyle=PRIMARY,
-        pagesize=20,
-        autofit=True,  # Auto-size columns
-        autoalign=False,  # Auto-align columns based on data
-
-
-    )
-
-    return dt
+# def table(note_form_tab):
+#     # Define column and row data
+#     coldata = [
+#         {"text": "Product Code", "stretch": True, "anchor": "w"},
+#         {"text": "Lot No.", "stretch": True},
+#         {"text": "Product Kind", "stretch": True},
+#         {"text": "Consumption Date", "stretch": True},
+#         {"text": "Entry Date", "stretch": True},
+#     ]
+#
+#     rowdata = get_notes_data_api()
+#
+#     # Create Tableview
+#     dt = Tableview(
+#         master=note_form_tab,
+#         coldata=coldata,
+#         rowdata=rowdata,
+#         paginated=True,
+#         searchable=True,
+#         bootstyle=PRIMARY,
+#         pagesize=20,
+#         autofit=True,  # Auto-size columns
+#         autoalign=False,  # Auto-align columns based on data
+#
+#
+#     )
+#
+#     return dt
 
 
 

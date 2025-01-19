@@ -5,9 +5,9 @@ from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime as d_datetime
+from .table import NoteTable
 import datetime
 from .validation import EntryValidation
-from .table import table
 
 
 def entry_fields(note_form_tab):
@@ -19,8 +19,19 @@ def entry_fields(note_form_tab):
         else:
             return None
 
-    def submit_data():
+        # Function to clear all entry fields
+    def clear_fields():
 
+        product_code_entry.delete(0, ttk.END)
+        lot_number_entry.delete(0, ttk.END)
+        product_kind_combobox.set("")
+        yesterday_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%m/%d/%Y")
+        date_entry.config(state="normal")
+        date_entry.delete(0, ttk.END)
+        date_entry.insert(0, yesterday_date)
+        date_entry.config(state="readonly")
+
+    def submit_data():
 
         # Collect the form data
         product_code = product_code_entry.get()
@@ -53,25 +64,17 @@ def entry_fields(note_form_tab):
         try:
             response = requests.post(f"{server_ip}/api/notes/temp/create/", json=data)
             if response.status_code == 200:  # Successfully created
-                Messagebox.show_info("Success", "Data added successfully!")
+                clear_fields()
 
+                note_table.refresh_table()
                 # refresh_table()  # Refresh the table
         except requests.exceptions.RequestException as e:
-            Messagebox.show_info("Success", "Data added successfully!")
+            Messagebox.show_info(e, "Data Entry Error")
 
         # Function to get the selected item's ID
 
 
-        # Function to clear all entry fields
-        def clear_fields():
-            product_code_entry.delete(0, ttk.END)
-            lot_number_entry.delete(0, ttk.END)
-            product_kind_combobox.set("")
-            yesterday_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%m/%d/%Y")
-            date_entry.config(state="normal")
-            date_entry.delete(0, ttk.END)
-            date_entry.insert(0, yesterday_date)
-            date_entry.config(state="readonly")
+
 
     # Function to send POST request
 
@@ -128,6 +131,9 @@ def entry_fields(note_form_tab):
         command=submit_data,
     )
     btn_submit.grid(row=1, column=6, columnspan=2, pady=10)
+
+
+    note_table = NoteTable(note_form_tab)
 
 
 def get_product_kinds_api():
