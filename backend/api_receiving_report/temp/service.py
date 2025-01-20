@@ -86,7 +86,7 @@ class TempReceivingReportCRUD(AppCRUD):
                 TempReceivingReport.receiving_date,
                 TempReceivingReport.created_at,
                 case(
-                    (StockOnHand.id == None, "No Balance"),  # If no StockOnHand record, show "No Balance"
+                    (StockOnHand.id == None, "No Beginning Balance"),  # If no StockOnHand record, show "No Balance"
                     else_=func.concat(
                         cast(StockOnHand.rm_soh, String),
                         "(kg) - ",

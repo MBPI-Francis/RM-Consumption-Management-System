@@ -22,3 +22,10 @@ class EntryValidation:
             elif key == "receiving_date" and not value:
                 text_list.append("Receiving Date")
         return text_list
+
+    # Validation function for numeric input
+    def validate_numeric_input(input_value):
+        """
+        Validates that the input contains only numeric characters.
+        """
+        return input_value.isdigit() or input_value == ""  # Allow digits or empty input

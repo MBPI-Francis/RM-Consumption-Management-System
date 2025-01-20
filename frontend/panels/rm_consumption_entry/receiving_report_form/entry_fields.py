@@ -7,6 +7,7 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
+from tkinter import StringVar
 
 
 def entry_fields(note_form_tab):
@@ -28,21 +29,18 @@ def entry_fields(note_form_tab):
             return None
 
         # Function to clear all entry fields
-    def clear_fields(flag=None):
+    def clear_fields():
 
-        warehouse_combobox.set("")
+        if not checkbox_reference_var.get():
+            ref_number_entry.delete(0, ttk.END)
+
+        if not checkbox_warehouse_var.get():
+            warehouse_combobox.set("")
         rm_codes_combobox.set("")
-        ref_number_entry.delete(0, ttk.END)
         qty_entry.delete(0, ttk.END)
 
-        # yesterday_date = (datetime.now() - timedelta(days=1)).strftime("%m/%d/%Y")
-        # received_date_entry.config(state="normal")
-        # received_date_entry.delete(0, ttk.END)
-        # received_date_entry.insert(0, yesterday_date)
-        # received_date_entry.config(state="readonly")
 
 
-    # You need to finish this code. This code is for the
     def get_selected_latest_rm_api():
 
         url = server_ip + "/api/stock_on_hand/list/"
@@ -126,8 +124,16 @@ def entry_fields(note_form_tab):
     warehouse_combobox.grid(row=1, column=0, columnspan=2, pady=10, padx=10)
     ToolTip(warehouse_combobox, text="Choose a warehouse")
 
-
-
+    # Checkbox for Warehouse lock
+    checkbox_warehouse_var = ttk.IntVar()  # Integer variable to store checkbox state (0 or 1)
+    lock_warehouse = ttk.Checkbutton(
+        form_frame,
+        text="Lock Warehouse",
+        variable=checkbox_warehouse_var,
+        bootstyle="round-toggle"
+    )
+    lock_warehouse.grid(row=1, column=3, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
+    ToolTip(lock_warehouse, text="Lock the warehouse by clicking this")
 
     # REF Number Entry Field
     ref_number_label = ttk.Label(form_frame, text="Reference Number:", font=("Helvetica", 10, "bold"))
@@ -136,7 +142,16 @@ def entry_fields(note_form_tab):
     ref_number_entry.grid(row=3, column=0, padx=5, pady=5)
     ToolTip(ref_number_entry, text="Enter the Reference Number")
 
-
+    checkbox_reference_var = ttk.IntVar()  # Integer variable to store checkbox state (0 or 1)
+    # Checkbox beside the combobox
+    lock_reference = ttk.Checkbutton(
+        form_frame,
+        text="Lock Reference Number",
+        variable=checkbox_reference_var,
+        bootstyle="round-toggle"
+    )
+    lock_reference.grid(row=3, column=3, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
+    ToolTip(lock_reference, text="Lock the reference number by clicking this")
 
     #RM CODE JSON-format choices (coming from the API)
     rm_codes = get_rm_code_api()
@@ -153,15 +168,22 @@ def entry_fields(note_form_tab):
         state="normal",
         width=30,
     )
+
     rm_codes_combobox.grid(row=5, column=0, columnspan=2, pady=10, padx=10)
-    ToolTip(rm_codes_combobox, text="Choose a warehouse")
+    ToolTip(rm_codes_combobox, text="Choose a raw material")
 
+    # Register the validation command
 
+    validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
 
     # Quantity Entry Field
     qty_label = ttk.Label(form_frame, text="Quantity:", font=("Helvetica", 10, "bold"))
     qty_label.grid(row=4, column=3, padx=5, pady=5, sticky=W)
-    qty_entry = ttk.Entry(form_frame, width=30)
+    qty_entry = ttk.Entry(form_frame,
+                          width=30,
+                          validate="key",  # Trigger validation on keystrokes
+                          validatecommand=(validate_numeric_command, "%P")  # Pass the current widget content ("%P")
+)
     qty_entry.grid(row=5, column=3, padx=5, pady=5)
     ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
@@ -239,9 +261,6 @@ def get_rm_code_api():
         return data
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
-
-
-
 
 
 
