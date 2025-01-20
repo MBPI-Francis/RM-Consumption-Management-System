@@ -1,10 +1,11 @@
+from backend.api_receiving_report.main.models import ReceivingReport
 from backend.api_stock_on_hand.v1.exceptions import StockOnHandCreateException, StockOnHandNotFoundException, \
     StockOnHandUpdateException, StockOnHandSoftDeleteException, StockOnHandRestoreException
 from backend.api_stock_on_hand.v1.main import AppCRUD, AppService
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate
 from uuid import UUID
-
+from backend.api_receiving_report.temp.service import TempReceivingReportCRUD
 
 # These are the code for the app to communicate to the database
 class StockOnHandCRUD(AppCRUD):
@@ -20,7 +21,7 @@ class StockOnHandCRUD(AppCRUD):
         self.db.refresh(rm_soh_item)
         return rm_soh_item
 
-    def get_rm_soh(self):
+    def all_rm_soh(self):
         rm_soh_item = self.db.query(StockOnHand).all()
         if rm_soh_item:
             return rm_soh_item
@@ -83,9 +84,17 @@ class StockOnHandService(AppService):
 
         return rm_soh_item
 
-    def get_rm_soh(self):
+    def all_rm_soh(self):
         try:
-            rm_soh_item = StockOnHandCRUD(self.db).get_rm_soh()
+            rm_soh_item = StockOnHandCRUD(self.db).all_rm_soh()
+
+        except Exception as e:
+            raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")
+        return rm_soh_item
+
+    def get_rm_soh(self, warehouse_id: UUID, rm_code_id: UUID):
+        try:
+            rm_soh_item = TempReceivingReportCRUD(self.db).get_latest_soh_record(warehouse_id, rm_code_id)
 
         except Exception as e:
             raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")

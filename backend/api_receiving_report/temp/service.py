@@ -3,29 +3,113 @@ from backend.api_receiving_report.temp.exceptions import TempReceivingReportCrea
 from backend.api_receiving_report.temp.main import AppCRUD, AppService
 from backend.api_receiving_report.temp.models import TempReceivingReport
 from backend.api_receiving_report.temp.schemas import TempReceivingReportCreate, TempReceivingReportUpdate
+from backend.api_raw_materials.v1.models import RawMaterial
+from backend.api_warehouses.v1.models import Warehouse
 from uuid import UUID
+from backend.api_stock_on_hand.v1.models import StockOnHand
+from sqlalchemy import desc
+from sqlalchemy.sql import func, cast, case
+from sqlalchemy.types import String
 
 
 # These are the code for the app to communicate to the database
 class TempReceivingReportCRUD(AppCRUD):
+
+
+    def get_latest_soh_record(self, warehouse_id, rm_code_id):
+        """
+        Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
+        """
+
+
+
+        return (
+            self.db.query(StockOnHand)
+            .filter(
+                StockOnHand.warehouse_id == warehouse_id,
+                StockOnHand.rm_code_id == rm_code_id,
+            )
+            .order_by(desc(StockOnHand.stock_change_date))  # Assuming 'date' is the column for the latest date
+            .first()
+        )
+
+
+
+
+
     def create_receiving_report(self, receiving_report: TempReceivingReportCreate):
-        receiving_report_item = TempReceivingReport(rm_code_id=receiving_report.rm_code_id,
-                                                warehouse_id=receiving_report.warehouse_id,
-                                                rm_soh_id=receiving_report.rm_soh_id,
-                                                ref_number=receiving_report.ref_number,
-                                                receiving_date=receiving_report.receiving_date,
-                                                qty_kg=receiving_report.qty_kg
-                                                )
+
+        # Get the latest StockOnHand record ID
+        latest_soh_record = self.get_latest_soh_record(
+            warehouse_id=receiving_report.warehouse_id,
+            rm_code_id=receiving_report.rm_code_id,
+        )
+
+        # Check if the raw material code in warahouse # haves stocks
+        if latest_soh_record:
+            # If it had stocks, then put the ID of that stock record
+            latest_soh_record_id = latest_soh_record.id
+            receiving_report_item = TempReceivingReport(rm_code_id=receiving_report.rm_code_id,
+                                                       warehouse_id=receiving_report.warehouse_id,
+                                                       rm_soh_id=latest_soh_record_id,
+                                                       ref_number=receiving_report.ref_number,
+                                                       receiving_date=receiving_report.receiving_date,
+                                                       qty_kg=receiving_report.qty_kg
+                                                       )
+
+        else:
+            # If there is no stock record, then make the rm_soh_id NULL in the database
+            receiving_report_item = TempReceivingReport(rm_code_id=receiving_report.rm_code_id,
+                                                       warehouse_id=receiving_report.warehouse_id,
+                                                       ref_number=receiving_report.ref_number,
+                                                       receiving_date=receiving_report.receiving_date,
+                                                       qty_kg=receiving_report.qty_kg
+                                                       )
+
+
         self.db.add(receiving_report_item)
         self.db.commit()
         self.db.refresh(receiving_report_item)
         return receiving_report_item
 
     def get_receiving_report(self):
-        receiving_report_item = self.db.query(TempReceivingReport).all()
-        if receiving_report_item:
-            return receiving_report_item
-        return []
+        """
+        Join StockOnHand, ReceivingReport, Warehouse, and RawMaterial tables.
+        """
+        # Join tables
+        stmt = (
+            self.db.query(
+                RawMaterial.rm_code.label("raw_material"),
+                TempReceivingReport.qty_kg,
+                TempReceivingReport.ref_number,
+                Warehouse.wh_name,
+                TempReceivingReport.receiving_date,
+                TempReceivingReport.created_at,
+                case(
+                    (StockOnHand.id == None, "No Balance"),  # If no StockOnHand record, show "No Balance"
+                    else_=func.concat(
+                        cast(StockOnHand.rm_soh, String),
+                        "(kg) - ",
+                        func.to_char(StockOnHand.stock_change_date, "MM/DD/YYYY")
+                    )
+                ).label("soh_and_date"),
+                TempReceivingReport.created_at,
+                TempReceivingReport.updated_at
+
+            )
+            .outerjoin(StockOnHand, StockOnHand.id == TempReceivingReport.rm_soh_id)  # Left join StockOnHand with ReceivingReport
+            .join(RawMaterial, TempReceivingReport.rm_code_id == RawMaterial.id)       # Join StockOnHand with RawMaterial
+            .join(Warehouse, TempReceivingReport.warehouse_id == Warehouse.id) # Join Receiving Report with Warehouse
+        )
+
+        # Return All the result
+        return stmt.all()
+
+
+        # receiving_report_item = self.db.query(TempReceivingReport).all()
+        # if receiving_report_item:
+        #     return receiving_report_item
+        # return []
 
 
     def update_receiving_report(self, receiving_report_id: UUID, receiving_report_update: TempReceivingReportUpdate):

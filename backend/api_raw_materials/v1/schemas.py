@@ -21,7 +21,9 @@ class RawMaterialUpdate(RawMaterialBase):
     description: Optional[str] = None
 
 
-class RawMaterialResponse(RawMaterialBase):
+class RawMaterialResponse(BaseModel):
+    id: UUID
+    rm_code: str
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
     description: Optional[str] = None

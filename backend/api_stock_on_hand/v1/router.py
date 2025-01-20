@@ -14,8 +14,18 @@ async def create_rm_soh(rm_soh: StockOnHandCreate, db: get_db = Depends()):
 
 @router.get("/list/", response_model=list[StockOnHandResponse])
 async def read_rm_soh(db: get_db = Depends()):
-    result = StockOnHandService(db).get_rm_soh()
+    result = StockOnHandService(db).all_rm_soh()
     return result
+
+
+@router.get("/get/", response_model=StockOnHandResponse)
+async def get_rm_soh(
+        warehouse_id: UUID,
+        rm_code_id: UUID,
+        db: get_db = Depends()):
+    result = StockOnHandService(db).get_rm_soh(warehouse_id, rm_code_id)
+    return result
+
 
 @router.put("/update/{rm_soh_id}/", response_model=StockOnHandResponse)
 async def update_rm_soh(rm_soh_id: UUID, rm_soh_update: StockOnHandUpdate, db: get_db = Depends()):

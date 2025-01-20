@@ -19,11 +19,23 @@ class RawMaterialCRUD(AppCRUD):
         self.db.refresh(raw_material_item)
         return raw_material_item
 
-    def get_raw_material(self):
+    def all_raw_material(self):
         raw_material_item = self.db.query(RawMaterial).all()
         if raw_material_item:
             return raw_material_item
         return []
+    
+    
+    def get_raw_material(self, rm_code):
+
+        computed_detail_item = (
+            self.db.query(RawMaterial).filter(
+                RawMaterial.rm_code == rm_code
+            ).first()
+        )
+        if computed_detail_item:
+            return computed_detail_item
+        return None
 
 
     def update_raw_material(self, rm_id: UUID, raw_material_update: RawMaterialUpdate):
@@ -82,13 +94,24 @@ class RawMaterialService(AppService):
 
         return raw_material_item
 
-    def get_raw_material(self):
+    def all_raw_material(self):
         try:
-            raw_material_item = RawMaterialCRUD(self.db).get_raw_material()
+            raw_material_item = RawMaterialCRUD(self.db).all_raw_material()
 
         except Exception as e:
             raise RawMaterialNotFoundException(detail=f"Error: {str(e)}")
         return raw_material_item
+
+
+
+    def get_raw_material(self, rm_code: str):
+        try:
+            raw_material_item = RawMaterialCRUD(self.db).get_raw_material(rm_code)
+
+        except Exception as e:
+            raise RawMaterialNotFoundException(detail=f"Error: {str(e)}")
+        return raw_material_item
+
 
     # This is the service/business logic in updating the raw_material.
     def update_raw_material(self, rm_id: UUID, raw_material_update: RawMaterialUpdate):

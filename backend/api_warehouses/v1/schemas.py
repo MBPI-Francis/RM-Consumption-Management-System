@@ -16,8 +16,10 @@ class WarehouseCreate(WarehouseBase):
 
 class WarehouseUpdate(WarehouseBase):
     pass
-class WarehouseResponse(WarehouseBase):
-    pass
+class WarehouseResponse(BaseModel):
+    id: UUID
+    wh_number: int
+    wh_name: str
 
     class Config:
         from_attributes = True

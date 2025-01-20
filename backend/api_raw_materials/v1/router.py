@@ -14,7 +14,16 @@ async def create_raw_material(raw_material: RawMaterialCreate, db: get_db = Depe
 
 @router.get("/list/", response_model=list[RawMaterialResponse])
 async def read_raw_material(db: get_db = Depends()):
-    result = RawMaterialService(db).get_raw_material()
+    result = RawMaterialService(db).all_raw_material()
+    return result
+
+
+@router.get("/get/", response_model=RawMaterialResponse)
+async def get_raw_material(
+    rm_code: str,
+    db: get_db = Depends()
+):
+    result = RawMaterialService(db).get_raw_material(rm_code)
     return result
 
 @router.put("/update/{rm_id}/", response_model=RawMaterialResponse)
