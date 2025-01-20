@@ -4,7 +4,7 @@ from .held_form.held_form_tab import held_form_tab
 from .notes_form.main_tab import notes_form_tab
 from .transfer_form.transfer_form_tab import transfer_form_tab
 from .preparation_form.preparation_form_tab import preparation_form_tab
-from .outgoing_report_form.outgoing_form_tab import outgoing_form_tab
+from .outgoing_report_form.main_tab import outgoing_form_tab
 from .receiving_report_form.main_tab import receiving_report_tab
 from .submit_entries.submit_entries_tab import submit_entries_tab
 
@@ -39,6 +39,7 @@ class ConsumptionEntryView:
         transfer_form_tab(notebook)
         held_form_tab(notebook)
         submit_entries_tab(notebook)
+
 
          # Configure rows and columns to be responsive
         consumption_entry_frame.grid_rowconfigure(0, weight=0)  # Label row does not resize

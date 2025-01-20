@@ -11,7 +11,7 @@ from tkinter import StringVar
 
 
 def entry_fields(note_form_tab):
-
+    
 
     def get_selected_warehouse_id():
         selected_name = warehouse_combobox.get()
@@ -63,7 +63,7 @@ def entry_fields(note_form_tab):
         rm_code_id = get_selected_rm_code_id()
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
-        received_date = received_date_entry.entry.get()
+        received_date = outgoing_date_entry.entry.get()
 
 
         # Convert date to YYYY-MM-DD
@@ -189,23 +189,23 @@ def entry_fields(note_form_tab):
     ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
     # Date Entry field
-    date_label = ttk.Label(form_frame, text="Receiving Date:", font=("Helvetica", 10, "bold"))
+    date_label = ttk.Label(form_frame, text="Outgoing Date:", font=("Helvetica", 10, "bold"))
     date_label.grid(row=4, column=5, padx=5, pady=5, sticky=W)
 
     # Calculate yesterday's date
     yesterday_date = datetime.now() - timedelta(days=1)
 
     # Create the DateEntry widget with yesterday's date as the default value
-    received_date_entry = ttk.DateEntry(
+    outgoing_date_entry = ttk.DateEntry(
         form_frame,
         bootstyle=PRIMARY,
         dateformat="%m/%d/%Y",
         startdate=yesterday_date,  # Set yesterday's date
         width=30
     )
-    received_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
+    outgoing_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
 
-    ToolTip(received_date_entry, text="This is the receiving date.")
+    ToolTip(outgoing_date_entry, text="This is the receiving date.")
 
     # Add button to submit data
     btn_submit = ttk.Button(
