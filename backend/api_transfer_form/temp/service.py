@@ -6,6 +6,7 @@ from backend.api_transfer_form.temp.schemas import TempTransferFormCreate, TempT
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
+from backend.api_droplist.v1.models import DropList
 from uuid import UUID
 
 from sqlalchemy import desc
@@ -54,7 +55,8 @@ class TempTransferFormCRUD(AppCRUD):
                                                     to_rm_soh_id=latest_soh_to.id,
                                                     ref_number=transfer_form.ref_number,
                                                     transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg
+                                                    qty_kg=transfer_form.qty_kg,
+                                                    status_id=transfer_form.status_id
                                                   )
 
 
@@ -65,7 +67,8 @@ class TempTransferFormCRUD(AppCRUD):
                                                     to_rm_soh_id=latest_soh_to.id,
                                                     ref_number=transfer_form.ref_number,
                                                     transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg
+                                                    qty_kg=transfer_form.qty_kg,
+                                                    status_id = transfer_form.status_id
                                                     )
 
         elif latest_soh_from and not latest_soh_to:
@@ -75,7 +78,8 @@ class TempTransferFormCRUD(AppCRUD):
                                                     from_rm_soh_id=latest_soh_from.id,
                                                     ref_number=transfer_form.ref_number,
                                                     transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg
+                                                    qty_kg=transfer_form.qty_kg,
+                                                    status_id=transfer_form.status_id
                                                     )
 
 
@@ -85,7 +89,8 @@ class TempTransferFormCRUD(AppCRUD):
                                                     to_warehouse_id=transfer_form.to_warehouse_id,
                                                     ref_number=transfer_form.ref_number,
                                                     transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg
+                                                    qty_kg=transfer_form.qty_kg,
+                                                    status_id=transfer_form.status_id
                                                     )
 
 
@@ -114,6 +119,7 @@ class TempTransferFormCRUD(AppCRUD):
                 FromWarehouse.wh_name.label("from_warehouse"),
                 ToWarehouse.wh_name.label("to_warehouse"),
                 TempTransferForm.transfer_date,
+                DropList.name.label("status"),
                 TempTransferForm.created_at,
                 TempTransferForm.updated_at
 
@@ -121,6 +127,8 @@ class TempTransferFormCRUD(AppCRUD):
             .outerjoin(FromStockOnHand, FromStockOnHand.id == TempTransferForm.from_rm_soh_id)  # Left join StockOnHand with TransferForm
             .outerjoin(ToStockOnHand,
                        ToStockOnHand.id == TempTransferForm.to_rm_soh_id)  # Left join StockOnHand with TransferForm
+            .outerjoin(DropList,
+                       DropList.id == TempTransferForm.status_id)  # Left join DropList with TransferForm
             .join(RawMaterial, TempTransferForm.rm_code_id == RawMaterial.id)       # Join StockOnHand with RawMaterial
             .join(FromWarehouse, TempTransferForm.from_warehouse_id == FromWarehouse.id) # Join TempTransferForm with Warehouse
             .join(ToWarehouse, TempTransferForm.to_warehouse_id == ToWarehouse.id)  # Join TempTransferForm with Warehouse

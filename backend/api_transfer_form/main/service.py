@@ -15,7 +15,8 @@ class TransferFormCRUD(AppCRUD):
                                                 computed_detail_id=transfer_form.computed_detail_id,
                                                 ref_number=transfer_form.ref_number,
                                                 transfer_date=transfer_form.transfer_date,
-                                                qty_kg=transfer_form.qty_kg
+                                                qty_kg=transfer_form.qty_kg,
+                                                status_id=transfer_form.status_id
                                                 )
         self.db.add(transfer_form_item)
         self.db.commit()

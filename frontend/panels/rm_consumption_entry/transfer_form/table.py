@@ -17,7 +17,7 @@ class NoteTable:
             {"text": "Quantity(kg)", "stretch": True},
             {"text": "Warehouse (FROM)", "stretch": True},
             {"text": "Warehouse (TO)", "stretch": True},
-            {"text": "Beginning Balance", "stretch": True},
+            {"text": "Status", "stretch": True},
             {"text": "Transfer Date", "stretch": True},
             {"text": "Entry Date", "stretch": True},
         ]
@@ -55,6 +55,7 @@ class NoteTable:
                     item["qty_kg"],
                     item["from_warehouse"],
                     item["to_warehouse"],
+                    item["status"],
                     item["transfer_date"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
                 )

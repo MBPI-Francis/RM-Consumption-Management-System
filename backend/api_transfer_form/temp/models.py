@@ -17,6 +17,8 @@ class TempTransferForm(Base):
     to_warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
     from_rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
     to_rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
+    status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
+
 
     ref_number = Column(String(50), nullable=False, unique=False)
     transfer_date = Column(Date,nullable=False)
@@ -40,6 +42,7 @@ class TempTransferForm(Base):
     to_rm_soh = relationship("StockOnHand", foreign_keys=[to_rm_soh_id], backref="to_soh_transfer_form_temp")
     from_warehouse = relationship("Warehouse", foreign_keys=[from_warehouse_id], backref="from_warehouse_transfer_form_temp")
     to_warehouse = relationship("Warehouse", foreign_keys=[to_warehouse_id], backref="to_warehouse_transfer_form_temp")
+    status = relationship("DropList", foreign_keys=[status_id], backref="status_transfer_form_temp")
 
 
 

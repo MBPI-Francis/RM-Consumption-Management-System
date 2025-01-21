@@ -10,6 +10,7 @@ class TempTransferForm(BaseModel):
     rm_code_id: UUID
     from_warehouse_id: UUID
     to_warehouse_id: UUID
+    status_id: Optional[UUID] = None
     ref_number: str = Field(max_length=50, description="The reference number of the Transfer Form")
     transfer_date: date
     qty_kg: float
@@ -28,6 +29,7 @@ class TempTransferFormResponse(BaseModel):
     ref_number: str
     transfer_date: date
     qty_kg: float
+    status: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     created_by: Optional[UUID] = None
