@@ -15,7 +15,8 @@ class NoteTable:
             {"text": "ID", "stretch": True, "anchor": "w"},
             {"text": "Raw Material Code", "stretch": True, "anchor": "w"},
             {"text": "Created by", "stretch": True},
-            {"text": "Date Created", "stretch": True}
+            {"text": "Date Created", "stretch": True},
+            {"text": "Action", "stretch": True}
         ]
         self.rowdata = self.fetch_and_format_data()
 
@@ -50,7 +51,7 @@ class NoteTable:
                     item["rm_code"],
                     item["created_by"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p")
-                )
+            )
                 for item in data
             ]
             return rowdata
