@@ -10,9 +10,10 @@ class HeldForm(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
     rm_soh_id: UUID
-    status_id: UUID
+    current_status_id: UUID
+    new_status_id: UUID
     computed_detail_id: UUID
-    held_date: date
+    change_status_date: date
     qty_kg: float
 
 

@@ -10,7 +10,7 @@ class HeldFormCRUD(AppCRUD):
         held_form_item = HeldForm(rm_code_id=held_form.rm_code_id,
                                     warehouse_id=held_form.warehouse_id,
                                     rm_soh_id=held_form.rm_soh_id,
-                                    held_date=held_form.held_date,
+                                    change_status_date=held_form.held_date,
                                     qty_kg=held_form.qty_kg,
                                     status_id=held_form.status_id,
                                     computed_detail_id=held_form.computed_detail_id

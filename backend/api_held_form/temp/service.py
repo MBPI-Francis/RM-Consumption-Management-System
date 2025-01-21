@@ -10,11 +10,12 @@ from uuid import UUID
 class TempHeldFormCRUD(AppCRUD):
     def create_held_form(self, held_form: TempHeldFormCreate):
         held_form_item = TempHeldForm(rm_code_id=held_form.rm_code_id,
-                                                warehouse_id=held_form.warehouse_id,
-                                                rm_soh_id=held_form.rm_soh_id,
-                                                held_date=held_form.held_date,
-                                                qty_kg=held_form.qty_kg,
-                                                status_id=held_form.status_id
+                                            warehouse_id=held_form.warehouse_id,
+                                            rm_soh_id=held_form.rm_soh_id,
+                                            change_status_date=held_form.change_status_date,
+                                            qty_kg=held_form.qty_kg,
+                                            current_status_id=held_form.current_status_id,
+                                            new_status_id=held_form.new_status_id
                                                 )
         self.db.add(held_form_item)
         self.db.commit()

@@ -10,8 +10,9 @@ class TempHeldForm(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
     rm_soh_id: UUID
-    status_id: UUID
-    held_date: date
+    current_status_id: UUID
+    new_status_id: UUID
+    change_status_date: date
     qty_kg: float
 
 

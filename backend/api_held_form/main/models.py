@@ -15,10 +15,12 @@ class HeldForm(Base):
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
     rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
-    status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=False)
+    current_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
+    new_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
     computed_detail_id = Column(UUID(as_uuid=True), ForeignKey("tbl_computed_details.id"), nullable=False)
 
-    held_date = Column(Date,nullable=False)
+
+    change_status_date = Column(Date,nullable=False)
     qty_kg = Column(Numeric(10, 2), nullable=False)
     is_deleted = Column(Boolean, default=False)
 
@@ -37,9 +39,9 @@ class HeldForm(Base):
     rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_held_form")
     rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_held_form")
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_held_form")
-    status = relationship("DropList", foreign_keys=[status_id], backref="status_held_form")
+    current_status = relationship("DropList", foreign_keys=[current_status_id], backref="current_status_held_form")
+    new_status = relationship("DropList", foreign_keys=[new_status_id], backref="new_status_held_form")
     computed_detail = relationship("ComputedDetail", foreign_keys=[computed_detail_id], backref="compdetail_held_form")
-
 
 
 
