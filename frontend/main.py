@@ -1,7 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from sidebar.sidebar import Sidebar
-from panels.warehouse.warehouse_view import WarehouseView
+from panels.warehouse.main_view import WarehouseView
 from panels.department.department_view import DepartmentView
 from panels.user.user_view import UserView
 from panels.raw_material.main_view import RawMaterialView
@@ -38,9 +38,8 @@ class App(ttk.Window):
         # Initialize Views
         self.views = {
             "warehouse": WarehouseView(self.content_frame),
-            "department": DepartmentView(self.content_frame),
-            "user": UserView(self.content_frame),
             "raw_material": RawMaterialView(self.content_frame),
+            "user": UserView(self.content_frame),
             "consumption_entry": ConsumptionEntryView(self.content_frame)
         }
 

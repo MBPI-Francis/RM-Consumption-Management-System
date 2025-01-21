@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_raw_materials.v1.schemas import RawMaterialCreate, RawMaterialUpdate, RawMaterialResponse
+from backend.api_raw_materials.v1.schemas import RawMaterialCreate, RawMaterialUpdate, RawMaterialResponse, TransformedRawMaterialResponse
 from backend.api_raw_materials.v1.service import RawMaterialService
 from backend.settings.database import get_db
 from uuid import UUID
@@ -15,6 +15,11 @@ async def create_raw_material(raw_material: RawMaterialCreate, db: get_db = Depe
 @router.get("/list/", response_model=list[RawMaterialResponse])
 async def read_raw_material(db: get_db = Depends()):
     result = RawMaterialService(db).all_raw_material()
+    return result
+
+@router.get("/transformed_list/", response_model=list[TransformedRawMaterialResponse])
+async def read_transformed_raw_material(db: get_db = Depends()):
+    result = RawMaterialService(db).all_transformed_raw_material()
     return result
 
 

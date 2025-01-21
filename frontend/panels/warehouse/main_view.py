@@ -1,9 +1,9 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .main_tab import rm_code_tab
+from .main_tab import warehouse_tab
 
 
-class RawMaterialView:
+class WarehouseView:
     def __init__(self, parent):
         self.parent = parent
 
@@ -15,15 +15,4 @@ class RawMaterialView:
         notebook.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         # Create the frames for each tab
-        rm_code_tab(notebook)
-        # rm_soh_tab(notebook)
-
-
-        # Add the tabs to the notebook
-
-
-
-
-
-        # Populate the Stock on Hand Tab
-
+        warehouse_tab(notebook)

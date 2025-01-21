@@ -28,6 +28,22 @@ class RawMaterialResponse(BaseModel):
     updated_by_id: Optional[UUID] = None
     description: Optional[str] = None
     rm_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
+
+class TransformedRawMaterialResponse(BaseModel):
+    id: UUID
+    rm_code: str
+    created_by: Optional[str] = None
+    rm_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+

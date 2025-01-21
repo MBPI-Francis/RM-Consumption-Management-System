@@ -1,6 +1,8 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from .entry_fields import entry_fields
+
 
 
 def rm_code_tab(notebook):
@@ -14,3 +16,5 @@ def rm_code_tab(notebook):
         bootstyle=INFO,
     )
     raw_material_label.pack(pady=20, padx=20)
+    entry_fields(raw_material_tab)
+

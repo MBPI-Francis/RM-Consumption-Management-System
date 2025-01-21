@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_warehouses.v1.schemas import WarehouseCreate, WarehouseUpdate, WarehouseResponse
+from backend.api_warehouses.v1.schemas import WarehouseCreate, WarehouseUpdate, WarehouseResponse, TransformedWarehouseResponse
 from backend.api_warehouses.v1.service import WarehouseService
 from backend.settings.database import get_db
 from uuid import UUID
@@ -15,6 +15,12 @@ async def create_warehouse(warehouse: WarehouseCreate, db: get_db = Depends()):
 @router.get("/list/", response_model=list[WarehouseResponse])
 async def read_warehouse(db: get_db = Depends()):
     result = WarehouseService(db).get_warehouse()
+    return result
+
+
+@router.get("/transformed_list/", response_model=list[TransformedWarehouseResponse])
+async def read_transformed_raw_material(db: get_db = Depends()):
+    result = WarehouseService(db).all_transformed_warehouse_list()
     return result
 
 @router.put("/update/{warehouse_id}/", response_model=WarehouseResponse)

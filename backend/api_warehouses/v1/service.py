@@ -3,6 +3,8 @@ from backend.api_warehouses.v1.exceptions import WarehouseCreateException, Wareh
 from backend.api_warehouses.v1.main import AppCRUD, AppService
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_warehouses.v1.schemas import WarehouseCreate, WarehouseUpdate
+from backend.api_users.v1.models import User
+from sqlalchemy.sql import func
 from uuid import UUID
 
 
@@ -24,6 +26,26 @@ class WarehouseCRUD(AppCRUD):
         if warehouse_item:
             return warehouse_item
         return []
+    
+    
+    def all_transformed_warehouse_list(self):
+        # Join tables
+        stmt = (
+            self.db.query(
+                Warehouse.id,
+                Warehouse.wh_number,
+                Warehouse.wh_name,
+                Warehouse.created_at,
+                Warehouse.updated_at,
+                func.concat(User.first_name, " ", User.last_name).label("created_by")
+            )
+            .outerjoin(User,
+                       User.id == Warehouse.created_by_id)  # Left join StockOnHand with ReceivingReport
+        )
+
+        # Return All the result
+        return stmt.all()
+        
 
 
     def update_warehouse(self, warehouse_id: UUID, warehouse_update: WarehouseUpdate):
@@ -90,6 +112,16 @@ class WarehouseService(AppService):
         except Exception as e:
             raise WarehouseNotFoundException(detail=f"Error: {str(e)}")
         return warehouse_item
+
+
+    def all_transformed_warehouse_list(self):
+        try:
+            warehouse_item = WarehouseCRUD(self.db).all_transformed_warehouse_list()
+
+        except Exception as e:
+            raise WarehouseNotFoundException(detail=f"Error: {str(e)}")
+        return warehouse_item
+
 
     # This is the service/business logic in updating the warehouse.
     def update_warehouse(self, warehouse_id: UUID, warehouse_update: WarehouseUpdate):
