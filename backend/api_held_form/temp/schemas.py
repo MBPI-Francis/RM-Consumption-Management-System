@@ -3,13 +3,13 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 
 class TempHeldForm(BaseModel):
     rm_code_id: UUID
+    ref_number: str
     warehouse_id: UUID
-    rm_soh_id: UUID
     current_status_id: UUID
     new_status_id: UUID
     change_status_date: date
@@ -23,8 +23,18 @@ class TempHeldFormCreate(TempHeldForm):
 class TempHeldFormUpdate(TempHeldForm):
     pass
 
-class TempHeldFormResponse(TempHeldForm):
-    pass
+class TempHeldFormResponse(BaseModel):
+    raw_material: str
+    wh_name: str
+    ref_number: str
+    current_status: str
+    new_status: str
+    change_status_date: date
+    qty_kg: float
+    created_at: datetime
+    updated_at: datetime
+    created_by_id: Optional[UUID] = None
+    updated_by_id: Optional[UUID] = None
 
     class Config:
         from_attributes = True

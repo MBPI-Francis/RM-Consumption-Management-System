@@ -16,8 +16,9 @@ class NoteTable:
             {"text": "Warehouse", "stretch": True},
             {"text": "Reference No.", "stretch": True},
             {"text": "Quantity(kg)", "stretch": True},
-            {"text": "Beginning Balance", "stretch": True},
-            {"text": "Outgoing Date", "stretch": True},
+            {"text": "Previous Status", "stretch": True},
+            {"text": "New Status", "stretch": True},
+            {"text": "Doc Date", "stretch": True},
             {"text": "Entry Date", "stretch": True},
         ]
         self.rowdata = self.fetch_and_format_data()
@@ -38,7 +39,7 @@ class NoteTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/outgoing_reports/temp/list/"
+        url = server_ip + "/api/held_forms/temp/list/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -53,8 +54,9 @@ class NoteTable:
                     item["wh_name"],
                     item["ref_number"],
                     item["qty_kg"],
-                    item["soh_and_date"],
-                    item["outgoing_date"],
+                    item["current_status"],
+                    item["new_status"],
+                    item["change_status_date"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
                 )
                 for item in data

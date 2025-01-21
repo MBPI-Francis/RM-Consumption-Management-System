@@ -64,6 +64,8 @@ def entry_fields(note_form_tab):
         rm_code_id = get_selected_rm_code_id()
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
+        current_status = get_selected_current_status_id()
+        new_status = get_selected_new_status_id()
         change_status_date = change_status_date_entry.entry.get()
 
 
@@ -78,6 +80,8 @@ def entry_fields(note_form_tab):
         data = {
             "rm_code_id": rm_code_id,
             "warehouse_id": warehouse_id,
+            "current_status_id": current_status,
+            "new_status_id": new_status,
             "ref_number": ref_number,
             "change_status_date": change_status_date,
             "qty_kg": qty,
@@ -215,7 +219,7 @@ def entry_fields(note_form_tab):
     status_names = list(status_to_id.keys())
 
 
-    # Combobox for Warehouse Drop Down
+    # Combobox for Current Status Drop Down
     current_status_label = ttk.Label(form_frame, text="Current Status", font=("Helvetica", 10, "bold"))
     current_status_label.grid(row=6, column=0, padx=5, pady=5, sticky=W)
     current_status_combobox = ttk.Combobox(
@@ -248,8 +252,10 @@ def entry_fields(note_form_tab):
         form_frame,
         text="+ Add",
         command=submit_data,
+        width = 10
     )
-    btn_submit.grid(row=5, column=6, columnspan=2, pady=10)
+    btn_submit.grid(row=7, column=5, padx=5, pady=5, sticky=W)
+    ToolTip(btn_submit, text="Click to add new record")
 
     # Calling the table
     note_table = NoteTable(note_form_tab)

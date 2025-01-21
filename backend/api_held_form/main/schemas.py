@@ -9,6 +9,7 @@ from datetime import date
 class HeldForm(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
+    ref_number: str
     rm_soh_id: UUID
     current_status_id: UUID
     new_status_id: UUID

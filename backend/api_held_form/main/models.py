@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, ForeignKey, DateTime, Boolean, Date, Numeric
+from sqlalchemy import Column, ForeignKey, DateTime, Boolean, Date, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -21,6 +21,7 @@ class HeldForm(Base):
 
 
     change_status_date = Column(Date,nullable=False)
+    ref_number = Column(String(50), nullable=False, unique=False)
     qty_kg = Column(Numeric(10, 2), nullable=False)
     is_deleted = Column(Boolean, default=False)
 

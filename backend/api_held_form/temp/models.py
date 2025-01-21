@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, ForeignKey, DateTime, Boolean, Date, Numeric
+from sqlalchemy import Column, ForeignKey, DateTime, Boolean, Date, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -13,12 +13,13 @@ class TempHeldForm(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
-    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
+    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
     current_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
     new_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
     
 
     change_status_date = Column(Date,nullable=False)
+    ref_number = Column(String(50), nullable=False, unique=False)
     qty_kg = Column(Numeric(10, 2), nullable=False)
     is_deleted = Column(Boolean, default=False)
 

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
-from backend.api_held_form.temp.schemas import TempHeldFormCreate, TempHeldFormUpdate, TempHeldFormResponse
+from backend.api_held_form.temp.schemas import TempHeldFormCreate, TempHeldFormUpdate, TempHeldFormResponse, TempHeldForm
 from backend.api_held_form.temp.service import TempHeldFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
 router = APIRouter(prefix="/api/held_forms/temp")
 
-@router.post("/create/", response_model=TempHeldFormResponse)
+@router.post("/create/", response_model=TempHeldForm)
 async def create_held_form(held_form: TempHeldFormCreate, db: get_db = Depends()):
     result = TempHeldFormService(db).create_held_form(held_form)
     return result
