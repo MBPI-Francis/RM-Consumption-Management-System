@@ -45,6 +45,7 @@ class TempHeldFormCRUD(AppCRUD):
 
             held_form_item = TempHeldForm(rm_code_id=held_form.rm_code_id,
                                                 warehouse_id=held_form.warehouse_id,
+                                                ref_number=held_form.ref_number,
                                                 rm_soh_id=latest_soh_record_id,
                                                 change_status_date=held_form.change_status_date,
                                                 qty_kg=held_form.qty_kg,
@@ -55,6 +56,7 @@ class TempHeldFormCRUD(AppCRUD):
         else:
             held_form_item = TempHeldForm(rm_code_id=held_form.rm_code_id,
                                                 warehouse_id=held_form.warehouse_id,
+                                                ref_number=held_form.ref_number,
                                                 change_status_date=held_form.change_status_date,
                                                 qty_kg=held_form.qty_kg,
                                                 current_status_id=held_form.current_status_id,

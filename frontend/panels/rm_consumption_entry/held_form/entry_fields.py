@@ -54,6 +54,8 @@ def entry_fields(note_form_tab):
         if not checkbox_warehouse_var.get():
             warehouse_combobox.set("")
         rm_codes_combobox.set("")
+        current_status_combobox.set("")
+        new_status_combobox.set("")
         qty_entry.delete(0, ttk.END)
 
 
@@ -84,7 +86,7 @@ def entry_fields(note_form_tab):
             "new_status_id": new_status,
             "ref_number": ref_number,
             "change_status_date": change_status_date,
-            "qty_kg": qty,
+            "qty_kg": qty
         }
 
         print("This is the data: ", data)
