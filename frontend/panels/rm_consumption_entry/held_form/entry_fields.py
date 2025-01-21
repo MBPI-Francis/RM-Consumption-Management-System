@@ -167,7 +167,7 @@ def entry_fields(note_form_tab):
     rm_codes_combobox = ttk.Combobox(
         form_frame,
         values=rm_names,
-        state="normal",
+        state="readonly",
         width=30,
     )
 
@@ -190,7 +190,7 @@ def entry_fields(note_form_tab):
     ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
     # Date Entry field
-    date_label = ttk.Label(form_frame, text="Outgoing Date:", font=("Helvetica", 10, "bold"))
+    date_label = ttk.Label(form_frame, text="Change Status Date:", font=("Helvetica", 10, "bold"))
     date_label.grid(row=4, column=5, padx=5, pady=5, sticky=W)
 
     # Calculate yesterday's date
@@ -205,7 +205,7 @@ def entry_fields(note_form_tab):
         width=30
     )
     change_status_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
-    ToolTip(change_status_date_entry, text="This is the outgoing date.")
+    ToolTip(change_status_date_entry, text="This is the change of status date.")
 
 
 
