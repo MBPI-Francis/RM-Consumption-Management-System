@@ -1,6 +1,8 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from .entry_fields import entry_fields
+
 
 
 def preparation_form_tab(notebook):
@@ -9,8 +11,11 @@ def preparation_form_tab(notebook):
     # Populate the Raw Materials Tab
     preparation_form_label = ttk.Label(
         preparation_form_tab,
-        text="Preparation Form Content Here",
+        text="Preparation Form Entry",
         font=("Helvetica", 14),
         bootstyle=INFO,
     )
     preparation_form_label.pack(pady=20, padx=20)
+
+    entry_fields(preparation_form_tab)
+

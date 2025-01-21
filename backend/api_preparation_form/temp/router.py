@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
-from backend.api_preparation_form.temp.schemas import TempPreparationFormCreate, TempPreparationFormUpdate, TempPreparationFormResponse
+from backend.api_preparation_form.temp.schemas import TempPreparationFormCreate, TempPreparationFormUpdate, TempPreparationFormResponse, TempPreparationForm
 from backend.api_preparation_form.temp.service import TempPreparationFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
 router = APIRouter(prefix="/api/preparation_forms/temp")
 
-@router.post("/create/", response_model=TempPreparationFormResponse)
+@router.post("/create/", response_model=TempPreparationForm)
 async def create_preparation_form(preparation_form: TempPreparationFormCreate, db: get_db = Depends()):
     result = TempPreparationFormService(db).create_preparation_form(preparation_form)
     return result
