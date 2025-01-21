@@ -13,13 +13,22 @@ from tkinter import StringVar
 def entry_fields(note_form_tab):
     
 
-    def get_selected_warehouse_id():
-        selected_name = warehouse_combobox.get()
+    def get_selected_warehouse_from_id():
+        selected_name = warehouse_from_combobox.get()
         selected_id = warehouse_to_id.get(selected_name)  # Get the corresponding ID
         if selected_id:
             return selected_id
         else:
             return None
+
+    def get_selected_warehouse_to_id():
+        selected_name = warehouse_to_combobox.get()
+        selected_id = warehouse_to_id.get(selected_name)  # Get the corresponding ID
+        if selected_id:
+            return selected_id
+        else:
+            return None
+
 
     def get_selected_rm_code_id():
         selected_name = rm_codes_combobox.get()
@@ -36,7 +45,9 @@ def entry_fields(note_form_tab):
             ref_number_entry.delete(0, ttk.END)
 
         if not checkbox_warehouse_var.get():
-            warehouse_combobox.set("")
+            warehouse_from_combobox.set("")
+            warehouse_to_combobox.set("")
+
         rm_codes_combobox.set("")
         qty_entry.delete(0, ttk.END)
 
@@ -59,16 +70,23 @@ def entry_fields(note_form_tab):
     def submit_data():
 
         # Collect the form data
-        warehouse_id = get_selected_warehouse_id()
+        warehouse_from_id = get_selected_warehouse_from_id()
+        warehouse_to_id = get_selected_warehouse_to_id()
+
+        # Validation for the two warehouse choices
+        if warehouse_from_id == warehouse_to_id:
+            Messagebox.show_error("The Warehouse (FROM) and Warehouse (TO) should be different.", "Data Entry Error")
+            return
+
         rm_code_id = get_selected_rm_code_id()
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
-        outgoing_date = outgoing_date_entry.entry.get()
+        transfer_date = transfer_date_entry.entry.get()
 
 
         # Convert date to YYYY-MM-DD
         try:
-            outgoing_date = datetime.strptime(outgoing_date, "%m/%d/%Y").strftime("%Y-%m-%d")
+            transfer_date = datetime.strptime(transfer_date, "%m/%d/%Y").strftime("%Y-%m-%d")
         except ValueError:
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
@@ -76,9 +94,10 @@ def entry_fields(note_form_tab):
         # Create a dictionary with the data
         data = {
             "rm_code_id": rm_code_id,
-            "warehouse_id": warehouse_id,
+            "from_warehouse_id": warehouse_from_id,
+            "to_warehouse_id": warehouse_to_id,
             "ref_number": ref_number,
-            "outgoing_date": outgoing_date,
+            "transfer_date": transfer_date,
             "qty_kg": qty,
         }
 
@@ -92,7 +111,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/outgoing_reports/temp/create/", json=data)
+            response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
             if response.status_code == 200:  # Successfully created
                 clear_fields()
 
@@ -113,17 +132,32 @@ def entry_fields(note_form_tab):
     warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
     warehouse_names = list(warehouse_to_id.keys())
 
-    # Combobox for Warehouse Drop Down
-    warehouse_label = ttk.Label(form_frame, text="Warehouse:", font=("Helvetica", 10, "bold"))
-    warehouse_label.grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    warehouse_combobox = ttk.Combobox(
+    # Combobox for Warehouse FROM Drop Down
+    warehouse_from_label = ttk.Label(form_frame, text="Warehouse (FROM):", font=("Helvetica", 10, "bold"))
+    warehouse_from_label.grid(row=0, column=0, padx=5, pady=5, sticky=W)
+    warehouse_from_combobox = ttk.Combobox(
         form_frame,
         values=warehouse_names,
         state="readonly",
         width=30,
     )
-    warehouse_combobox.grid(row=1, column=0, columnspan=2, pady=10, padx=10)
-    ToolTip(warehouse_combobox, text="Choose a warehouse")
+    warehouse_from_combobox.grid(row=1, column=0, columnspan=2, pady=10, padx=10)
+    ToolTip(warehouse_from_combobox, text="Choose a warehouse where the raw material is coming from")
+
+
+    # Combobox for Warehouse TO Drop Down
+    warehouse_to_label = ttk.Label(form_frame, text="Warehouse (TO):", font=("Helvetica", 10, "bold"))
+    warehouse_to_label.grid(row=0, column=3, padx=5, pady=5, sticky=W)
+    warehouse_to_combobox = ttk.Combobox(
+        form_frame,
+        values=warehouse_names,
+        state="readonly",
+        width=30,
+    )
+    warehouse_to_combobox.grid(row=1, column=3, columnspan=2, pady=10, padx=10)
+    ToolTip(warehouse_to_combobox, text="Choose a warehouse where the raw material is transferred to")
+
+
 
     # Checkbox for Warehouse lock
     checkbox_warehouse_var = ttk.IntVar()  # Integer variable to store checkbox state (0 or 1)
@@ -133,7 +167,7 @@ def entry_fields(note_form_tab):
         variable=checkbox_warehouse_var,
         bootstyle="round-toggle"
     )
-    lock_warehouse.grid(row=1, column=3, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
+    lock_warehouse.grid(row=1, column=5, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
     ToolTip(lock_warehouse, text="Lock the warehouse by clicking this")
 
     # REF Number Entry Field
@@ -196,16 +230,16 @@ def entry_fields(note_form_tab):
     yesterday_date = datetime.now() - timedelta(days=1)
 
     # Create the DateEntry widget with yesterday's date as the default value
-    outgoing_date_entry = ttk.DateEntry(
+    transfer_date_entry = ttk.DateEntry(
         form_frame,
         bootstyle=PRIMARY,
         dateformat="%m/%d/%Y",
         startdate=yesterday_date,  # Set yesterday's date
         width=30
     )
-    outgoing_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
+    transfer_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
 
-    ToolTip(outgoing_date_entry, text="This is the outgoing date.")
+    ToolTip(transfer_date_entry, text="This is the transfer date.")
 
     # Add button to submit data
     btn_submit = ttk.Button(

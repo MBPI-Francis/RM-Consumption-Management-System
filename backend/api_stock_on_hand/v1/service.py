@@ -6,9 +6,11 @@ from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate
 from uuid import UUID
 from backend.api_receiving_report.temp.service import TempReceivingReportCRUD
+from sqlalchemy import desc
 
 # These are the code for the app to communicate to the database
 class StockOnHandCRUD(AppCRUD):
+
     def create_rm_soh(self, rm_soh: StockOnHandCreate):
         rm_soh_item = StockOnHand(rm_code_id=rm_soh.rm_code_id,
                                   warehouse_id=rm_soh.warehouse_id,

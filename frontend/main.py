@@ -10,7 +10,7 @@ from panels.rm_consumption_entry.main_view import ConsumptionEntryView
 class App(ttk.Window):
     def __init__(self):
         super().__init__(themename="cosmo")  # Choose the ttkbootstrap theme
-        self.title("TTKBootstrap Sidebar Navigation")
+        self.title("Warehouse RM Stock Movement Program")
         self.geometry("1300x700")
 
         # Configure row/column for responsiveness of the main window

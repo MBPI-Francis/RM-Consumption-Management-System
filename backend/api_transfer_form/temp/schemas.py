@@ -3,14 +3,13 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 
 class TempTransferForm(BaseModel):
     rm_code_id: UUID
     from_warehouse_id: UUID
     to_warehouse_id: UUID
-    rm_soh_id: UUID
     ref_number: str = Field(max_length=50, description="The reference number of the Transfer Form")
     transfer_date: date
     qty_kg: float
@@ -22,8 +21,16 @@ class TempTransferFormCreate(TempTransferForm):
 class TempTransferFormUpdate(TempTransferForm):
     pass
 
-class TempTransferFormResponse(TempTransferForm):
-    pass
-
+class TempTransferFormResponse(BaseModel):
+    raw_material: str
+    from_warehouse: str
+    to_warehouse: str
+    ref_number: str
+    transfer_date: date
+    qty_kg: float
+    created_at: datetime
+    updated_at: datetime
+    created_by: Optional[UUID] = None
+    updated_by: Optional[UUID] = None
     class Config:
         from_attributes = True

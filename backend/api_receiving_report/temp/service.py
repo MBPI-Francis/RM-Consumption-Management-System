@@ -34,9 +34,6 @@ class TempReceivingReportCRUD(AppCRUD):
         )
 
 
-
-
-
     def create_receiving_report(self, receiving_report: TempReceivingReportCreate):
 
         # Get the latest StockOnHand record ID

@@ -85,6 +85,8 @@ from backend.settings.database import server_ip
 from datetime import datetime
 
 
+
+
 class NoteTable:
 
     def __init__(self, root):

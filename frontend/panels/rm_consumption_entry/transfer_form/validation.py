@@ -7,8 +7,11 @@ class EntryValidation:
 
         for key, value in entries.items():
 
-            if key == "warehouse_id" and not value:
-                text_list.append("Warehouse")
+            if key == "from_warehouse_id" and not value:
+                text_list.append("Warehouse FROM")
+
+            elif key == "to_warehouse_id" and not value:
+                text_list.append("Warehouse TO")
 
             elif key == "ref_number" and not value:
                 text_list.append("Reference Number")
@@ -19,8 +22,8 @@ class EntryValidation:
             elif key == "qty_kg" and not value:
                 text_list.append("Quantity")
 
-            elif key == "outgoing_date" and not value:
-                text_list.append("Outgoing Date")
+            elif key == "transfer_date" and not value:
+                text_list.append("Tansfer Date")
         return text_list
 
     # Validation function for numeric input
