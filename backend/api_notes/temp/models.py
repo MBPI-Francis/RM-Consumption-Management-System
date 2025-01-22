@@ -9,7 +9,7 @@ from backend.api_users.v1.models import User
 
 # Parent Model: Department
 class TempNotes(Base):
-    __tablename__ = "tbl_notes_temp"
+    __tablename__ = "tbl_notes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     product_code = Column(String(80), nullable=False)
