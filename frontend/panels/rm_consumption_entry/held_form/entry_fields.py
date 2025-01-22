@@ -211,7 +211,7 @@ def entry_fields(note_form_tab):
         width=30
     )
     change_status_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
-    ToolTip(change_status_date_entry, text="This is the change of status date.")
+    ToolTip(change_status_date_entry, text="Choose a change status date.")
 
 
 
