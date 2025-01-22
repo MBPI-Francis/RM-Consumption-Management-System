@@ -1,4 +1,3 @@
-from backend.api_receiving_report.main.models import ReceivingReport
 from backend.api_stock_on_hand.v1.exceptions import StockOnHandCreateException, StockOnHandNotFoundException, \
     StockOnHandUpdateException, StockOnHandSoftDeleteException, StockOnHandRestoreException
 from backend.api_stock_on_hand.v1.main import AppCRUD, AppService

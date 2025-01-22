@@ -9,7 +9,7 @@ from backend.api_users.v1.models import User
 
 # Parent Model: Department
 class TempTransferForm(Base):
-    __tablename__ = "tbl_transfer_forms_temp"
+    __tablename__ = "tbl_transfer_forms"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)

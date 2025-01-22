@@ -8,7 +8,7 @@ from backend.settings.database import Base  # Assuming Base is imported from you
 
 # Parent Model: Department
 class TempHeldForm(Base):
-    __tablename__ = "tbl_held_forms_temp"
+    __tablename__ = "tbl_held_forms"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
