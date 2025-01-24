@@ -94,7 +94,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ogr.warehouse_id AS WarehouseID,
                     ogr.rm_code_id AS RawMaterialID,
                     SUM(ogr.qty_kg) AS Total_OGR_Quantity,
-                    ogr.date_computed AS DateComputed,
+                    ogr.date_computed AS DateComputed
                 FROM 
                     tbl_outgoing_reports AS ogr
                 INNER JOIN tbl_warehouses AS wh
