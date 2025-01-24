@@ -56,7 +56,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     SELECT 
                         SOH.warehouse_id AS warehouseid,
                         WH.wh_name AS WarehouseName,
-                        WH.WH_number AS WarehouseNumber,
+                        WH.wh_number AS WarehouseNumber,
                         SOH.rm_code_id AS rawmaterialid,
                         RM.rm_code AS RMCode,
                         SOH.rm_soh AS beginningbalance,
@@ -217,6 +217,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 SELECT 
                     hf.rm_code_id AS RawMaterialID,
                     wh.wh_name AS WarehouseName,
+                    wh.id AS WarehouseID,
                     wh.wh_number AS WarehouseNumber,
                     rm.rm_code AS RMCode,
                     SUM(qty_kg) AS HeldQuantity,
@@ -234,13 +235,15 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 WHERE 
                     new_status.name LIKE 'held%' AND hf.date_computed = '{params_date}'
                 GROUP BY 
-                    hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed
+                    hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id
             )
             
             
             -- Final Query
             SELECT
+                ib.rawmaterialid,
                 ib.rmcode,
+                ib.warehouseid,
                 ib.warehousename,
                 ib.warehousenumber,
                 ib.BeginningBalance
@@ -275,7 +278,9 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
             UNION ALL
             
             SELECT
+                hs.rawmaterialid,
                 hs.RMCode,
+                hs.warehouseid,
                 hs.WarehouseName,
                 hs.WarehouseNumber,
                 hs.HeldQuantity AS New_Beginning_Balance,
