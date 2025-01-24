@@ -301,30 +301,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
 
         # Commit the transaction
         db.commit()
-
-        def create_soh_whse_excel():
-            # Create a new workbook
-            wb = Workbook()
-
-            # Sheet 1: NOTES
-            notes_sheet = wb.active
-            notes_sheet.title = "NOTES"
-
-            # Populate the NOTES sheet
-            notes_sheet["A1"] = "Daily Ending Inventory Report from:"
-            notes_sheet["B1"] = "September 18, 2023"  # Sample date
-            notes_sheet["A2"] = "List of Batches Included in Report"
-            notes_sheet["A3"] = "MASTERBATCH"
-            notes_sheet.append(["PRODUCT CODE", "LOT#", "Product Kind"])
-            notes_sheet.append(["SAMPLE-CODE-1", "SAMPLE-5106AJ-5109AJ", "SAMPLE-MB"])
-            notes_sheet.append(["SAMPLE-CODE-2", "SAMPLE-5110AJ", "SAMPLE-DC"])
-
-            # Apply formatting
-            for col in ["A", "B", "C"]:
-                for cell in notes_sheet[col]:
-                    cell.alignment = Alignment(horizontal="center", vertical="center")
-            notes_sheet["A4"].font = Font(bold=True)
-
+        
         return {"message": "Views created successfully"}
 
     except Exception as e:
