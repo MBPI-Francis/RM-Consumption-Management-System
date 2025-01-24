@@ -404,20 +404,23 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
 
 # API endpoint to get records from the dynamic view
 @router.get("/get_soh/{date}", response_model=list[dict])
-def get_soh(date: str, db: get_db = Depends()):
-    records = get_data_from_dynamic_view(db, date)
+def get_soh(params_date: str, db: get_db = Depends()):
+    date_object = datetime.strptime(params_date, "%Y-%m-%d")
+    view_date = date_object.strftime("%Y_%m_%d")
+    records = get_data_from_dynamic_view(db, view_date)
+
     if not records:
         raise HTTPException(status_code=404, detail="No records found")
     return records
 
 
 # Helper function to query the view dynamically
-def get_data_from_dynamic_view(db, date: str) -> list[dict]:
+def get_data_from_dynamic_view(db, param_date: str) -> list[dict]:
     # Format the view name dynamically
-    view_name = f"view_wh_soh_{date}"
+    view_name = f"view_wh_soh_{param_date}"
 
     # Prepare the SQL query to select all records from the dynamic view
-    query = text(f"SELECT rmcode, warehousename, warehousenumber, new_beginning_balance, status FROM {view_name}")
+    query = text(f"SELECT * FROM {view_name}")
 
     try:
         # Execute the query and fetch all rows
