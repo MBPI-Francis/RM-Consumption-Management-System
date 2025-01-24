@@ -12,6 +12,7 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.worksheet.datavalidation import DataValidation
 import psycopg2  # PostgreSQL library
 from backend.settings.database import engine
+from datetime import date
 
 router = APIRouter(prefix="/api")
 
@@ -35,14 +36,15 @@ async def get_new_soh(db: get_db = Depends()):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/create_stock_view/")
-async def create_stock_view(db: get_db = Depends()):
-
+async def create_stock_view(params_date ,db: get_db = Depends()):
     try:
-        # Get today's date in YYYYMMDD format for the view name
-        today = datetime.now().strftime("%Y-%m-%d")
-        view_today = datetime.now().strftime("%Y_%m_%d")
+        # Get params_date's date in YYYYMMDD format for the view name
 
-        view_name = f"view_wh_soh_{view_today}"
+        # Convert the params_date_entry_value into this format '2025_01_14'
+        date_object = datetime.strptime(params_date, "%Y-%m-%d")
+        view_date = date_object.strftime("%Y_%m_%d")
+
+        view_name = f"view_wh_soh_{view_date}"
 
         # SQL query for creating the view
         sql_query = f"""
@@ -97,7 +99,7 @@ async def create_stock_view(db: get_db = Depends()):
                 INNER JOIN tbl_warehouses AS wh
                     ON ogr.warehouse_id = wh.id
                 WHERE 
-                    ogr.date_computed = '{today}'
+                    ogr.date_computed = '{params_date}'
                 GROUP BY 
                     ogr.warehouse_id, ogr.rm_code_id, ogr.date_computed
             ),
@@ -116,7 +118,7 @@ async def create_stock_view(db: get_db = Depends()):
                     ON pf.warehouse_id = wh.id
                     
                 WHERE 
-                    pf.date_computed = '{today}'
+                    pf.date_computed = '{params_date}'
                 GROUP BY 
                     pf.warehouse_id, pf.rm_code_id, pf.date_computed
             ),
@@ -133,7 +135,7 @@ async def create_stock_view(db: get_db = Depends()):
                 INNER JOIN tbl_warehouses AS wh_from
                     ON tf.from_warehouse_id = wh_from.id
                 WHERE 
-                    tf.date_computed = '{today}' AND tf.status_id ISNULL 
+                    tf.date_computed = '{params_date}' AND tf.status_id ISNULL 
                 GROUP BY 
                     tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
                 UNION ALL
@@ -149,7 +151,7 @@ async def create_stock_view(db: get_db = Depends()):
                     ON tf.to_warehouse_id = wh_to.id
                     
                 WHERE 
-                    tf.date_computed = '{today}' AND tf.status_id ISNULL
+                    tf.date_computed = '{params_date}' AND tf.status_id ISNULL
                 GROUP BY 
                     tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
             ),
@@ -168,7 +170,7 @@ async def create_stock_view(db: get_db = Depends()):
                     ON rr.warehouse_id = wh.id
                     
                 WHERE 
-                    rr.date_computed = '{today}'
+                    rr.date_computed = '{params_date}'
                 GROUP BY 
                     rr.warehouse_id, rr.rm_code_id, rr.date_computed
             ),
@@ -205,7 +207,7 @@ async def create_stock_view(db: get_db = Depends()):
                     ON hf.new_status_id = ib.statusid
                     
                 WHERE 
-                    hf.date_computed = '{today}'
+                    hf.date_computed = '{params_date}'
                 GROUP BY 
                     hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ),
@@ -230,7 +232,7 @@ async def create_stock_view(db: get_db = Depends()):
                     ON hf.new_status_id = new_status.id
                 
                 WHERE 
-                    new_status.name LIKE 'held%' AND hf.date_computed = '{today}'
+                    new_status.name LIKE 'held%' AND hf.date_computed = '{params_date}'
                 GROUP BY 
                     hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed
             )

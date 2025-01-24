@@ -35,10 +35,12 @@ def entry_fields(note_form_tab):
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
 
-        # Create a dictionary with the data
+        # Call the function to get all the data from the created view table and pass the date the user entered
         data = get_soh_data(date_entry_value)
 
-
+        entry_date = {
+            "date": date_entry_value
+        }
 
         print("This is the data: ", data)
 
@@ -50,7 +52,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/create_stock_view/", json=data)
+            response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
             if response.status_code == 200:  # Successfully created
                 clear_fields()
                 note_table.refresh_table()
@@ -126,7 +128,7 @@ def create_soh_whse_excel(date_entry_value, data):
 
     # Populate the NOTES sheet
     notes_sheet["A1"] = "Daily Ending Inventory Report from:"
-    notes_sheet["B1"] = f"{wh_date}"  # Sample date
+    notes_sheet["B1"] = f"{notes_date}"  # Sample date
     notes_sheet["A2"] = "List of Batches Included in Report"
     notes_sheet["A3"] = "MASTERBATCH"
     notes_sheet.append(["PRODUCT CODE", "LOT#", "Product Kind"])
