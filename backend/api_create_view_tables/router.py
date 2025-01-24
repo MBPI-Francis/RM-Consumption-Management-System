@@ -418,29 +418,29 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
     date_object = datetime.strptime(params_date, "%Y-%m-%d")
     formatted_date = date_object.strftime("%Y_%m_%d")
 
-    """Fetch data from API and format for table rowdata."""
-    url = f"{server_ip}/api/get_soh/{formatted_date}"
+    # Format the view name dynamically
+    view_name = f"view_wh_soh_{formatted_date}"
+
+    # Prepare the SQL query to select all records from the dynamic view
+    query = text(f"SELECT * FROM {view_name}")
 
     try:
-        # Step 1: Fetch data from the external API
-        response = requests.get(url)
-        if response.status_code != 200:
-            # Raise an HTTPException if the API request fails
-            raise HTTPException(status_code=500, detail="Failed to fetch data from API")
+        # Execute the query and fetch all rows
+        result = db.execute(query).fetchall()
 
-        # Parse the API response as a list of dictionaries
-        raw_data = response.json()
-
-        # Step 2: Transform and insert the data into the database
-        for record in raw_data:
-            # Prepare the data for database insertion
-            transformed_data = {
-                "rm_code_id": record["rawmaterialid"],  # Raw material ID
-                "warehouse_id": record["warehouseid"],  # Warehouse ID
-                "rm_soh": record["new_beginning_balance"],  # New beginning stock balance
-                "status_id": record["statusid"],  # Stock status ID
+        # Convert the result into a list of dictionaries
+        records = [
+            {
+                "rawmaterialid": row[0],
+                "warehouseid": row[2],
+                "new_beginning_balance": row[5],
+                "statusid": row[7]
             }
-
+            for row in result
+        ]
+        print("The data: ", records)
+        # Step 2: Transform and insert the data into the database
+        for record in records:
             rm_soh_item = StockOnHand(rm_code_id=record["rawmaterialid"],
                                       warehouse_id=record["warehouseid"],
                                       rm_soh=record["new_beginning_balance"],
@@ -448,7 +448,6 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
             db.add(rm_soh_item)
             db.commit()
             db.refresh(rm_soh_item)
-
 
         # Return a success message upon successful insertion
         return {"message": "StockOnHand records updated successfully."}

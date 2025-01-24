@@ -26,9 +26,9 @@ CREATE OR REPLACE VIEW public.view_latest_soh
     rankedrecords.rawmaterialid,
     rankedrecords.rmcode,
     rankedrecords.beginningbalance,
-    rankedrecords.stockchangedate,
     rankedrecords.statusname,
-    rankedrecords.statusid
+    rankedrecords.statusid,
+    rankedrecords.stockchangedate
    FROM rankedrecords
   WHERE rankedrecords.row_num = 1;
 
