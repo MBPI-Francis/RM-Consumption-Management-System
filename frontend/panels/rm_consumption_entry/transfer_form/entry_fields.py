@@ -61,21 +61,6 @@ def entry_fields(note_form_tab):
         qty_entry.delete(0, ttk.END)
 
 
-
-    # def get_selected_latest_rm_api():
-    #
-    #     url = server_ip + "/api/stock_on_hand/list/"
-    #     response = requests.get(url)
-    #
-    #     # Check if the request was successful
-    #     if response.status_code == 200:
-    #         # Parse JSON response
-    #         data = response.json()
-    #         print("Data fetched successfully!")
-    #         return data
-    #     else:
-    #         print(f"Failed to fetch data. Status code: {response.status_code}")
-
     def submit_data():
 
         # Collect the form data
@@ -218,20 +203,6 @@ def entry_fields(note_form_tab):
     rm_codes_combobox.grid(row=5, column=0, pady=5, padx=5, sticky=W)
     ToolTip(rm_codes_combobox, text="Choose a raw material")
 
-    # Register the validation command
-
-    validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
-
-    # Quantity Entry Field
-    qty_label = ttk.Label(form_frame, text="Quantity:", font=("Helvetica", 10, "bold"))
-    qty_label.grid(row=4, column=1, pady=5, padx=5, sticky=W)
-    qty_entry = ttk.Entry(form_frame,
-                          width=30,
-                          validate="key",  # Trigger validation on keystrokes
-                          validatecommand=(validate_numeric_command, "%P")  # Pass the current widget content ("%P")
-)
-    qty_entry.grid(row=5, column=1, pady=5, padx=5, sticky=W)
-    ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
 
     # Status JSON-format choices (coming from the API)
@@ -241,16 +212,32 @@ def entry_fields(note_form_tab):
 
     # Combobox for Status Drop Down
     status_label = ttk.Label(form_frame, text="Status", font=("Helvetica", 10, "bold"))
-    status_label.grid(row=4, column=2, padx=5, pady=5, sticky=W)
+    status_label.grid(row=4, column=1, padx=5, pady=5, sticky=W)
     status_combobox = ttk.Combobox(
         form_frame,
         values=status_names,
-        state="readonly",
-        width=20,
+        state="normal",
+        width=30,
     )
-    status_combobox.grid(row=5, column=2, pady=10, padx=10)
+    status_combobox.grid(row=5, column=1, pady=10, padx=10, sticky=W)
     ToolTip(status_combobox, text="Choose the current status")
 
+
+
+
+    # Register the validation command
+    validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
+
+    # Quantity Entry Field
+    qty_label = ttk.Label(form_frame, text="Quantity:", font=("Helvetica", 10, "bold"))
+    qty_label.grid(row=4, column=2, pady=5, padx=5, sticky=W)
+    qty_entry = ttk.Entry(form_frame,
+                          width=30,
+                          validate="key",  # Trigger validation on keystrokes
+                          validatecommand=(validate_numeric_command, "%P")  # Pass the current widget content ("%P")
+)
+    qty_entry.grid(row=5, column=2, pady=5, padx=5, sticky=W)
+    ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
 
     # Date Entry field

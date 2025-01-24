@@ -14,6 +14,8 @@ class StockOnHand(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
+
+    status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
     rm_soh = Column(Numeric(10, 2), nullable=False)
     description = Column(String(300), nullable=True)
     is_deleted = Column(Boolean, default=False)
@@ -30,6 +32,7 @@ class StockOnHand(Base):
     deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_soh")
     rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_soh")
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_soh")
+    status = relationship("DropList", foreign_keys=[status_id], backref="status_soh")
 
 
 
