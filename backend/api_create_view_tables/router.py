@@ -3,16 +3,17 @@ from fastapi import APIRouter, Depends
 from backend.settings.database import get_db
 from datetime import datetime
 from sqlalchemy import text
-import pandas as pd
-import os
-from ttkbootstrap import Style
-from tkinter.filedialog import asksaveasfilename
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
-from openpyxl.worksheet.datavalidation import DataValidation
-import psycopg2  # PostgreSQL library
-from backend.settings.database import engine
 from datetime import date
+from sqlalchemy import update
+from backend.api_preparation_form.temp.models import TempPreparationForm
+from backend.api_notes.temp.models import TempNotes
+from backend.api_transfer_form.temp.models import TempTransferForm
+from backend.api_outgoing_report.temp.models import TempOutgoingReport
+from backend.api_receiving_report.temp.models import TempReceivingReport
+from backend.api_held_form.temp.models import TempHeldForm
+
 
 router = APIRouter(prefix="/api")
 
@@ -324,77 +325,6 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     cell.alignment = Alignment(horizontal="center", vertical="center")
             notes_sheet["A4"].font = Font(bold=True)
 
-            # Function to create a WHSE sheet
-            def create_whse_sheet(sheet_name):
-                sheet = wb.create_sheet(sheet_name)
-
-                # Populate the header
-                header = [
-                    "Date", "No of bags", "qty per packing",
-                    f"{sheet_name} - Excess", "Total", "Status", "drop list"
-                ]
-                sheet.append(header)
-                sheet["A1"] = "09/18/2025"  # Example date
-                sheet["A1"].font = Font(bold=True)
-
-                # Example data for rows
-                data = [
-                    ["A7", "", "", 18.1, 18.1, "", "held : under evaluation"],
-                    ["A8", "", "", 5.52, 5.52, "", "held : reject"],
-                    ["AO1", 5, 25.00, 7.19, 132.19, "", "held : contaminated"],
-                    ["AO8", "", "", 27.97, 27.97, "", ""],
-                    ["AO9", "", "", 7.92, 7.92, "", ""],
-                ]
-
-                for row in data:
-                    sheet.append(row)
-
-                # Create a dropdown list for the "drop list" column
-                dv = DataValidation(
-                    type="list",
-                    formula1='"held : under evaluation,held : reject,held : contaminated"',
-                    allow_blank=True,
-                    showDropDown=True
-                )
-                # Apply the data validation to the G column for rows 2 to 100
-                for row in range(2, 101):
-                    cell = f"G{row}"  # Example: G2, G3, ..., G100
-                    dv.add(sheet[cell])
-                sheet.add_data_validation(dv)
-
-            # Sheet 2: WHSE1
-            create_whse_sheet("WHSE1")
-
-            # Sheet 3: WHSE2
-            create_whse_sheet("WHSE2")
-
-            # Sheet 4: WHSE4
-            create_whse_sheet("WHSE4")
-
-            # Initialize ttkbootstrap Style and create the dialog
-            style = Style("cosmo")
-            root = style.master
-            root.withdraw()  # Hide the root window
-
-            # Use tkinter's asksaveasfilename for file dialog
-            file_path = asksaveasfilename(
-                title="Save Excel File",
-                defaultextension=".xlsx",
-                filetypes=[("Excel files", "*.xlsx")]
-            )
-
-            # Save the workbook
-            if file_path:
-                try:
-                    wb.save(file_path)
-                    print(f"Excel file saved successfully at {file_path}")
-                except Exception as e:
-                    print(f"Error saving file: {e}")
-            else:
-                print("File save canceled by the user.")
-
-            return print("File is created")
-
         return {"message": "Views created successfully"}
 
     except Exception as e:
@@ -444,5 +374,53 @@ def get_data_from_dynamic_view(db, param_date: str) -> list[dict]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching data: {str(e)}")
 
+
+# Helping function for the api
+def update_date_computed_for_table(table, db):
+    """
+    Updates the `date_computed` column to the current date for records where it is NULL in the given table.
+    """
+    try:
+        # Generate the current date
+        current_date = date.today()
+
+        # Create an update query
+        stmt = (
+            update(table)
+            .where(table.date_computed.is_(None))
+            .values(date_computed=current_date)
+        )
+
+        # Execute the query
+        db.execute(stmt)
+        db.commit()
+        return True
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update table {table.__tablename__}: {e}")
+
+@router.post("/update-date-computed")
+async def update_date_computed(db: get_db = Depends()):
+    """
+    Updates the `date_computed` column to the current date for all specified tables.
+    """
+    tables = [
+        TempNotes,
+        TempPreparationForm,
+        TempTransferForm,
+        TempOutgoingReport,
+        TempReceivingReport,
+        TempHeldForm,
+    ]
+
+    updated_tables = []
+
+    for table in tables:
+        success = update_date_computed_for_table(table, db)
+        if success:
+            updated_tables.append(table.__tablename__)
+
+    return {"message": "Update successful", "updated_tables": updated_tables}
 
 
