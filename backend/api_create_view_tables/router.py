@@ -43,6 +43,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
         # Convert the params_date_entry_value into this format '2025_01_14'
         date_object = datetime.strptime(params_date, "%Y-%m-%d")
         view_date = date_object.strftime("%Y_%m_%d")
+        today = date.today()
 
         view_name = f"view_wh_soh_{view_date}"
 
@@ -93,13 +94,13 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ogr.warehouse_id AS WarehouseID,
                     ogr.rm_code_id AS RawMaterialID,
                     SUM(ogr.qty_kg) AS Total_OGR_Quantity,
-                    ogr.date_computed AS DateComputed
+                    ogr.date_computed AS DateComputed,
                 FROM 
                     tbl_outgoing_reports AS ogr
                 INNER JOIN tbl_warehouses AS wh
                     ON ogr.warehouse_id = wh.id
                 WHERE 
-                    ogr.date_computed = '{params_date}'
+                    ogr.date_computed = '{today}'
                 GROUP BY 
                     ogr.warehouse_id, ogr.rm_code_id, ogr.date_computed
             ),
@@ -118,7 +119,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON pf.warehouse_id = wh.id
                     
                 WHERE 
-                    pf.date_computed = '{params_date}'
+                    pf.date_computed = '{today}'
                 GROUP BY 
                     pf.warehouse_id, pf.rm_code_id, pf.date_computed
             ),
@@ -135,7 +136,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 INNER JOIN tbl_warehouses AS wh_from
                     ON tf.from_warehouse_id = wh_from.id
                 WHERE 
-                    tf.date_computed = '{params_date}' AND tf.status_id ISNULL 
+                    tf.date_computed = '{today}' AND tf.status_id ISNULL 
                 GROUP BY 
                     tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
                 UNION ALL
@@ -151,7 +152,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON tf.to_warehouse_id = wh_to.id
                     
                 WHERE 
-                    tf.date_computed = '{params_date}' AND tf.status_id ISNULL
+                    tf.date_computed = '{today}' AND tf.status_id ISNULL
                 GROUP BY 
                     tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
             ),
@@ -170,7 +171,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON rr.warehouse_id = wh.id
                     
                 WHERE 
-                    rr.date_computed = '{params_date}'
+                    rr.date_computed = '{today}'
                 GROUP BY 
                     rr.warehouse_id, rr.rm_code_id, rr.date_computed
             ),
@@ -207,7 +208,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON hf.new_status_id = ib.statusid
                     
                 WHERE 
-                    hf.date_computed = '{params_date}'
+                    hf.date_computed = '{today}'
                 GROUP BY 
                     hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ),
@@ -233,7 +234,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON hf.new_status_id = new_status.id
                 
                 WHERE 
-                    new_status.name LIKE 'held%' AND hf.date_computed = '{params_date}'
+                    new_status.name LIKE 'held%' AND hf.date_computed = '{today}'
                 GROUP BY 
                     hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id
             )
@@ -403,7 +404,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
 
 
 # API endpoint to get records from the dynamic view
-@router.get("/get_soh/{date}", response_model=list[dict])
+@router.get("/get_soh/", response_model=list[dict])
 def get_soh(params_date: str, db: get_db = Depends()):
     date_object = datetime.strptime(params_date, "%Y-%m-%d")
     view_date = date_object.strftime("%Y_%m_%d")
