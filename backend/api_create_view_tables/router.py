@@ -1,10 +1,8 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from fastapi import APIRouter, Depends
 from backend.settings.database import get_db
 from datetime import datetime
 from sqlalchemy import text
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment
 from datetime import date
 from sqlalchemy import update
 from backend.api_preparation_form.temp.models import TempPreparationForm
@@ -12,7 +10,10 @@ from backend.api_notes.temp.models import TempNotes
 from backend.api_transfer_form.temp.models import TempTransferForm
 from backend.api_outgoing_report.temp.models import TempOutgoingReport
 from backend.api_receiving_report.temp.models import TempReceivingReport
+from backend.api_stock_on_hand.v1.service import AppService
 from backend.api_held_form.temp.models import TempHeldForm
+from backend.settings.database import server_ip
+import requests
 
 
 router = APIRouter(prefix="/api")
@@ -224,7 +225,8 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     rm.rm_code AS RMCode,
                     SUM(qty_kg) AS HeldQuantity,
                     new_status.name AS Status,
-                    hf.date_computed
+                    hf.date_computed,
+                    hf.new_status_id AS StatusID
                 FROM 
                     tbl_held_forms AS hf
                 INNER JOIN tbl_raw_materials AS rm
@@ -237,7 +239,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 WHERE 
                     new_status.name LIKE 'held%' AND hf.date_computed = '{today}'
                 GROUP BY 
-                    hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id
+                    hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
             )
             
             
@@ -256,7 +258,8 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 + COALESCE(tf.Total_Transferred_Quantity, 0)
                 - COALESCE(cs.Total_Held, 0)
                 + COALESCE(cs.Total_Released, 0) AS New_Beginning_Balance,
-                '' AS Status
+                '' AS Status,
+                NULL AS StatusID
             FROM 
                 initialbalance ib
             LEFT JOIN 
@@ -286,7 +289,8 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 hs.WarehouseName,
                 hs.WarehouseNumber,
                 hs.HeldQuantity AS New_Beginning_Balance,
-                hs.Status
+                hs.Status,
+                hs.StatusID
             FROM 
                 Held_Status_Details hs
             
@@ -301,7 +305,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
 
         # Commit the transaction
         db.commit()
-        
+
         return {"message": "Views created successfully"}
 
     except Exception as e:
@@ -400,4 +404,53 @@ async def update_date_computed(db: get_db = Depends()):
 
     return {"message": "Update successful", "updated_tables": updated_tables}
 
+
+@router.post("/update_stock_on_hand/")
+async def update_stock_on_hand(db=Depends(get_db)):
+    """
+    Endpoint to update the stock-on-hand records from an external API.
+
+    Args:
+        db: Database session dependency injected by FastAPI.
+
+    Returns:
+        A JSON response indicating the success of the operation.
+    """
+    url = f"{server_ip}/api/get/new_soh/"
+
+    try:
+        # Step 1: Fetch data from the external API
+        response = requests.get(url)
+        if response.status_code != 200:
+            # Raise an HTTPException if the API request fails
+            raise HTTPException(status_code=500, detail="Failed to fetch data from API")
+
+        # Parse the API response as a list of dictionaries
+        raw_data = response.json()
+
+        # Step 2: Transform and insert the data into the database
+        for record in raw_data:
+            # Prepare the data for database insertion
+            transformed_data = {
+                "rm_code_id": record["rawmaterialid"],  # Raw material ID
+                "warehouse_id": record["warehouseid"],  # Warehouse ID
+                "rm_soh": record["new_beginning_balance"],  # New beginning stock balance
+                "status_id": record["statusid"],  # Stock status ID
+            }
+
+            # Call the service method to create a StockOnHand record
+            result = AppService(db).create_stock_on_hand(transformed_data)
+            if not result.success:
+                # Raise an exception if the insertion fails
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to insert record: {result.message}",
+                )
+
+        # Return a success message upon successful insertion
+        return {"message": "StockOnHand records updated successfully."}
+
+    except Exception as e:
+        # Handle any unexpected exceptions and return a 500 error with details
+        raise HTTPException(status_code=500, detail=str(e))
 

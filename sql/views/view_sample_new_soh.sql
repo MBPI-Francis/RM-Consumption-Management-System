@@ -107,13 +107,14 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             rm.rm_code AS rmcode,
             sum(hf.qty_kg) AS heldquantity,
             new_status.name AS status,
-            hf.date_computed
+            hf.date_computed,
+            hf.new_status_id AS statusid
            FROM tbl_held_forms hf
              JOIN tbl_raw_materials rm ON hf.rm_code_id = rm.id
              JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
           WHERE new_status.name::text ~~ 'held%'::text AND hf.date_computed IS NULL
-          GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id
+          GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
         )
  SELECT ib.rawmaterialid,
     ib.rmcode,
@@ -121,7 +122,8 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
     ib.warehousename,
     ib.warehousenumber,
     ib.beginningbalance + COALESCE(rr.total_received, 0::numeric) + COALESCE(pf.total_returned, 0::numeric) - COALESCE(ogr.total_ogr_quantity, 0::numeric) - COALESCE(pf.total_prepared, 0::numeric) + COALESCE(tf.total_transferred_quantity, 0::numeric) - COALESCE(cs.total_held, 0::numeric) + COALESCE(cs.total_released, 0::numeric) AS new_beginning_balance,
-    ''::character varying AS status
+    ''::character varying AS status,
+    NULL::uuid AS statusid
    FROM initialbalance ib
      LEFT JOIN ogr_adjustments ogr ON ib.warehouseid = ogr.warehouseid AND ib.rawmaterialid = ogr.rawmaterialid
      LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
@@ -136,7 +138,8 @@ UNION ALL
     hs.warehousename,
     hs.warehousenumber,
     hs.heldquantity AS new_beginning_balance,
-    hs.status
+    hs.status,
+    hs.statusid
    FROM held_status_details hs
   ORDER BY 2, 4, 5, 7 NULLS FIRST;
 
