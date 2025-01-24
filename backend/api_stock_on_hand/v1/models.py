@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -34,5 +34,10 @@ class StockOnHand(Base):
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_soh")
     status = relationship("DropList", foreign_keys=[status_id], backref="status_soh")
 
+
+   # Composite Unique Constraint
+    __table_args__ = (
+        UniqueConstraint('rm_code_id', 'rm_soh', 'warehouse_id', 'stock_change_date', 'status_id', name='uix_rm_soh_warehouse_status'),
+    )
 
 

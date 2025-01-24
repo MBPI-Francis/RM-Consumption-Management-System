@@ -10,7 +10,7 @@ from backend.api_notes.temp.models import TempNotes
 from backend.api_transfer_form.temp.models import TempTransferForm
 from backend.api_outgoing_report.temp.models import TempOutgoingReport
 from backend.api_receiving_report.temp.models import TempReceivingReport
-from backend.api_stock_on_hand.v1.service import AppService
+from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_held_form.temp.models import TempHeldForm
 from backend.settings.database import server_ip
 import requests
@@ -404,7 +404,7 @@ async def update_date_computed(db: get_db = Depends()):
 
 
 @router.post("/update_stock_on_hand/")
-async def update_stock_on_hand(db=Depends(get_db)):
+async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
     """
     Endpoint to update the stock-on-hand records from an external API.
 
@@ -414,7 +414,12 @@ async def update_stock_on_hand(db=Depends(get_db)):
     Returns:
         A JSON response indicating the success of the operation.
     """
-    url = f"{server_ip}/api/get/new_soh/"
+    # Convert the date_entry_value into this format '2025_01_14'
+    date_object = datetime.strptime(params_date, "%Y-%m-%d")
+    formatted_date = date_object.strftime("%Y_%m_%d")
+
+    """Fetch data from API and format for table rowdata."""
+    url = f"{server_ip}/api/get_soh/{formatted_date}"
 
     try:
         # Step 1: Fetch data from the external API
@@ -436,14 +441,14 @@ async def update_stock_on_hand(db=Depends(get_db)):
                 "status_id": record["statusid"],  # Stock status ID
             }
 
-            # Call the service method to create a StockOnHand record
-            result = AppService(db).create_stock_on_hand(transformed_data)
-            if not result.success:
-                # Raise an exception if the insertion fails
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to insert record: {result.message}",
-                )
+            rm_soh_item = StockOnHand(rm_code_id=record["rawmaterialid"],
+                                      warehouse_id=record["warehouseid"],
+                                      rm_soh=record["new_beginning_balance"],
+                                      status_id= record["statusid"])
+            db.add(rm_soh_item)
+            db.commit()
+            db.refresh(rm_soh_item)
+
 
         # Return a success message upon successful insertion
         return {"message": "StockOnHand records updated successfully."}

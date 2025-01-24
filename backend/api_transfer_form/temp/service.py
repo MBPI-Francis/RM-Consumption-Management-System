@@ -9,7 +9,7 @@ from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_droplist.v1.models import DropList
 from uuid import UUID
 
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
 from sqlalchemy.orm import aliased
@@ -110,7 +110,6 @@ class TempTransferFormCRUD(AppCRUD):
         """
         Join StockOnHand, TransferForm, Warehouse, and RawMaterial tables.
         """
-        # Join tables
         stmt = (
             self.db.query(
                 RawMaterial.rm_code.label("raw_material"),
@@ -122,28 +121,32 @@ class TempTransferFormCRUD(AppCRUD):
                 DropList.name.label("status"),
                 TempTransferForm.created_at,
                 TempTransferForm.updated_at
-
             )
-            .outerjoin(FromStockOnHand, FromStockOnHand.id == TempTransferForm.from_rm_soh_id)  # Left join StockOnHand with TransferForm
+            .outerjoin(FromStockOnHand,
+                       FromStockOnHand.id == TempTransferForm.from_rm_soh_id)  # Left join StockOnHand with TransferForm
             .outerjoin(ToStockOnHand,
                        ToStockOnHand.id == TempTransferForm.to_rm_soh_id)  # Left join StockOnHand with TransferForm
-            .outerjoin(DropList,
-                       DropList.id == TempTransferForm.status_id)  # Left join DropList with TransferForm
-            .join(RawMaterial, TempTransferForm.rm_code_id == RawMaterial.id)       # Join StockOnHand with RawMaterial
-            .join(FromWarehouse, TempTransferForm.from_warehouse_id == FromWarehouse.id) # Join TempTransferForm with Warehouse
-            .join(ToWarehouse, TempTransferForm.to_warehouse_id == ToWarehouse.id)  # Join TempTransferForm with Warehouse
+            .outerjoin(DropList, DropList.id == TempTransferForm.status_id)  # Left join DropList with TransferForm
+            .join(RawMaterial, TempTransferForm.rm_code_id == RawMaterial.id)  # Join StockOnHand with RawMaterial
+            .join(FromWarehouse,
+                  TempTransferForm.from_warehouse_id == FromWarehouse.id)  # Join TempTransferForm with Warehouse
+            .join(ToWarehouse,
+                  TempTransferForm.to_warehouse_id == ToWarehouse.id)  # Join TempTransferForm with Warehouse
+            .filter(
+                # Filter for records where is_cleared or is_deleted is NULL or False
+                or_(
+                    TempTransferForm.is_cleared.is_(None),  # NULL check for is_cleared
+                    TempTransferForm.is_cleared == False # False check for is_cleared
+                ),
+                or_(
+                    TempTransferForm.is_deleted.is_(None),  # NULL check for is_deleted
+                    TempTransferForm.is_deleted == False  # False check for is_deleted
+                )
+            )
         )
 
-        # Return All the result
+        # Return filtered results
         return stmt.all()
-
-
-
-
-        # transfer_form_item = self.db.query(TempTransferForm).all()
-        # if transfer_form_item:
-        #     return transfer_form_item
-        # return []
 
 
     def update_transfer_form(self, transfer_form_id: UUID, transfer_form_update: TempTransferFormUpdate):

@@ -6,7 +6,7 @@ from backend.api_preparation_form.temp.schemas import TempPreparationFormCreate,
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
 from uuid import UUID
@@ -86,6 +86,17 @@ class TempPreparationFormCRUD(AppCRUD):
                        StockOnHand.id == TempPreparationForm.rm_soh_id)  # Left join StockOnHand with ReceivingReport
             .join(RawMaterial, TempPreparationForm.rm_code_id == RawMaterial.id)  # Join TempPreparationForm with RawMaterial
             .join(Warehouse, TempPreparationForm.warehouse_id == Warehouse.id)  # Join TempPreparationForm with Warehouse
+            .filter(
+                # Filter for records where is_cleared or is_deleted is NULL or False
+                or_(
+                    TempPreparationForm.is_cleared.is_(None),  # NULL check for is_cleared
+                    TempPreparationForm.is_cleared == False  # False check for is_cleared
+                ),
+                or_(
+                    TempPreparationForm.is_deleted.is_(None),  # NULL check for is_deleted
+                    TempPreparationForm.is_deleted == False  # False check for is_deleted
+                )
+            )
         )
 
         # Return All the result

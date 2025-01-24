@@ -7,7 +7,7 @@ from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from uuid import UUID
 from backend.api_stock_on_hand.v1.models import StockOnHand
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
 
@@ -97,6 +97,17 @@ class TempReceivingReportCRUD(AppCRUD):
             .outerjoin(StockOnHand, StockOnHand.id == TempReceivingReport.rm_soh_id)  # Left join StockOnHand with ReceivingReport
             .join(RawMaterial, TempReceivingReport.rm_code_id == RawMaterial.id)       # Join StockOnHand with RawMaterial
             .join(Warehouse, TempReceivingReport.warehouse_id == Warehouse.id) # Join Receiving Report with Warehouse
+            .filter(
+                # Filter for records where is_cleared or is_deleted is NULL or False
+                or_(
+                    TempReceivingReport.is_cleared.is_(None),  # NULL check for is_cleared
+                    TempReceivingReport.is_cleared == False  # False check for is_cleared
+                ),
+                or_(
+                    TempReceivingReport.is_deleted.is_(None),  # NULL check for is_deleted
+                    TempReceivingReport.is_deleted == False  # False check for is_deleted
+                )
+            )
         )
 
         # Return All the result

@@ -8,9 +8,7 @@ from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_droplist.v1.models import DropList
-from sqlalchemy import desc
-from sqlalchemy.sql import func, cast, case
-from sqlalchemy.types import String
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import aliased
 
 # These are the code for the app to communicate to the database
@@ -98,6 +96,17 @@ class TempHeldFormCRUD(AppCRUD):
             .join(Warehouse, TempHeldForm.warehouse_id == Warehouse.id)  # Join TempHeldForm with Warehouse
             .join(CurrentStatus, TempHeldForm.current_status_id == CurrentStatus.id)  # Join TempHeldForm with CurrentStatus
             .join(NewStatus, TempHeldForm.new_status_id == NewStatus.id)  # Join TempHeldForm with NewStatus
+            .filter(
+                # Filter for records where is_cleared or is_deleted is NULL or False
+                or_(
+                    TempHeldForm.is_cleared.is_(None),  # NULL check for is_cleared
+                    TempHeldForm.is_cleared == False  # False check for is_cleared
+                ),
+                or_(
+                    TempHeldForm.is_deleted.is_(None),  # NULL check for is_deleted
+                    TempHeldForm.is_deleted == False  # False check for is_deleted
+                )
+            )
 
         )
 
