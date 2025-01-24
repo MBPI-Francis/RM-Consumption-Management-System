@@ -6,7 +6,7 @@ from .transfer_form.main_tab import transfer_form_tab
 from .preparation_form.main_tab import preparation_form_tab
 from .outgoing_report_form.main_tab import outgoing_form_tab
 from .receiving_report_form.main_tab import receiving_report_tab
-from .submit_entries.submit_entries_tab import submit_entries_tab
+from .submit_entries.main_tab import submit_entries_tab
 
 class ConsumptionEntryView:
     def __init__(self, parent):
