@@ -44,22 +44,25 @@ def entry_fields(note_form_tab):
 
         print("This is the data: ", data)
 
-        # # Validate the data entries in front-end side
-        # if EntryValidation.entry_validation(data):
-        #     error_text = EntryValidation.entry_validation(data)
-        #     Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
-        #     return
-
             # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
+            response = requests.post(f"{server_ip}/api/update-date-computed")
             if response.status_code == 200:  # Successfully created
-                clear_fields()
-                note_table.refresh_table()
-                create_soh_whse_excel(date_entry_value, data)
-                # refresh_table()  # Refresh the table
+                # Send a POST request to the API
+                try:
+                    response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
+                    if response.status_code == 200:  # Successfully created
+                        clear_fields()
+                        note_table.refresh_table()
+                        create_soh_whse_excel(date_entry_value, data)
+                        # refresh_table()  # Refresh the table
+                except requests.exceptions.RequestException as e:
+                    Messagebox.show_info(e, "Data Entry Error")
+
         except requests.exceptions.RequestException as e:
             Messagebox.show_info(e, "Data Entry Error")
+
+
 
 
     # Create a frame for the form inputs
