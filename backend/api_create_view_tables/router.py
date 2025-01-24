@@ -296,8 +296,6 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
             
             ORDER BY 
                 RMCode, WarehouseName, WarehouseNumber, Status NULLS FIRST;
-
-
         """
 
         # Execute the query

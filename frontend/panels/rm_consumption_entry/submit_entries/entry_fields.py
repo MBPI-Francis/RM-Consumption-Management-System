@@ -44,26 +44,28 @@ def entry_fields(note_form_tab):
 
         print("This is the data: ", data)
 
-            # Send a POST request to the API
         try:
+            # Send a POST request to update the computed date in the API
             response = requests.post(f"{server_ip}/api/update-date-computed")
-            if response.status_code == 200:  # Successfully created
-                # Send a POST request to the API
+            if response.status_code == 200:  # Check if the request was successful
                 try:
+                    # Send another POST request to create a stock view with the given date
                     response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
-                    if response.status_code == 200:  # Successfully created
+                    if response.status_code == 200:  # Check if the stock view was successfully created
+                        # Clear input fields after successful operation
                         clear_fields()
+
+                        # Refresh the note table to display updated data
                         note_table.refresh_table()
+
+                        # Generate an Excel file for the stock-on-hand data
                         create_soh_whse_excel(date_entry_value, data)
-                        # refresh_table()  # Refresh the table
                 except requests.exceptions.RequestException as e:
+                    # Show an error message if the second POST request fails
                     Messagebox.show_info(e, "Data Entry Error")
-
         except requests.exceptions.RequestException as e:
+            # Show an error message if the first POST request fails
             Messagebox.show_info(e, "Data Entry Error")
-
-
-
 
     # Create a frame for the form inputs
     form_frame = ttk.Frame(note_form_tab)
