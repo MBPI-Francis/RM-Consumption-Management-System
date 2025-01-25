@@ -64,16 +64,6 @@ def entry_fields(note_form_tab):
                 # Show an error message if the second POST request fails
                 Messagebox.show_info(e, "Data Entry Error")
 
-
-            try:
-                # Send another POST request to create a stock view with the given date
-                response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
-                if response.status_code == 200:  # Check if the stock view was successfully created
-                    print("Successfully Created the View")
-            except requests.exceptions.RequestException as e:
-                # Show an error message if the second POST request fails
-                Messagebox.show_info(e, "Data Entry Error")
-
             try:
                 # Send another POST request to update the stocks
                 response = requests.post(f"{server_ip}/api/update_stock_on_hand/?params_date={date_entry_value}")
@@ -84,8 +74,8 @@ def entry_fields(note_form_tab):
                 # Show an error message if the second POST request fails
                 Messagebox.show_info(e, "Data Entry Error")
 
-            # Call the function to get all the data from the created view table and pass the date the user entered
-            data = get_soh_data(date_entry_value)
+            # Call the function to get all the data from the view table
+            data = get_soh_data()
             print("This is the data: ", data)
 
             # Generate an Excel file for the stock-on-hand data
@@ -96,7 +86,6 @@ def entry_fields(note_form_tab):
 
             # Refresh the note table to display updated data
             note_table.refresh_table()
-
         except requests.exceptions.RequestException as e:
             # Show an error message if the first POST request fails
             Messagebox.show_info(e, "Data Entry Error")
@@ -116,7 +105,6 @@ def entry_fields(note_form_tab):
     )
     lock_warehouse.grid(row=0, column=0, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
     ToolTip(lock_warehouse, text="Lock the date")
-
 
 
     # Calculate yesterday's date
@@ -207,7 +195,7 @@ def create_soh_whse_excel(date_entry_value, data):
         # Populate the header
         header = [
             "Date", "No of bags", "qty per packing",
-            f"{wh_header}", "Total", "Status", "drop list"
+            f"{wh_header}", "Total", "Status"
         ]
         sheet.append(header)
         sheet["A1"] = f"{wh_date}"  # Example date
@@ -267,15 +255,10 @@ def create_soh_whse_excel(date_entry_value, data):
     else:
         print("File save canceled by the user.")
 
-def get_soh_data(date_entry_value):
-
-    # Convert the date_entry_value into this format '2025_01_14'
-    date_object = datetime.strptime(date_entry_value, "%Y-%m-%d")
-    formatted_date = date_object.strftime("%Y_%m_%d")
-
+def get_soh_data():
 
     """Fetch data from API and format for table rowdata."""
-    url = f"{server_ip}/api/get_soh/{formatted_date}"
+    url = f"{server_ip}/api/get/new_soh/"
     try:
         response = requests.get(url)
         response.raise_for_status()

@@ -1,6 +1,6 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .main_tab import rm_code_tab
+from .main_tab import rm_code_tab, rm_soh_tab
 
 
 class RawMaterialView:
@@ -16,7 +16,7 @@ class RawMaterialView:
 
         # Create the frames for each tab
         rm_code_tab(notebook)
-        # rm_soh_tab(notebook)
+        rm_soh_tab(notebook)
 
 
         # Add the tabs to the notebook
