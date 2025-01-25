@@ -1,8 +1,8 @@
--- View: public.view_latest_soh
+-- View: public.view_beginning_soh
 
--- DROP VIEW public.view_latest_soh;
+-- DROP VIEW public.view_beginning_soh;
 
-CREATE OR REPLACE VIEW public.view_latest_soh
+CREATE OR REPLACE VIEW public.view_beginning_soh
  AS
  WITH rankedrecords AS (
          SELECT soh.warehouse_id AS warehouseid,
@@ -12,7 +12,7 @@ CREATE OR REPLACE VIEW public.view_latest_soh
             rm.rm_code AS rmcode,
             soh.rm_soh AS beginningbalance,
             soh.stock_change_date AS stockchangedate,
-            status.name AS statusname,
+            COALESCE(status.name, ''::character varying) AS statusname,
             soh.status_id AS statusid,
             row_number() OVER (PARTITION BY soh.warehouse_id, soh.rm_code_id, soh.status_id ORDER BY soh.stock_change_date DESC) AS row_num
            FROM tbl_stock_on_hand soh
@@ -31,8 +31,8 @@ CREATE OR REPLACE VIEW public.view_latest_soh
     stockchangedate
    FROM rankedrecords
   WHERE row_num = 1
-  ORDER BY rmcode ASC;
+  ORDER BY rmcode, stockchangedate DESC;
 
-ALTER TABLE public.view_latest_soh
+ALTER TABLE public.view_beginning_soh
     OWNER TO postgres;
 

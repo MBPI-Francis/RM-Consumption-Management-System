@@ -1,8 +1,8 @@
--- View: public.view_sample_new_soh
+-- View: public.view_ending_stocks_balance
 
--- DROP VIEW public.view_sample_new_soh;
+-- DROP VIEW public.view_ending_stocks_balance;
 
-CREATE OR REPLACE VIEW public.view_sample_new_soh
+CREATE OR REPLACE VIEW public.view_ending_stocks_balance
  AS
  WITH initialbalance AS (
          WITH rankedrecords AS (
@@ -39,9 +39,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             ogr.date_computed AS datecomputed
            FROM tbl_outgoing_reports ogr
              JOIN tbl_warehouses wh ON ogr.warehouse_id = wh.id
-          WHERE (ogr.is_cleared IS NULL OR ogr.is_cleared = False)
-		  		AND
-				  (ogr.is_deleted IS NULL OR ogr.is_deleted = False)
+          WHERE (ogr.is_cleared IS NULL OR ogr.is_cleared = false) AND (ogr.is_deleted IS NULL OR ogr.is_deleted = false) AND ogr.created_at::date = CURRENT_DATE AND ogr.date_computed IS NULL
           GROUP BY ogr.warehouse_id, ogr.rm_code_id, ogr.date_computed
         ), pf_adjustments AS (
          SELECT pf.warehouse_id AS warehouseid,
@@ -51,9 +49,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             pf.date_computed AS datecomputed
            FROM tbl_preparation_forms pf
              JOIN tbl_warehouses wh ON pf.warehouse_id = wh.id
-          WHERE (pf.is_cleared IS NULL OR pf.is_cleared = False)
-		  		AND
-				  (pf.is_deleted IS NULL OR pf.is_deleted = False)
+          WHERE (pf.is_cleared IS NULL OR pf.is_cleared = false) AND (pf.is_deleted IS NULL OR pf.is_deleted = false) AND pf.created_at::date = CURRENT_DATE AND pf.date_computed IS NULL
           GROUP BY pf.warehouse_id, pf.rm_code_id, pf.date_computed
         ), tf_adjustments AS (
          SELECT tf.from_warehouse_id AS warehouseid,
@@ -62,9 +58,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             tf.date_computed AS datecomputed
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
-          WHERE	(tf.is_cleared IS NULL OR tf.is_cleared = False)
-		  		AND (tf.is_deleted IS NULL OR tf.is_deleted = False)
-		  		AND tf.status_id IS NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.status_id IS NULL AND tf.created_at::date = CURRENT_DATE AND tf.date_computed IS NULL
           GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
         UNION ALL
          SELECT tf.to_warehouse_id AS warehouseid,
@@ -73,9 +67,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             tf.date_computed AS datecomputed
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
-          WHERE 	(tf.is_cleared IS NULL OR tf.is_cleared = False)
-			  		AND (tf.is_deleted IS NULL OR tf.is_deleted = False)
-				  	AND tf.status_id IS NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.status_id IS NULL AND tf.created_at::date = CURRENT_DATE AND tf.date_computed IS NULL
           GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
         ), rr_adjustments AS (
          SELECT rr.warehouse_id AS warehouseid,
@@ -84,9 +76,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
             rr.date_computed AS datecomputed
            FROM tbl_receiving_reports rr
              JOIN tbl_warehouses wh ON rr.warehouse_id = wh.id
-          WHERE
-		  		(rr.is_cleared IS NULL OR rr.is_cleared = False)
-		  		AND (rr.is_deleted IS NULL OR rr.is_deleted = False)
+          WHERE (rr.is_cleared IS NULL OR rr.is_cleared = false) AND (rr.is_deleted IS NULL OR rr.is_deleted = false) AND rr.created_at::date = CURRENT_DATE AND rr.date_computed IS NULL
           GROUP BY rr.warehouse_id, rr.rm_code_id, rr.date_computed
         ), status_adjustments AS (
          SELECT hf.warehouse_id AS warehouseid,
@@ -107,8 +97,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
              JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
              LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
-          WHERE 	(hf.is_cleared IS NULL OR hf.is_cleared = False)
-		  			AND (hf.is_deleted IS NULL OR hf.is_deleted = False)
+          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.created_at::date = CURRENT_DATE AND hf.date_computed IS NULL
           GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
         ), held_status_details AS (
          SELECT hf.rm_code_id AS rawmaterialid,
@@ -124,9 +113,7 @@ CREATE OR REPLACE VIEW public.view_sample_new_soh
              JOIN tbl_raw_materials rm ON hf.rm_code_id = rm.id
              JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
-          WHERE new_status.name::text ~~ 'held%'::text
-		  		AND (hf.is_cleared IS NULL OR hf.is_cleared = False)
-		  		AND (hf.is_deleted IS NULL OR hf.is_deleted = False)
+          WHERE new_status.name::text ~~ 'held%'::text AND (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.created_at::date = CURRENT_DATE AND hf.date_computed IS NULL
           GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
         )
  SELECT ib.rawmaterialid,
@@ -156,6 +143,6 @@ UNION ALL
    FROM held_status_details hs
   ORDER BY 2, 4, 5, 7 NULLS FIRST;
 
-ALTER TABLE public.view_sample_new_soh
+ALTER TABLE public.view_ending_stocks_balance
     OWNER TO postgres;
 
