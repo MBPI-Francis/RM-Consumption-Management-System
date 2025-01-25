@@ -24,6 +24,24 @@ def entry_fields(note_form_tab):
             date_entry.entry.delete(0, tk.END)
 
 
+    def btn_clear():
+        """Fetch data from API and format for table rowdata."""
+        url = f"{server_ip}/api/clear-table-data"
+        try:
+            # Send another POST request to clear data
+            response = requests.post(url)
+            if response.status_code == 200:  # Check if the stock view was successfully created
+                print("Successfully Cleared the Data")
+                Messagebox.show_info("Data is successfully cleared!", "Data Clearing")
+
+            else:
+                print(f"There is an error:  {response.status_code}")
+                Messagebox.show_error(f"There must be a mistake, the status code is {response.status_code}", "Data Clearing Error")
+
+        except requests.exceptions.RequestException as e:
+            return False
+
+
     def submit_data():
 
         date_entry_value = date_entry.entry.get()
@@ -35,34 +53,50 @@ def entry_fields(note_form_tab):
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
 
-        # Call the function to get all the data from the created view table and pass the date the user entered
-        data = get_soh_data(date_entry_value)
-
-        entry_date = {
-            "date": date_entry_value
-        }
-
-        print("This is the data: ", data)
-
         try:
-            # Send a POST request to update the computed date in the API
-            response = requests.post(f"{server_ip}/api/update-date-computed")
-            if response.status_code == 200:  # Check if the request was successful
-                try:
-                    # Send another POST request to create a stock view with the given date
-                    response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
-                    if response.status_code == 200:  # Check if the stock view was successfully created
-                        # Clear input fields after successful operation
-                        clear_fields()
 
-                        # Refresh the note table to display updated data
-                        note_table.refresh_table()
+            try:
+                # Send a POST request to update the computed date in the API
+                response = requests.post(f"{server_ip}/api/update-date-computed")
+                if response.status_code == 200:  # Check if the request was successful
+                    print("Successfully Updated the Computed Date")
+            except requests.exceptions.RequestException as e:
+                # Show an error message if the second POST request fails
+                Messagebox.show_info(e, "Data Entry Error")
 
-                        # Generate an Excel file for the stock-on-hand data
-                        create_soh_whse_excel(date_entry_value, data)
-                except requests.exceptions.RequestException as e:
-                    # Show an error message if the second POST request fails
-                    Messagebox.show_info(e, "Data Entry Error")
+
+            try:
+                # Send another POST request to create a stock view with the given date
+                response = requests.post(f"{server_ip}/api/create_stock_view/?params_date={date_entry_value}")
+                if response.status_code == 200:  # Check if the stock view was successfully created
+                    print("Successfully Created the View")
+            except requests.exceptions.RequestException as e:
+                # Show an error message if the second POST request fails
+                Messagebox.show_info(e, "Data Entry Error")
+
+            try:
+                # Send another POST request to update the stocks
+                response = requests.post(f"{server_ip}/api/update_stock_on_hand/?params_date={date_entry_value}")
+                if response.status_code == 200:  # Check if the stock view was successfully created
+                    print("Successfully Updated the Stocks.")
+
+            except requests.exceptions.RequestException as e:
+                # Show an error message if the second POST request fails
+                Messagebox.show_info(e, "Data Entry Error")
+
+            # Call the function to get all the data from the created view table and pass the date the user entered
+            data = get_soh_data(date_entry_value)
+            print("This is the data: ", data)
+
+            # Generate an Excel file for the stock-on-hand data
+            create_soh_whse_excel(date_entry_value, data)
+
+            # Clear input fields after successful operation
+            clear_fields()
+
+            # Refresh the note table to display updated data
+            note_table.refresh_table()
+
         except requests.exceptions.RequestException as e:
             # Show an error message if the first POST request fails
             Messagebox.show_info(e, "Data Entry Error")
@@ -107,8 +141,18 @@ def entry_fields(note_form_tab):
         text="Calculate Data",
         command=submit_data,
     )
-    btn_submit.grid(row=1, column=2, columnspan=2, pady=10)
+    btn_submit.grid(row=1, column=2, pady=10)
     ToolTip(btn_submit, text="Click the button to calculate all the entered data.")
+
+
+    # Add button to clear data
+    btn_clear = ttk.Button(
+        form_frame,
+        text="Clear Data",
+        command=btn_clear,
+    )
+    btn_clear.grid(row=1, column=6, pady=30, padx=10)
+    ToolTip(btn_clear, text="Click the button to clear all the data.")
 
     # Calling the table
     note_table = NoteTable(note_form_tab)
@@ -244,6 +288,10 @@ def get_soh_data(date_entry_value):
 
     # Return both buttons as a tuple
     return []
+
+
+
+
 
 
 

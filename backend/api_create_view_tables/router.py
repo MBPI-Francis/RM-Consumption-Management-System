@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from backend.settings.database import get_db
 from datetime import datetime
 from sqlalchemy import text
-from datetime import date
+from datetime import date, timedelta
 from sqlalchemy import update
 from backend.api_preparation_form.temp.models import TempPreparationForm
 from backend.api_notes.temp.models import TempNotes
@@ -45,7 +45,13 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
         # Convert the params_date_entry_value into this format '2025_01_14'
         date_object = datetime.strptime(params_date, "%Y-%m-%d")
         view_date = date_object.strftime("%Y_%m_%d")
+
+        # Get today's date
         today = date.today()
+        # Calculate yesterday's date
+        yesterday = today - timedelta(days=1)
+        # Format yesterday's date as needed
+        formatted_yesterday = yesterday.strftime('%Y-%m-%d')  # Example: '2025-01-24'
 
         view_name = f"view_wh_soh_{view_date}"
 
@@ -66,7 +72,8 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                         SOH.stock_change_date AS stockchangedate,
                         STATUS.name AS StatusName,
                         SOH.status_id AS StatusID,
-                        row_number() OVER (PARTITION BY SOH.warehouse_id, SOH.rm_code_id, SOH.status_id ORDER BY SOH.stock_change_date DESC) AS row_num
+                        SOH.date_computed, 
+                        row_number() OVER (PARTITION BY SOH.warehouse_id, SOH.rm_code_id, SOH.status_id ORDER BY SOH.date_computed DESC) AS row_num
                     FROM tbl_stock_on_hand AS SOH
                     INNER JOIN tbl_raw_materials AS RM 
                         ON SOH.rm_code_id = RM.id
@@ -85,9 +92,11 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     rankedrecords.beginningbalance,
                     rankedrecords.stockchangedate,
                     rankedrecords.statusname,
-                    rankedrecords.statusid
+                    rankedrecords.statusid,
+                    rankedrecords.date_computed
                 FROM rankedrecords
-                WHERE rankedrecords.row_num = 1
+                WHERE rankedrecords.row_num = 1 
+                    AND date_computed = '{formatted_yesterday}'
             ), 
             
             -- Step 2: Outgoing Report Adjustments
@@ -102,7 +111,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 INNER JOIN tbl_warehouses AS wh
                     ON ogr.warehouse_id = wh.id
                 WHERE 
-                    ogr.date_computed = '{today}'
+                    ogr.date_computed = '{today}' AND (ogr.is_deleted ISNULL OR ogr.is_deleted = False)
                 GROUP BY 
                     ogr.warehouse_id, ogr.rm_code_id, ogr.date_computed
             ),
@@ -121,7 +130,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON pf.warehouse_id = wh.id
                     
                 WHERE 
-                    pf.date_computed = '{today}'
+                    pf.date_computed = '{today}' AND (pf.is_deleted ISNULL OR pf.is_deleted = False)
                 GROUP BY 
                     pf.warehouse_id, pf.rm_code_id, pf.date_computed
             ),
@@ -138,7 +147,9 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                 INNER JOIN tbl_warehouses AS wh_from
                     ON tf.from_warehouse_id = wh_from.id
                 WHERE 
-                    tf.date_computed = '{today}' AND tf.status_id ISNULL 
+                    tf.date_computed = '{today}' 
+                    AND tf.status_id ISNULL  
+                    AND (tf.is_deleted ISNULL OR tf.is_deleted = False)
                 GROUP BY 
                     tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
                 UNION ALL
@@ -154,7 +165,9 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON tf.to_warehouse_id = wh_to.id
                     
                 WHERE 
-                    tf.date_computed = '{today}' AND tf.status_id ISNULL
+                    tf.date_computed = '{today}' 
+                    AND tf.status_id ISNULL
+                    AND (tf.is_deleted ISNULL OR tf.is_deleted = False)
                 GROUP BY 
                     tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
             ),
@@ -174,6 +187,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     
                 WHERE 
                     rr.date_computed = '{today}'
+                    AND (rr.is_deleted ISNULL OR rr.is_deleted = False)
                 GROUP BY 
                     rr.warehouse_id, rr.rm_code_id, rr.date_computed
             ),
@@ -211,6 +225,7 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     
                 WHERE 
                     hf.date_computed = '{today}'
+                    AND (hf.is_deleted ISNULL OR hf.is_deleted = False)
                 GROUP BY 
                     hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ),
@@ -237,7 +252,9 @@ async def create_stock_view(params_date ,db: get_db = Depends()):
                     ON hf.new_status_id = new_status.id
                 
                 WHERE 
-                    new_status.name LIKE 'held%' AND hf.date_computed = '{today}'
+                    new_status.name LIKE 'held%' 
+                    AND hf.date_computed = '{today}'
+                    AND (hf.is_deleted ISNULL OR hf.is_deleted = False)
                 GROUP BY 
                     hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
             )
@@ -417,6 +434,7 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
     # Convert the date_entry_value into this format '2025_01_14'
     date_object = datetime.strptime(params_date, "%Y-%m-%d")
     formatted_date = date_object.strftime("%Y_%m_%d")
+    current_date = date.today()
 
     # Format the view name dynamically
     view_name = f"view_wh_soh_{formatted_date}"
@@ -444,7 +462,8 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
             rm_soh_item = StockOnHand(rm_code_id=record["rawmaterialid"],
                                       warehouse_id=record["warehouseid"],
                                       rm_soh=record["new_beginning_balance"],
-                                      status_id= record["statusid"])
+                                      status_id= record["statusid"],
+                                      date_computed=current_date)
             db.add(rm_soh_item)
             db.commit()
             db.refresh(rm_soh_item)
@@ -455,4 +474,60 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
     except Exception as e:
         # Handle any unexpected exceptions and return a 500 error with details
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Helping function for the api
+def clear_table_func(table, db):
+    """
+    Updates the `date_computed` column to the current date for records where it is NULL in the given table.
+    """
+    try:
+
+        # Create an update query
+        stmt = (
+            update(table)
+            .where((table.is_cleared.is_(None)) | (table.is_cleared == False))  # Check for NULL or False
+            .values(is_cleared=True)  # Set is_clear to True
+        )
+
+        # Only uncomment this for unclearing the records
+        # stmt = (
+        #     update(table)
+        #     .where((table.is_cleared == True))  # Check for NULL or False
+        #     .values(is_cleared=False)  # Set is_clear to True
+        # )
+
+        # Execute the query
+        db.execute(stmt)
+        db.commit()
+        return True
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update table {table.__tablename__}: {e}")
+
+@router.post("/clear-table-data")
+async def clear_table_data(db: get_db = Depends()):
+    """
+    Updates the `is_cleared` column to True for all specified tables.
+    """
+    tables = [
+        TempNotes,
+        TempPreparationForm,
+        TempTransferForm,
+        TempOutgoingReport,
+        TempReceivingReport,
+        TempHeldForm,
+    ]
+
+    updated_tables = []
+
+    for table in tables:
+        success = clear_table_func(table, db)
+        if success:
+            updated_tables.append(table.__tablename__)
+
+    return {"message": "Update successful", "updated_tables": updated_tables}
+
+
 

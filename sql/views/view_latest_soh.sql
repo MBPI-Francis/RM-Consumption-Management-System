@@ -20,17 +20,18 @@ CREATE OR REPLACE VIEW public.view_latest_soh
              JOIN tbl_warehouses wh ON soh.warehouse_id = wh.id
              LEFT JOIN tbl_droplist status ON soh.status_id = status.id
         )
- SELECT rankedrecords.warehouseid,
-    rankedrecords.warehousename,
-    rankedrecords.warehousenumber,
-    rankedrecords.rawmaterialid,
-    rankedrecords.rmcode,
-    rankedrecords.beginningbalance,
-    rankedrecords.statusname,
-    rankedrecords.statusid,
-    rankedrecords.stockchangedate
+ SELECT warehouseid,
+    warehousename,
+    warehousenumber,
+    rawmaterialid,
+    rmcode,
+    beginningbalance,
+    statusname,
+    statusid,
+    stockchangedate
    FROM rankedrecords
-  WHERE rankedrecords.row_num = 1;
+  WHERE row_num = 1
+  ORDER BY rmcode ASC;
 
 ALTER TABLE public.view_latest_soh
     OWNER TO postgres;

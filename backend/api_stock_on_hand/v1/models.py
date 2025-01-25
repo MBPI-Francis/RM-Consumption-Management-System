@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric, UniqueConstraint
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Numeric, UniqueConstraint, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -24,7 +24,7 @@ class StockOnHand(Base):
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
-
+    date_computed = Column(Date, nullable=True)
 
     # Relationships for created_by, updated_by, and deleted_by
     created_by = relationship("User", foreign_keys=[created_by_id], backref="created_soh")
