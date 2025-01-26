@@ -57,11 +57,9 @@ def entry_fields(note_form_tab):
 
             # Call the function to get all the data from the view table
             data = get_soh_data()
-            print("This is the data: ", data)
 
             # Generate an Excel file for the stock-on-hand data
             create_soh_whse_excel(date_entry_value, data)
-
 
             try:
                 # Send another POST request to update the stocks
@@ -69,22 +67,18 @@ def entry_fields(note_form_tab):
                 if response.status_code == 200:  # Check if the stock view was successfully created
                     print("Successfully Updated the Stocks.")
 
+                    try:
+                        # Send a POST request to update the computed date in the API
+                        response = requests.post(f"{server_ip}/api/update-date-computed")
+                        if response.status_code == 200:  # Check if the request was successful
+                            print("Successfully Updated the Computed Date")
+                    except requests.exceptions.RequestException as e:
+                        # Show an error message if the second POST request fails
+                        Messagebox.show_info(e, "Data Entry Error")
+
             except requests.exceptions.RequestException as e:
                 # Show an error message if the second POST request fails
                 Messagebox.show_info(e, "Data Entry Error")
-
-            try:
-                # Send a POST request to update the computed date in the API
-                response = requests.post(f"{server_ip}/api/update-date-computed")
-                if response.status_code == 200:  # Check if the request was successful
-                    print("Successfully Updated the Computed Date")
-            except requests.exceptions.RequestException as e:
-                # Show an error message if the second POST request fails
-                Messagebox.show_info(e, "Data Entry Error")
-
-
-
-
 
             # Clear input fields after successful operation
             clear_fields()

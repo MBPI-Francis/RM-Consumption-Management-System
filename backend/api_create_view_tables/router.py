@@ -57,47 +57,6 @@ async def get_beginning_balance(db: get_db = Depends()):
 
 
 
-# API endpoint to get records from the dynamic view
-# @router.get("/get_soh/", response_model=list[dict])
-# def get_soh(db: get_db = Depends()):
-#
-#     records = get_data_from_dynamic_view(db)
-#
-#     if not records:
-#         raise HTTPException(status_code=404, detail="No records found")
-#     return records
-
-
-# # Helper function to query the view dynamically
-# def get_data_from_dynamic_view(db) -> list[dict]:
-#     # Format the view name dynamically
-#
-#
-#     # Prepare the SQL query to select all records from the dynamic view
-#     query = text(f"SELECT * FROM view_ending_stocks_balance")
-#
-#     try:
-#         # Execute the query and fetch all rows
-#         result = db.execute(query).fetchall()
-#
-#         # Convert the result into a list of dictionaries
-#         records = [
-#             {
-#                 "rmcode": row[0],
-#                 "warehousename": row[1],
-#                 "warehousenumber": row[2],
-#                 "new_beginning_balance": row[3],
-#                 "status": row[4]
-#             }
-#             for row in result
-#         ]
-#
-#         return records
-#
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error fetching data: {str(e)}")
-
-
 # Helping function for the api
 def update_date_computed_for_table(table, db):
     """
@@ -158,16 +117,9 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
     Returns:
         A JSON response indicating the success of the operation.
     """
-    # Convert the date_entry_value into this format '2025_01_14'
-    date_object = datetime.strptime(params_date, "%Y-%m-%d")
-    formatted_date = date_object.strftime("%Y_%m_%d")
+
     current_date = date.today()
-
-    # Format the view name dynamically
-    view_name = f"view_wh_soh_{formatted_date}"
-
-    # Prepare the SQL query to select all records from the dynamic view
-    query = text(f"SELECT * FROM {view_name}")
+    query = text("SELECT * FROM view_ending_stocks_balance")
 
     try:
         # Execute the query and fetch all rows
