@@ -169,9 +169,23 @@ def create_soh_whse_excel(date_entry_value, data):
     notes_sheet["A3"] = "MASTERBATCH"
     notes_sheet.append(["PRODUCT CODE", "LOT#", "Product Kind"])
 
-    # Example data for the notes sheet
-    notes_sheet.append(["SAMPLE-CODE-1", "SAMPLE-5106AJ-5109AJ", "SAMPLE-MB"])
-    notes_sheet.append(["SAMPLE-CODE-2", "SAMPLE-5110AJ", "SAMPLE-DC"])
+    # Fetch data from the API
+    try:
+        api_url = f"{server_ip}/api/notes/temp/list/"
+        response = requests.get(api_url)
+        response.raise_for_status()
+        api_data = response.json()
+
+        # Insert data into the NOTES sheet
+        for record in api_data:
+            notes_sheet.append([
+                record["product_code"],
+                record["lot_number"],
+                record["product_kind_id"]
+            ])
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data from API: {e}")
 
     # Apply formatting
     for col in ["A", "B", "C"]:
