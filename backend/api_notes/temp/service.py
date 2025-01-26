@@ -25,10 +25,14 @@ class TempNotesCRUD(AppCRUD):
         notes_item = self.db.query(TempNotes).filter(
             or_(
                 TempNotes.is_cleared.is_(None),  # NULL check for is_cleared
-                TempNotes.is_cleared == False,  # False check for is_cleared
+                TempNotes.is_cleared == False # False check for is_cleared
+
+            ),
+            or_(
                 TempNotes.is_deleted.is_(None),  # NULL check for is_deleted
                 TempNotes.is_deleted == False  # False check for is_deleted
             )
+
         ).all()
 
         # Return the filtered records, or an empty list if no records are found
