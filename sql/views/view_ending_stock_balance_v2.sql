@@ -73,10 +73,104 @@ WITH initialbalance AS (
           WHERE (rr.is_cleared IS NULL OR rr.is_cleared = false) AND (rr.is_deleted IS NULL OR rr.is_deleted = false) AND rr.date_computed IS NULL
           GROUP BY rr.warehouse_id, rr.rm_code_id, rr.date_computed
         ),
-		status_adjustments AS (
+		status_adjustments_eval AS (
          	SELECT
 				hf.warehouse_id AS warehouseid,
 				hf.rm_code_id AS rawmaterialid,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'held : contaminated'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_held,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_released,
+				hf.date_computed AS datecomputed
+			   FROM tbl_held_forms hf
+				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
+				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
+				 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+-- 				 LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
+			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
+				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
+				AND hf.date_computed IS NULL
+				AND (new_status.name = 'held : under evaluation' OR current_status.name = 'held : under evaluation')
+			  GROUP BY hf.warehouse_id,
+						hf.rm_code_id,
+						hf.date_computed
+        ),
+
+	status_adjustments_conta AS (
+         	SELECT
+				hf.warehouse_id AS warehouseid,
+				hf.rm_code_id AS rawmaterialid,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'held : under evaluation'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
+
+						ELSE 0::numeric
+					END) AS total_held,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_released,
+				hf.date_computed AS datecomputed
+			   FROM tbl_held_forms hf
+				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
+				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
+				 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+-- 				 LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
+			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
+				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
+				AND hf.date_computed IS NULL
+				AND (new_status.name = 'held : contaminated' OR current_status.name = 'held : contaminated')
+			  GROUP BY hf.warehouse_id,
+						hf.rm_code_id,
+						hf.date_computed
+        ),
+
+	status_adjustments_rejec AS (
+         	SELECT
+				hf.warehouse_id AS warehouseid,
+				hf.rm_code_id AS rawmaterialid,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'held : under evaluation'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : contaminated'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_held,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_released,
+				hf.date_computed AS datecomputed
+			   FROM tbl_held_forms hf
+				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
+				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
+				 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+-- 				 LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
+			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
+				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
+				AND hf.date_computed IS NULL
+				AND (new_status.name = 'held : rejected' OR current_status.name = 'held : rejected')
+			  GROUP BY hf.warehouse_id,
+						hf.rm_code_id,
+						hf.date_computed
+        ),
+
+
+		status_adjustments_good AS (
+         	SELECT
+				hf.warehouse_id AS warehouseid,
+
+				hf.rm_code_id AS rawmaterialid,
+
 				sum(
 					CASE
 						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
@@ -87,10 +181,7 @@ WITH initialbalance AS (
 						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
 						ELSE 0::numeric
 					END) AS total_released,
-				hf.date_computed AS datecomputed,
-				hf.new_status_id AS Statusid,
-				new_status.name AS newstatus,
-				current_status.name AS currentstatus
+				hf.date_computed AS datecomputed
 			   FROM tbl_held_forms hf
 				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
 				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
@@ -99,10 +190,11 @@ WITH initialbalance AS (
 			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
 				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
 				AND hf.date_computed IS NULL
+				AND (new_status.name = 'good' OR current_status.name = 'good')
 			  GROUP BY hf.warehouse_id,
 						hf.rm_code_id,
-						hf.date_computed,
-						hf.new_status_id, new_status.name, current_status.name
+						hf.date_computed
+
         ),
 
 		held_status_details AS (
@@ -131,7 +223,7 @@ WITH initialbalance AS (
 				ib.warehousename,
 				ib.warehousenumber,
 				CASE
-					WHEN ib.statusname = 'held : rejected' AND cs.currentstatus = 'held : rejected'
+					WHEN ib.statusname = 'held : rejected'
 					THEN
 						ib.beginningbalance
 						+ COALESCE(rr.total_received, 0::numeric)
@@ -139,19 +231,11 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						- COALESCE(cs.total_released, 0::numeric)
+						-COALESCE(rej.total_held, 0::numeric)
+						- COALESCE(rej.total_released, 0::numeric)
 
-					WHEN ib.statusname = 'held : under evaluation' AND cs.currentstatus = 'held : under evaluation'
-					THEN
-						ib.beginningbalance
-						+ COALESCE(rr.total_received, 0::numeric)
-						+ COALESCE(pf.total_returned, 0::numeric)
-						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
-						- COALESCE(pf.total_prepared, 0::numeric)
-						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						- COALESCE(cs.total_released, 0::numeric)
 
-					WHEN ib.statusname = 'held : contaminated' AND cs.currentstatus = 'held : contaminated'
+					WHEN ib.statusname = 'held : under evaluation'
 					THEN
 						ib.beginningbalance
 						+ COALESCE(rr.total_received, 0::numeric)
@@ -159,7 +243,19 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						- COALESCE(cs.total_released, 0::numeric)
+						- COALESCE(eval.total_held, 0::numeric)
+						- COALESCE(eval.total_released, 0::numeric)
+
+					WHEN ib.statusname = 'held : contaminated'
+					THEN
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+						- COALESCE(cs.total_held, 0::numeric)
+		 				- COALESCE(cs.total_released, 0::numeric)
 
 					WHEN ib.statusname IS NULL
 		 			THEN
@@ -169,16 +265,9 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						- COALESCE(cs.total_held, 0::numeric)
-						+ COALESCE(cs.total_released, 0::numeric)
+						- COALESCE(good.total_held, 0::numeric)
+						+ COALESCE(good.total_released, 0::numeric)
 
-		 			ELSE
-						ib.beginningbalance
-						+ COALESCE(rr.total_received, 0::numeric)
-						+ COALESCE(pf.total_returned, 0::numeric)
-						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
-						- COALESCE(pf.total_prepared, 0::numeric)
-						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
 
 				END AS new_beginning_balance,
 				COALESCE(ib.statusname, ''::character varying) AS status,
@@ -188,7 +277,10 @@ WITH initialbalance AS (
 			 LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
 			 LEFT JOIN tf_adjustments tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid
 			 LEFT JOIN rr_adjustments rr ON ib.warehouseid = rr.warehouseid AND ib.rawmaterialid = rr.rawmaterialid
-			 LEFT JOIN status_adjustments cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
+			 LEFT JOIN status_adjustments_conta cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
+			 LEFT JOIN status_adjustments_eval eval ON ib.warehouseid = eval.warehouseid AND eval.rawmaterialid = cs.rawmaterialid
+			 LEFT JOIN status_adjustments_rejec rej ON ib.warehouseid = rej.warehouseid AND ib.rawmaterialid = rej.rawmaterialid
+			 LEFT JOIN status_adjustments_good good  ON ib.warehouseid = good.warehouseid AND ib.rawmaterialid = good.rawmaterialid
 			UNION ALL
 			SELECT hs.rawmaterialid,
 			hs.rmcode,
@@ -209,17 +301,17 @@ SELECT rawmaterialid,
 			warehouseid,
 			warehousename,
 			warehousenumber,
-			SUM(new_beginning_balance) as new_beginning_balance,
+			sum(new_beginning_balance) as new_beginning_balance,
 			status,
 			statusid
 FROM computed_statement
 -- WHERE new_beginning_balance != 0
-GROUP BY rawmaterialid,
+GROUP BY
+rawmaterialid,
 			rmcode,
 			warehouseid,
 			warehousename,
 			warehousenumber,
 			status,
 			statusid
-
 
