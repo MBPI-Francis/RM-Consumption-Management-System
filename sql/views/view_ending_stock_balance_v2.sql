@@ -79,7 +79,8 @@ WITH initialbalance AS (
 				hf.rm_code_id AS rawmaterialid,
 				sum(
 					CASE
-						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : contaminated'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
 						ELSE 0::numeric
 					END) AS total_held,
 				sum(
@@ -108,9 +109,9 @@ WITH initialbalance AS (
 				hf.rm_code_id AS rawmaterialid,
 				sum(
 					CASE
-						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
-						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
-						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : under evaluation'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
+
 						ELSE 0::numeric
 					END) AS total_held,
 				sum(
@@ -139,7 +140,8 @@ WITH initialbalance AS (
 				hf.rm_code_id AS rawmaterialid,
 				sum(
 					CASE
-						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : under evaluation'::text THEN hf.qty_kg
+						WHEN new_status.name::text ~~ 'held : contaminated'::text THEN hf.qty_kg
 						ELSE 0::numeric
 					END) AS total_held,
 				sum(
@@ -227,7 +229,7 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						--COALESCE(rej.total_held, 0::numeric)
+						-COALESCE(rej.total_held, 0::numeric)
 						- COALESCE(rej.total_released, 0::numeric)
 
 
@@ -239,7 +241,7 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						--COALESCE(eval.total_held, 0::numeric)
+						- COALESCE(eval.total_held, 0::numeric)
 						- COALESCE(eval.total_released, 0::numeric)
 
 					WHEN ib.statusname = 'held : contaminated'
@@ -250,7 +252,7 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
-						-- COALESCE(cs.total_held, 0::numeric)
+						- COALESCE(cs.total_held, 0::numeric)
 		 				- COALESCE(cs.total_released, 0::numeric)
 
 					WHEN ib.statusname IS NULL
