@@ -1,10 +1,4 @@
--- View: public.view_ending_stocks_balance
-
--- DROP VIEW public.view_ending_stocks_balance;
-
-CREATE OR REPLACE VIEW public.view_ending_stocks_balance
- AS
- WITH initialbalance AS (
+WITH initialbalance AS (
          WITH rankedrecords AS (
                  SELECT soh.warehouse_id AS warehouseid,
                     wh.wh_name AS warehousename,
@@ -78,31 +72,38 @@ CREATE OR REPLACE VIEW public.view_ending_stocks_balance
              JOIN tbl_warehouses wh ON rr.warehouse_id = wh.id
           WHERE (rr.is_cleared IS NULL OR rr.is_cleared = false) AND (rr.is_deleted IS NULL OR rr.is_deleted = false) AND rr.date_computed IS NULL
           GROUP BY rr.warehouse_id, rr.rm_code_id, rr.date_computed
-        ), status_adjustments AS (
-         SELECT hf.warehouse_id AS warehouseid,
-            hf.rm_code_id AS rawmaterialid,
-            sum(
-                CASE
-                    WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
-                    ELSE 0::numeric
-                END) AS total_held,
-            sum(
-                CASE
-                    WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
-                    ELSE 0::numeric
-                END) AS total_released,
-            hf.date_computed AS datecomputed,
-            hf.new_status_id AS statusid,
-            new_status.name AS statusname
-           FROM tbl_held_forms hf
-             JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-             JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
-             JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
-             LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
-          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL
-          GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed, hf.new_status_id, new_status.name
-        ), held_status_details AS (
-         SELECT hf.rm_code_id AS rawmaterialid,
+        ),
+		status_adjustments AS (
+         	SELECT
+				hf.warehouse_id AS warehouseid,
+				hf.rm_code_id AS rawmaterialid,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'held%'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_held,
+				sum(
+					CASE
+						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
+						ELSE 0::numeric
+					END) AS total_released,
+				hf.date_computed AS datecomputed
+			   FROM tbl_held_forms hf
+				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
+				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
+				 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+-- 				 LEFT JOIN initialbalance ib ON hf.new_status_id = ib.statusid
+			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
+				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
+				AND hf.date_computed IS NULL
+			  GROUP BY hf.warehouse_id,
+						hf.rm_code_id,
+						hf.date_computed
+        ),
+
+		held_status_details AS (
+         SELECT
+			hf.rm_code_id AS rawmaterialid,
             wh.wh_name AS warehousename,
             wh.id AS warehouseid,
             wh.wh_number AS warehousenumber,
@@ -117,33 +118,73 @@ CREATE OR REPLACE VIEW public.view_ending_stocks_balance
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
           WHERE new_status.name::text ~~ 'held%'::text AND (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL
           GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
-        )
- SELECT ib.rawmaterialid,
-    ib.rmcode,
-    ib.warehouseid,
-    ib.warehousename,
-    ib.warehousenumber,
-    ib.beginningbalance + COALESCE(rr.total_received, 0::numeric) + COALESCE(pf.total_returned, 0::numeric) - COALESCE(ogr.total_ogr_quantity, 0::numeric) - COALESCE(pf.total_prepared, 0::numeric) + COALESCE(tf.total_transferred_quantity, 0::numeric) - COALESCE(cs.total_held, 0::numeric) + COALESCE(cs.total_released, 0::numeric) AS new_beginning_balance,
-    COALESCE(ib.statusname, ''::character varying) AS status,
-    ib.statusid
-   FROM initialbalance ib
-     LEFT JOIN ogr_adjustments ogr ON ib.warehouseid = ogr.warehouseid AND ib.rawmaterialid = ogr.rawmaterialid
-     LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
-     LEFT JOIN tf_adjustments tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid
-     LEFT JOIN rr_adjustments rr ON ib.warehouseid = rr.warehouseid AND ib.rawmaterialid = rr.rawmaterialid
-     LEFT JOIN status_adjustments cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
-UNION ALL
- SELECT hs.rawmaterialid,
-    hs.rmcode,
-    hs.warehouseid,
-    hs.warehousename,
-    hs.warehousenumber,
-    hs.heldquantity AS new_beginning_balance,
-    hs.status,
-    hs.statusid
-   FROM held_status_details hs
-  ORDER BY 2, 4, 5, 7 NULLS FIRST;
+        ),
 
-ALTER TABLE public.view_ending_stocks_balance
-    OWNER TO postgres;
+	 computed_statement AS (
+				SELECT ib.rawmaterialid,
+				ib.rmcode,
+				ib.warehouseid,
+				ib.warehousename,
+				ib.warehousenumber,
+				CASE
+					WHEN ib.statusname LIKE 'held%'
+					THEN
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+
+					ELSE
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+						- COALESCE(cs.total_held, 0::numeric)
+						+ COALESCE(cs.total_released, 0::numeric)
+				END AS new_beginning_balance,
+				COALESCE(ib.statusname, ''::character varying) AS status,
+				ib.statusid
+			FROM initialbalance ib
+			 LEFT JOIN ogr_adjustments ogr ON ib.warehouseid = ogr.warehouseid AND ib.rawmaterialid = ogr.rawmaterialid
+			 LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
+			 LEFT JOIN tf_adjustments tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid
+			 LEFT JOIN rr_adjustments rr ON ib.warehouseid = rr.warehouseid AND ib.rawmaterialid = rr.rawmaterialid
+			 LEFT JOIN status_adjustments cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
+			UNION ALL
+			SELECT hs.rawmaterialid,
+			hs.rmcode,
+			hs.warehouseid,
+			hs.warehousename,
+			hs.warehousenumber,
+			hs.heldquantity AS new_beginning_balance ,
+			hs.status,
+			hs.statusid
+			FROM held_status_details hs
+			ORDER BY 2, 4, 5, 7 NULLS FIRST
+		 )
+
+
+
+SELECT rawmaterialid,
+			rmcode,
+			warehouseid,
+			warehousename,
+			warehousenumber,
+			SUM(new_beginning_balance) as new_beginning_balance,
+			status,
+			statusid
+FROM computed_statement
+WHERE new_beginning_balance != 0
+GROUP BY rawmaterialid,
+			rmcode,
+			warehouseid,
+			warehousename,
+			warehousenumber,
+			status,
+			statusid
+
 
