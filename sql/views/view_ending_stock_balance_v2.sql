@@ -190,9 +190,11 @@ WITH initialbalance AS (
 			  WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false)
 				AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
 				AND hf.date_computed IS NULL
+				AND (new_status.name = 'good' OR current_status.name = 'good')
 			  GROUP BY hf.warehouse_id,
 						hf.rm_code_id,
 						hf.date_computed
+
         ),
 
 		held_status_details AS (
