@@ -24,6 +24,23 @@ router = APIRouter(prefix="/api")
 @router.get("/get/new_soh/")
 async def get_new_soh(db: get_db = Depends()):
     try:
+        query = text("SELECT * FROM view_ending_stocks_balance WHERE new_beginning_balance != 0.00")
+        result = db.execute(query)
+        rows = result.fetchall()
+        # Convert rows to a list of dictionaries
+        # Use explicit extraction of column values
+        data = [
+            {column: value for column, value in row._mapping.items()}
+            for row in rows
+        ]
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/get/new_soh/with_zero/")
+async def get_new_soh(db: get_db = Depends()):
+    try:
         query = text("SELECT * FROM view_ending_stocks_balance")
         result = db.execute(query)
         rows = result.fetchall()

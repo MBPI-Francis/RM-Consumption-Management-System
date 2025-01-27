@@ -36,7 +36,7 @@ class NoteTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/get/new_soh/"
+        url = server_ip + "/api/get/new_soh/with_zero/"
         try:
             response = requests.get(url)
             response.raise_for_status()

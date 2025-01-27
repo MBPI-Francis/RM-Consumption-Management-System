@@ -87,7 +87,10 @@ WITH initialbalance AS (
 						WHEN new_status.name::text ~~ 'good%'::text THEN hf.qty_kg
 						ELSE 0::numeric
 					END) AS total_released,
-				hf.date_computed AS datecomputed
+				hf.date_computed AS datecomputed,
+				hf.new_status_id AS Statusid,
+				new_status.name AS newstatus,
+				current_status.name AS currentstatus
 			   FROM tbl_held_forms hf
 				 JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
 				 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
@@ -98,7 +101,8 @@ WITH initialbalance AS (
 				AND hf.date_computed IS NULL
 			  GROUP BY hf.warehouse_id,
 						hf.rm_code_id,
-						hf.date_computed
+						hf.date_computed,
+						hf.new_status_id, new_status.name, current_status.name
         ),
 
 		held_status_details AS (
@@ -127,7 +131,7 @@ WITH initialbalance AS (
 				ib.warehousename,
 				ib.warehousenumber,
 				CASE
-					WHEN ib.statusname LIKE 'held%'
+					WHEN ib.statusname = 'held : rejected' AND cs.currentstatus = 'held : rejected'
 					THEN
 						ib.beginningbalance
 						+ COALESCE(rr.total_received, 0::numeric)
@@ -135,8 +139,30 @@ WITH initialbalance AS (
 						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
 						- COALESCE(pf.total_prepared, 0::numeric)
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+						- COALESCE(cs.total_released, 0::numeric)
 
-					ELSE
+					WHEN ib.statusname = 'held : under evaluation' AND cs.currentstatus = 'held : under evaluation'
+					THEN
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+						- COALESCE(cs.total_released, 0::numeric)
+
+					WHEN ib.statusname = 'held : contaminated' AND cs.currentstatus = 'held : contaminated'
+					THEN
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+						- COALESCE(cs.total_released, 0::numeric)
+
+					WHEN ib.statusname IS NULL
+		 			THEN
 						ib.beginningbalance
 						+ COALESCE(rr.total_received, 0::numeric)
 						+ COALESCE(pf.total_returned, 0::numeric)
@@ -145,6 +171,15 @@ WITH initialbalance AS (
 						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
 						- COALESCE(cs.total_held, 0::numeric)
 						+ COALESCE(cs.total_released, 0::numeric)
+
+		 			ELSE
+						ib.beginningbalance
+						+ COALESCE(rr.total_received, 0::numeric)
+						+ COALESCE(pf.total_returned, 0::numeric)
+						- COALESCE(ogr.total_ogr_quantity, 0::numeric)
+						- COALESCE(pf.total_prepared, 0::numeric)
+						+ COALESCE(tf.total_transferred_quantity, 0::numeric)
+
 				END AS new_beginning_balance,
 				COALESCE(ib.statusname, ''::character varying) AS status,
 				ib.statusid
@@ -178,7 +213,7 @@ SELECT rawmaterialid,
 			status,
 			statusid
 FROM computed_statement
-WHERE new_beginning_balance != 0
+-- WHERE new_beginning_balance != 0
 GROUP BY rawmaterialid,
 			rmcode,
 			warehouseid,
