@@ -216,6 +216,36 @@ WITH initialbalance AS (
           GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
         ),
 
+
+		transfer_form_details AS (
+         SELECT
+			tf.rm_code_id AS rawmaterialid,
+			rm.rm_code AS rmcode,
+			tf.to_warehouse_id AS warehouseid,
+			wh_to.wh_number as warehousenumber,
+			wh_to.wh_name as warehousename,
+			SUM(tf.qty_kg) as new_beginning_balance,
+			tf.date_computed,
+			stat.name AS status,
+			tf.status_id AS statusid
+           FROM tbl_transfer_forms tf
+            JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
+			JOIN tbl_raw_materials rm ON tf.rm_code_id = rm.id
+			LEFT JOIN tbl_droplist stat ON tf.status_id = stat.id
+         WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
+       	GROUP BY
+			tf.rm_code_id,
+			rm.rm_code,
+			tf.to_warehouse_id,
+			wh_to.wh_number,
+			wh_to.wh_name,
+			tf.date_computed,
+			stat.name,
+			tf.status_id
+
+		),
+
+
 	 computed_statement AS (
 				SELECT ib.rawmaterialid,
 				ib.rmcode,
@@ -291,7 +321,19 @@ WITH initialbalance AS (
 			hs.status,
 			hs.statusid
 			FROM held_status_details hs
+
+			UNION ALL
+		 SELECT tf.rawmaterialid,
+			tf.rmcode,
+			tf.warehouseid,
+			tf.warehousename,
+			tf.warehousenumber,
+			tf.new_beginning_balance AS new_beginning_balance ,
+			tf.status,
+			tf.statusid
+			FROM transfer_form_details tf
 			ORDER BY 2, 4, 5, 7 NULLS FIRST
+
 		 )
 
 
