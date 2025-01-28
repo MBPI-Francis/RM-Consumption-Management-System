@@ -47,6 +47,7 @@ class TempTransferFormCRUD(AppCRUD):
             rm_code_id=transfer_form.rm_code_id,
         )
 
+
         if latest_soh_from and latest_soh_to:
             transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
                                                     from_warehouse_id=transfer_form.from_warehouse_id,
