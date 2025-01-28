@@ -12,6 +12,7 @@ from backend.api_outgoing_report.temp.models import TempOutgoingReport
 from backend.api_receiving_report.temp.models import TempReceivingReport
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_held_form.temp.models import TempHeldForm
+from typing import Optional
 
 
 
@@ -72,22 +73,37 @@ async def get_beginning_balance(db: get_db = Depends()):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# This api checks if the record is existing in the new beginning soh.
 @router.get("/check/raw_material/")
 async def get_record(
         rm_id: UUID,
         warehouse_id: UUID,
-        status_id: UUID,
+        status_id: Optional[UUID]=None,
         db: get_db = Depends()):
     try:
-        query = text(f"""SELECT * FROM view_beginning_soh
-                            WHERE warehouseid = {warehouse_id}
-                                    AND statusid = {status_id}
-                                    AND rawmaterialid = {rm_id}""")
+
+        # Check if the status id is null
+        if status_id:
+            query = text(f"""SELECT * FROM view_beginning_soh
+                                       WHERE warehouseid = '{warehouse_id}'
+                                               AND statusid = '{status_id}'
+                                               AND rawmaterialid = '{rm_id}'""")
+
+        else:
+            query = text(f"""SELECT * FROM view_beginning_soh
+                            WHERE warehouseid = '{warehouse_id}'
+                                    AND rawmaterialid = '{rm_id}'""")
         result = db.execute(query)
         rows = result.fetchall()
-        return rows
+
+        # Returns true if the rows have racords based on the paramaters
+        if rows:
+            return True
+
+        else:
+            return False
     except Exception as e:
-        return False
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Helping function for the api

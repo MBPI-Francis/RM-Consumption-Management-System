@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
 from tkinter import StringVar
-
+from uuid import  UUID
 
 def entry_fields(note_form_tab):
     
@@ -60,6 +60,32 @@ def entry_fields(note_form_tab):
         rm_codes_combobox.set("")
         qty_entry.delete(0, ttk.END)
 
+    def check_raw_material(rm_id: UUID, warehouse_id: UUID, status_id: UUID = None):
+        url = f"{server_ip}/api/check/raw_material/"  # Replace with the actual URL of your FastAPI server
+
+        # Construct the query parameters
+        params = {
+            "rm_id": str(rm_id),  # Convert UUID to string for query parameter
+            "warehouse_id": str(warehouse_id),
+            "status_id": str(status_id) if status_id else None
+        }
+
+        try:
+            # Send the GET request
+            response = requests.get(url, params=params)
+
+            # Check if the response was successful
+            if response.status_code == 200:
+                # Parse the response data (True or False)
+                return response.json()  # This will return either True or False
+            else:
+                # Handle errors
+                print(f"Error: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return False
+
 
     def submit_data():
 
@@ -86,35 +112,49 @@ def entry_fields(note_form_tab):
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
 
-        # Create a dictionary with the data
-        data = {
-            "rm_code_id": rm_code_id,
-            "from_warehouse_id": warehouse_from_id,
-            "to_warehouse_id": warehouse_to_id,
-            "ref_number": ref_number,
-            "status_id": status_id,
-            "transfer_date": transfer_date,
-            "qty_kg": qty,
-        }
 
-        print("This is the data: ", data)
+        # Check if the record is existing in the inventory
+        # Call the check_raw_material function
+        result = check_raw_material(rm_code_id, warehouse_from_id, status_id)
 
-        # Validate the data entries in front-end side
-        if EntryValidation.entry_validation(data):
-            error_text = EntryValidation.entry_validation(data)
-            Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
+        # Display the result in the GUI
+        if result:
+
+            # Create a dictionary with the data
+            data = {
+                "rm_code_id": rm_code_id,
+                "from_warehouse_id": warehouse_from_id,
+                "to_warehouse_id": warehouse_to_id,
+                "ref_number": ref_number,
+                "status_id": status_id,
+                "transfer_date": transfer_date,
+                "qty_kg": qty,
+            }
+
+            print("This is the data: ", data)
+
+            # Validate the data entries in front-end side
+            if EntryValidation.entry_validation(data):
+                error_text = EntryValidation.entry_validation(data)
+                Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
+                return
+
+                # Send a POST request to the API
+            try:
+                response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
+                if response.status_code == 200:  # Successfully created
+                    clear_fields()
+
+                    note_table.refresh_table()
+                    # refresh_table()  # Refresh the table
+            except requests.exceptions.RequestException as e:
+                Messagebox.show_info(e, "Data Entry Error")
+
+        else:
+            Messagebox.show_error(f"The raw material record is not existing in the database.", "Failed Transfer.", alert=True)
             return
 
-            # Send a POST request to the API
-        try:
-            response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
-            if response.status_code == 200:  # Successfully created
-                clear_fields()
 
-                note_table.refresh_table()
-                # refresh_table()  # Refresh the table
-        except requests.exceptions.RequestException as e:
-            Messagebox.show_info(e, "Data Entry Error")
 
 
 
