@@ -1,10 +1,10 @@
 from fastapi import HTTPException, status
 from fastapi import APIRouter, Depends
 from backend.settings.database import get_db
-from datetime import datetime
-from sqlalchemy import text
+from sqlalchemy import text, false
 from datetime import date, timedelta
 from sqlalchemy import update
+from uuid import UUID
 from backend.api_preparation_form.temp.models import TempPreparationForm
 from backend.api_notes.temp.models import TempNotes
 from backend.api_transfer_form.temp.models import TempTransferForm
@@ -12,8 +12,7 @@ from backend.api_outgoing_report.temp.models import TempOutgoingReport
 from backend.api_receiving_report.temp.models import TempReceivingReport
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_held_form.temp.models import TempHeldForm
-from backend.settings.database import server_ip
-import requests
+
 
 
 router = APIRouter(prefix="/api")
@@ -72,6 +71,23 @@ async def get_beginning_balance(db: get_db = Depends()):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.get("/check/raw_material/")
+async def get_record(
+        rm_id: UUID,
+        warehouse_id: UUID,
+        status_id: UUID,
+        db: get_db = Depends()):
+    try:
+        query = text(f"""SELECT * FROM view_beginning_soh
+                            WHERE warehouseid = {warehouse_id}
+                                    AND statusid = {status_id}
+                                    AND rawmaterialid = {rm_id}""")
+        result = db.execute(query)
+        rows = result.fetchall()
+        return rows
+    except Exception as e:
+        return False
 
 
 # Helping function for the api
