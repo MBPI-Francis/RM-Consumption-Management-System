@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from fastapi import APIRouter, Depends
 from backend.settings.database import get_db
-from sqlalchemy import text, false
-from datetime import date, timedelta
+from sqlalchemy import text
+from datetime import date
 from sqlalchemy import update
 from uuid import UUID
 from backend.api_preparation_form.temp.models import TempPreparationForm
@@ -259,3 +259,37 @@ async def clear_table_data(db: get_db = Depends()):
 
 
 
+@router.get("/check/rm-stock-value/")
+async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, status_id: Optional[UUID]=None, db: get_db = Depends()):
+    try:
+
+        # Check if the status id is null
+        if status_id:
+            query = text(f"""SELECT beginningbalance FROM view_beginning_soh
+                                       WHERE warehouseid = '{warehouse_id}'
+                                               AND statusid = '{status_id}'
+                                               AND rawmaterialid = '{rm_id}'
+                                                """)
+
+        else:
+            query = text(f"""SELECT * FROM view_beginning_soh
+                            WHERE warehouseid = '{warehouse_id}'
+                                    AND rawmaterialid = '{rm_id}'""")
+        result = db.execute(query)
+        beginning_balance = result.fetchone()
+
+        # Check if there is a record after executing the query
+        if beginning_balance:
+            # Check if the entered_qty is less or equal than the beginning balance
+            #  Returns true if the entered quantity is less or equal
+            # Returns false if the entered quantity exceeds
+            if entered_qty <= beginning_balance:
+                return True
+
+            else:
+                return False
+
+        else:
+            return False
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
