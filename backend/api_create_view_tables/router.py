@@ -84,13 +84,13 @@ async def get_record(
 
         # Check if the status id is null
         if status_id:
-            query = text(f"""SELECT * FROM view_beginning_soh
+            query = text(f"""SELECT * FROM view_ending_stocks_balance
                                        WHERE warehouseid = '{warehouse_id}'
                                                AND statusid = '{status_id}'
                                                AND rawmaterialid = '{rm_id}'""")
 
         else:
-            query = text(f"""SELECT * FROM view_beginning_soh
+            query = text(f"""SELECT * FROM view_ending_stocks_balance
                             WHERE warehouseid = '{warehouse_id}'
                                     AND rawmaterialid = '{rm_id}'""")
         result = db.execute(query)
@@ -274,7 +274,8 @@ async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, statu
         else:
             query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
                             WHERE warehouseid = '{warehouse_id}'
-                                    AND rawmaterialid = '{rm_id}'""")
+                                    AND rawmaterialid = '{rm_id}'
+                                    AND statusid IS NULL""")
         result = db.execute(query)
         beginning_balance = result.fetchone()
         # Check if there is a record after executing the query

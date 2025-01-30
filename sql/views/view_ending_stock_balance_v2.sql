@@ -56,7 +56,10 @@
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
 			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
+			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
+			AND tf.date_computed IS NULL
+			AND tf.status_id IS NOT NULL
           GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
 
 			UNION ALL
@@ -69,11 +72,47 @@
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
 			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
+			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
+			AND tf.date_computed IS NULL
+			AND tf.status_id IS NOT NULL
 
           GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
 
-        ), rr_adjustments AS (
+        ),
+
+		tf_adjustments_good AS (
+         SELECT tf.from_warehouse_id AS warehouseid,
+            tf.rm_code_id AS rawmaterialid,
+            - sum(tf.qty_kg) AS total_transferred_quantity,
+            tf.date_computed AS datecomputed
+           FROM tbl_transfer_forms tf
+             JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
+			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
+			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
+			AND tf.date_computed IS NULL
+			AND tf.status_id IS NULL
+          GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
+
+			UNION ALL
+
+			SELECT tf.to_warehouse_id AS warehouseid,
+            tf.rm_code_id AS rawmaterialid,
+            sum(tf.qty_kg) AS total_transferred_quantity,
+            tf.date_computed AS datecomputed
+           FROM tbl_transfer_forms tf
+             JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
+			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
+			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
+			AND tf.date_computed IS NULL
+			AND tf.status_id IS NULL
+
+          GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
+
+        ),
+		rr_adjustments AS (
          SELECT rr.warehouse_id AS warehouseid,
             rr.rm_code_id AS rawmaterialid,
             sum(rr.qty_kg) AS total_received,
@@ -241,14 +280,13 @@
 								THEN COALESCE(tf.total_transferred_quantity, 0::numeric)
 						END, 0)
 
-				WHEN ib.statusname ISNULL THEN
-					- COALESCE(good.total_held, 0::numeric)
-					+ COALESCE(good.total_released, 0::numeric)
-					+ COALESCE(
-						CASE
-							WHEN tf.statusname ISNULL
-								THEN COALESCE(tf.total_transferred_quantity, 0::numeric)
-						END, 0)
+				WHEN ib.statusid ISNULL
+					THEN
+						- COALESCE(good.total_held, 0::numeric)
+						+ COALESCE(good.total_released, 0::numeric)
+						+ COALESCE(tfg.total_transferred_quantity, 0::numeric)
+
+
 
 			END AS new_beginning_balance,
             COALESCE(ib.statusname, ''::character varying) AS status,
@@ -257,6 +295,7 @@
              LEFT JOIN ogr_adjustments ogr ON ib.warehouseid = ogr.warehouseid AND ib.rawmaterialid = ogr.rawmaterialid
              LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
              LEFT JOIN tf_adjustments tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid AND ib.statusid = tf.statusid
+			  LEFT JOIN tf_adjustments_good tfg ON ib.warehouseid = tfg.warehouseid AND ib.rawmaterialid = tfg.rawmaterialid
              LEFT JOIN rr_adjustments rr ON ib.warehouseid = rr.warehouseid AND ib.rawmaterialid = rr.rawmaterialid
              LEFT JOIN status_adjustments_conta cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
              LEFT JOIN status_adjustments_eval eval ON ib.warehouseid = eval.warehouseid AND eval.rawmaterialid = cs.rawmaterialid
@@ -294,7 +333,7 @@
     computed_statement.statusid
    FROM computed_statement
    GROUP BY computed_statement.rawmaterialid,
-  computed_statement.rmcode, 
+  computed_statement.rmcode,
   computed_statement.warehouseid,
   computed_statement.warehousename,
   computed_statement.warehousenumber,

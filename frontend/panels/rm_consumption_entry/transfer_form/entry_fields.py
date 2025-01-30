@@ -68,8 +68,12 @@ def entry_fields(note_form_tab):
         params = {
             "rm_id": str(rm_id),  # Convert UUID to string for query parameter
             "warehouse_id": str(warehouse_id),
-            "status_id": str(status_id) if status_id else None
         }
+
+        # Include status_id only if it's not None
+        if status_id:
+            params["status_id"] = status_id
+        # Handle response
 
         try:
             # Send the GET request
@@ -128,8 +132,10 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
+        status_name = status_combobox.get()
 
-
+        if status_name == 'good':
+            status_id = None
 
         # Check if the record is existing in the inventory
         # Call the check_raw_material function
