@@ -93,17 +93,28 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
+        validatation_result = EntryValidation.validate_soh_value(
+            rm_code_id,
+            warehouse_id,
+            qty_prepared,
+            None
+        )
+        if validatation_result:
             # Send a POST request to the API
-        try:
-            response = requests.post(f"{server_ip}/api/preparation_forms/temp/create/", json=data)
-            if response.status_code == 200:  # Successfully created
-                clear_fields()
+            try:
+                response = requests.post(f"{server_ip}/api/preparation_forms/temp/create/", json=data)
+                if response.status_code == 200:  # Successfully created
+                    clear_fields()
+                    note_table.refresh_table()
+                    # refresh_table()  # Refresh the table
+            except requests.exceptions.RequestException as e:
+                Messagebox.show_error(e, "Data Entry Error")
 
-                note_table.refresh_table()
-                # refresh_table()  # Refresh the table
-        except requests.exceptions.RequestException as e:
-            Messagebox.show_info(e, "Data Entry Error")
-
+        else:
+            Messagebox.show_error(
+                "The entered quantity in 'Quantity (Prepared)' exceeds the available stock in the database.",
+                "Data Entry Error")
+            return
 
 
     # Create a frame for the form inputs

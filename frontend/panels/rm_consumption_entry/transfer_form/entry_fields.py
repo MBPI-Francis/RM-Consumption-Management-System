@@ -6,8 +6,9 @@ from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import NoteTable
-from .validation import EntryValidation
+from .validation import EntryValidation as TranferValidation
 from tkinter import StringVar
+from ..preparation_form.validation import EntryValidation as PrepValidation
 from uuid import  UUID
 
 def entry_fields(note_form_tab):
@@ -104,7 +105,6 @@ def entry_fields(note_form_tab):
         qty = qty_entry.get()
         transfer_date = transfer_date_entry.entry.get()
 
-
         # Convert date to YYYY-MM-DD
         try:
             transfer_date = datetime.strptime(transfer_date, "%m/%d/%Y").strftime("%Y-%m-%d")
@@ -112,50 +112,60 @@ def entry_fields(note_form_tab):
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
 
-
-        # Check if the record is existing in the inventory
-        # Call the check_raw_material function
-        result = check_raw_material(rm_code_id, warehouse_from_id, status_id)
-
-        # Display the result in the GUI
-        if result:
-
-            # Create a dictionary with the data
-            data = {
-                "rm_code_id": rm_code_id,
-                "from_warehouse_id": warehouse_from_id,
-                "to_warehouse_id": warehouse_to_id,
-                "ref_number": ref_number,
-                "status_id": status_id,
-                "transfer_date": transfer_date,
-                "qty_kg": qty,
-            }
-
-            print("This is the data: ", data)
-
-            # Validate the data entries in front-end side
-            if EntryValidation.entry_validation(data):
-                error_text = EntryValidation.entry_validation(data)
-                Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
-                return
-
-                # Send a POST request to the API
-            try:
-                response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
-                if response.status_code == 200:  # Successfully created
-                    clear_fields()
-
-                    note_table.refresh_table()
-                    # refresh_table()  # Refresh the table
-            except requests.exceptions.RequestException as e:
-                Messagebox.show_info(e, "Data Entry Error")
-
-        else:
-            Messagebox.show_error(f"The raw material record is not existing in the database.", "Failed Transfer.", alert=True)
+        # Create a dictionary with the data
+        data = {
+            "rm_code_id": rm_code_id,
+            "from_warehouse_id": warehouse_from_id,
+            "to_warehouse_id": warehouse_to_id,
+            "ref_number": ref_number,
+            "status_id": status_id,
+            "transfer_date": transfer_date,
+            "qty_kg": qty,
+        }
+        # Validate the data entries in front-end side
+        if TranferValidation.entry_validation(data):
+            error_text = TranferValidation.entry_validation(data)
+            Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
 
 
+
+        # Check if the record is existing in the inventory
+        # Call the check_raw_material function
+        result = check_raw_material(rm_code_id, warehouse_from_id, status_id)
+        # Display the result in the GUI
+        if result:
+
+            # Validate if the entry value exceeds the stock
+            validatation_result = PrepValidation.validate_soh_value(
+                rm_code_id,
+                warehouse_from_id,
+                qty,
+                status_id
+            )
+
+            if validatation_result:
+                    # Send a POST request to the API
+                try:
+                    response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
+                    if response.status_code == 200:  # Successfully created
+                        clear_fields()
+
+                        note_table.refresh_table()
+                        # refresh_table()  # Refresh the table
+                except requests.exceptions.RequestException as e:
+                    Messagebox.show_info(e, "Data Entry Error")
+
+            else:
+                Messagebox.show_error(
+                    "The entered quantity in 'Quantity' exceeds the available stock in the database.",
+                    "Data Entry Error")
+                return
+
+        else:
+            Messagebox.show_error(f"The raw material record is not existing in the database.", "Failed Transfer.", alert=True)
+            return
 
 
     # Create a frame for the form inputs
@@ -266,7 +276,7 @@ def entry_fields(note_form_tab):
 
 
     # Register the validation command
-    validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
+    validate_numeric_command = form_frame.register(TranferValidation.validate_numeric_input)
 
     # Quantity Entry Field
     qty_label = ttk.Label(form_frame, text="Quantity:", font=("Helvetica", 10, "bold"))

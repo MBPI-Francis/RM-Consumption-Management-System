@@ -7,6 +7,7 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
+from ..preparation_form.validation import EntryValidation as PrepValidation
 from tkinter import StringVar
 
 
@@ -41,21 +42,6 @@ def entry_fields(note_form_tab):
         qty_entry.delete(0, ttk.END)
 
 
-
-    # def get_selected_latest_rm_api():
-    #
-    #     url = server_ip + "/api/stock_on_hand/list/"
-    #     response = requests.get(url)
-    #
-    #     # Check if the request was successful
-    #     if response.status_code == 200:
-    #         # Parse JSON response
-    #         data = response.json()
-    #         print("Data fetched successfully!")
-    #         return data
-    #     else:
-    #         print(f"Failed to fetch data. Status code: {response.status_code}")
-
     def submit_data():
 
         # Collect the form data
@@ -73,6 +59,8 @@ def entry_fields(note_form_tab):
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
 
+
+
         # Create a dictionary with the data
         data = {
             "rm_code_id": rm_code_id,
@@ -82,7 +70,6 @@ def entry_fields(note_form_tab):
             "qty_kg": qty,
         }
 
-        print("This is the data: ", data)
 
         # Validate the data entries in front-end side
         if EntryValidation.entry_validation(data):
@@ -90,17 +77,31 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
+        # Validate if the entry value exceeds the stock
+        validatation_result = PrepValidation.validate_soh_value(
+            rm_code_id,
+            warehouse_id,
+            qty
+        )
+
+        if validatation_result:
+
             # Send a POST request to the API
-        try:
-            response = requests.post(f"{server_ip}/api/outgoing_reports/temp/create/", json=data)
-            if response.status_code == 200:  # Successfully created
-                clear_fields()
+            try:
+                response = requests.post(f"{server_ip}/api/outgoing_reports/temp/create/", json=data)
+                if response.status_code == 200:  # Successfully created
+                    clear_fields()
 
-                note_table.refresh_table()
-                # refresh_table()  # Refresh the table
-        except requests.exceptions.RequestException as e:
-            Messagebox.show_info(e, "Data Entry Error")
+                    note_table.refresh_table()
+            except requests.exceptions.RequestException as e:
+                Messagebox.show_error(e, "Data Entry Error")
+                return
 
+        else:
+            Messagebox.show_error(
+                "The entered quantity in 'Quantity' exceeds the available stock in the database.",
+                "Data Entry Error")
+            return
 
 
     # Create a frame for the form inputs

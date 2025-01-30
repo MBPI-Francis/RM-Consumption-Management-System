@@ -265,25 +265,25 @@ async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, statu
 
         # Check if the status id is null
         if status_id:
-            query = text(f"""SELECT beginningbalance FROM view_beginning_soh
+            query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
                                        WHERE warehouseid = '{warehouse_id}'
                                                AND statusid = '{status_id}'
                                                AND rawmaterialid = '{rm_id}'
                                                 """)
 
         else:
-            query = text(f"""SELECT * FROM view_beginning_soh
+            query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
                             WHERE warehouseid = '{warehouse_id}'
                                     AND rawmaterialid = '{rm_id}'""")
         result = db.execute(query)
         beginning_balance = result.fetchone()
-
         # Check if there is a record after executing the query
         if beginning_balance:
             # Check if the entered_qty is less or equal than the beginning balance
             #  Returns true if the entered quantity is less or equal
             # Returns false if the entered quantity exceeds
-            if entered_qty <= beginning_balance:
+
+            if entered_qty <= beginning_balance[0]:
                 return True
 
             else:
