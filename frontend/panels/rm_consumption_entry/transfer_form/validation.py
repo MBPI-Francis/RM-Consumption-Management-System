@@ -24,6 +24,9 @@ class EntryValidation:
 
             elif key == "transfer_date" and not value:
                 text_list.append("Tansfer Date")
+
+            elif key == "status_id" and not value:
+                text_list.append("Status")
         return text_list
 
     # Validation function for numeric input

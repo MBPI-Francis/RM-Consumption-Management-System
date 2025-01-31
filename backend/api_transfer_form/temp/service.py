@@ -8,6 +8,8 @@ from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_droplist.v1.models import DropList
 from uuid import UUID
+from sqlalchemy import text
+from sqlalchemy.future import select
 
 from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
@@ -35,6 +37,32 @@ class TempTransferFormCRUD(AppCRUD):
 
     def create_transfer_form(self, transfer_form: TempTransferFormCreate):
 
+        # Check if the status id is null
+        query = text("""SELECT * FROM view_beginning_soh
+                        WHERE warehouseid = :warehouse_id
+                              AND rawmaterialid = :rm_code_id
+                              AND statusid = :status_id""")
+
+        record = self.db.execute(query, {
+            "warehouse_id": transfer_form.to_warehouse_id,
+            "rm_code_id": transfer_form.rm_code_id,
+            "status_id": transfer_form.status_id
+        }).fetchone()  # or .fetchall() if expecting multiple rows
+        result = record
+
+        # This feature is required for the calculation
+        if not result:
+            # Create a new StockOnHand record
+            new_stock = StockOnHand(
+                rm_code_id=transfer_form.rm_code_id,
+                warehouse_id=transfer_form.to_warehouse_id,
+                rm_soh=0.00,
+                status_id=transfer_form.status_id
+            )
+            self.db.add(new_stock)
+            self.db.commit()
+            self.db.refresh(new_stock)
+            print('NAKAPAG CREATE KA NG RECORD PARE KO ', new_stock)
 
         # Get the latest StockOnHand record ID
         latest_soh_from = self.get_latest_soh_record(

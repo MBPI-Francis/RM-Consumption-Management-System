@@ -97,8 +97,6 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
-        if current_status_name == "good":
-            current_status = None
         validatation_result = PrepValidation.validate_soh_value(
             rm_code_id,
             warehouse_id,

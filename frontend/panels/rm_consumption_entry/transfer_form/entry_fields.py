@@ -267,7 +267,7 @@ def entry_fields(note_form_tab):
     status_combobox = ttk.Combobox(
         form_frame,
         values=status_names,
-        state="normal",
+        state="readonly",
         width=30,
     )
     status_combobox.grid(row=5, column=1, pady=10, padx=10, sticky=W)

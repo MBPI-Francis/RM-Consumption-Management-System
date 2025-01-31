@@ -4,8 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # This is the connection string (also known as a database URL) used to specify
 # How to connect to your PostgreSQL database.
-#DATABASE_URL = "postgresql://postgres:mbpi@192.168.1.13:5432/RMManagementSystemDB"
-DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
+DATABASE_URL = "postgresql://postgres:mbpi@192.168.1.13:5432/RMManagementSystemDB"
+# DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
 
 
 # The engine is responsible for managing low-level details like connecting to

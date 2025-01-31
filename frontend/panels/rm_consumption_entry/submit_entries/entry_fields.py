@@ -102,7 +102,7 @@ def entry_fields(note_form_tab):
         variable=checkbox_date_var,
         bootstyle="round-toggle"
     )
-    lock_warehouse.grid(row=0, column=0, pady=10, padx=10, sticky=W)  # Position the checkbox next to the combobox
+    lock_warehouse.grid(row=0, column=0, padx=10, sticky=W)  # Position the checkbox next to the combobox
     ToolTip(lock_warehouse, text="Lock the date")
 
 
@@ -117,7 +117,7 @@ def entry_fields(note_form_tab):
         startdate=yesterday_date,  # Set yesterday's date
         width=30
     )
-    date_entry.grid(row=1, column=0, padx=5, pady=5, sticky=W)
+    date_entry.grid(row=1, column=0, padx=5, sticky=W)
 
     ToolTip(date_entry, text="This is the outgoing date.")
 

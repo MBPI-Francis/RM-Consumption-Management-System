@@ -19,8 +19,6 @@ from typing import Optional
 router = APIRouter(prefix="/api")
 
 
-
-
 @router.get("/get/new_soh/")
 async def get_new_soh(db: get_db = Depends()):
     try:
@@ -263,6 +261,8 @@ async def clear_table_data(db: get_db = Depends()):
 async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, status_id: Optional[UUID]=None, db: get_db = Depends()):
     try:
 
+
+        print(status_id)
         # Check if the status id is null
         if status_id:
             query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
