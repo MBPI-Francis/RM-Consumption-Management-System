@@ -47,71 +47,37 @@
           GROUP BY pf.warehouse_id, pf.rm_code_id, pf.date_computed
         ),
 
-		tf_adjustments AS (
+		transferred_from AS (
          SELECT tf.from_warehouse_id AS warehouseid,
             tf.rm_code_id AS rawmaterialid,
-            - sum(tf.qty_kg) AS total_transferred_quantity,
+            - sum(tf.qty_kg) AS transferred_from_qty,
             tf.date_computed AS datecomputed,
 			status.id as statusid, status.name as statusname
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
 			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
-			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
-			AND tf.date_computed IS NULL
-			AND tf.status_id IS NOT NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
           GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
 
-			UNION ALL
+		),
+
+		transferred_to AS (
 
 			SELECT tf.to_warehouse_id AS warehouseid,
             tf.rm_code_id AS rawmaterialid,
-            sum(tf.qty_kg) AS total_transferred_quantity,
+            sum(tf.qty_kg) AS transferred_to_qty,
             tf.date_computed AS datecomputed,
 			status.id as statusid, status.name as statusname
            FROM tbl_transfer_forms tf
              JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
 			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
-			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
-			AND tf.date_computed IS NULL
-			AND tf.status_id IS NOT NULL
+          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
 
           GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
 
-        ),
-
-		tf_adjustments_good AS (
-         SELECT tf.from_warehouse_id AS warehouseid,
-            tf.rm_code_id AS rawmaterialid,
-            - sum(tf.qty_kg) AS total_transferred_quantity,
-            tf.date_computed AS datecomputed
-           FROM tbl_transfer_forms tf
-             JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
-			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
-			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
-			AND tf.date_computed IS NULL
-			AND tf.status_id IS NULL
-          GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed
-
-			UNION ALL
-
-			SELECT tf.to_warehouse_id AS warehouseid,
-            tf.rm_code_id AS rawmaterialid,
-            sum(tf.qty_kg) AS total_transferred_quantity,
-            tf.date_computed AS datecomputed
-           FROM tbl_transfer_forms tf
-             JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
-			LEFT JOIN tbl_droplist AS status ON tf.status_id = status.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false)
-			AND (tf.is_deleted IS NULL OR tf.is_deleted = false)
-			AND tf.date_computed IS NULL
-			AND tf.status_id IS NULL
-
-          GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed
 
         ),
+
 		rr_adjustments AS (
          SELECT rr.warehouse_id AS warehouseid,
             rr.rm_code_id AS rawmaterialid,
@@ -162,7 +128,9 @@
              JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
              JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
-          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : contaminated'::text OR current_status.name::text = 'held : contaminated'::text)
+          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false)
+			AND hf.date_computed IS NULL
+			AND (new_status.name::text = 'held : contaminated'::text OR current_status.name::text = 'held : contaminated'::text)
           GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
         ), status_adjustments_rejec AS (
          SELECT hf.warehouse_id AS warehouseid,
@@ -223,23 +191,7 @@
           GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
         ),
 
-		transfer_form_details AS (
-         SELECT tf.rm_code_id AS rawmaterialid,
-            rm.rm_code AS rmcode,
-            tf.to_warehouse_id AS warehouseid,
-            wh_to.wh_number AS warehousenumber,
-            wh_to.wh_name AS warehousename,
-            sum(tf.qty_kg) AS new_beginning_balance,
-            tf.date_computed,
-            stat.name AS status,
-            tf.status_id AS statusid
-           FROM tbl_transfer_forms tf
-             JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
-             JOIN tbl_raw_materials rm ON tf.rm_code_id = rm.id
-             LEFT JOIN tbl_droplist stat ON tf.status_id = stat.id
-          WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
-          GROUP BY tf.rm_code_id, rm.rm_code, tf.to_warehouse_id, wh_to.wh_number, wh_to.wh_name, tf.date_computed, stat.name, tf.status_id
-        ), computed_statement AS (
+        computed_statement AS (
          SELECT ib.rawmaterialid,
             ib.rmcode,
             ib.warehouseid,
@@ -258,7 +210,13 @@
 					+ COALESCE(
 						CASE
 							WHEN tf.statusname = 'held : rejected'::text
-								THEN tf.total_transferred_quantity
+								THEN tf.transferred_from_qty
+						END, 0)
+
+					+ COALESCE(
+						CASE
+							WHEN tt.statusname = 'held : rejected'::text
+								THEN tt.transferred_to_qty
 						END, 0)
 
 				WHEN ib.statusname::text = 'held : under evaluation'::text THEN
@@ -267,8 +225,14 @@
 					+ COALESCE(
 						CASE
 							WHEN tf.statusname = 'held : under evaluation'::text
-								THEN COALESCE(tf.total_transferred_quantity, 0::numeric)
-						END,0)
+								THEN tf.transferred_from_qty
+						END, 0)
+
+					+ COALESCE(
+						CASE
+							WHEN tt.statusname = 'held : under evaluation'::text
+								THEN tt.transferred_to_qty
+						END, 0)
 
 
 				WHEN ib.statusname::text = 'held : contaminated'::text THEN
@@ -277,15 +241,30 @@
 					+ COALESCE(
 						CASE
 							WHEN tf.statusname = 'held : contaminated'::text
-								THEN COALESCE(tf.total_transferred_quantity, 0::numeric)
+								THEN tf.transferred_from_qty
 						END, 0)
 
-				WHEN ib.statusid ISNULL
+					+ COALESCE(
+						CASE
+							WHEN tt.statusname = 'held : contaminated'::text
+								THEN tt.transferred_to_qty
+						END, 0)
+
+				WHEN ib.statusname = 'good'
 					THEN
 						- COALESCE(good.total_held, 0::numeric)
 						+ COALESCE(good.total_released, 0::numeric)
-						+ COALESCE(tfg.total_transferred_quantity, 0::numeric)
+						+ COALESCE(
+							CASE
+								WHEN tf.statusname = 'good'::text
+									THEN tf.transferred_from_qty
+							END, 0)
 
+						+ COALESCE(
+							CASE
+								WHEN tt.statusname = 'good'::text
+									THEN tt.transferred_to_qty
+							END, 0)
 
 
 			END AS new_beginning_balance,
@@ -294,13 +273,14 @@
            FROM initialbalance ib
              LEFT JOIN ogr_adjustments ogr ON ib.warehouseid = ogr.warehouseid AND ib.rawmaterialid = ogr.rawmaterialid
              LEFT JOIN pf_adjustments pf ON ib.warehouseid = pf.warehouseid AND ib.rawmaterialid = pf.rawmaterialid
-             LEFT JOIN tf_adjustments tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid AND ib.statusid = tf.statusid
-			  LEFT JOIN tf_adjustments_good tfg ON ib.warehouseid = tfg.warehouseid AND ib.rawmaterialid = tfg.rawmaterialid
+             LEFT JOIN transferred_from tf ON ib.warehouseid = tf.warehouseid AND ib.rawmaterialid = tf.rawmaterialid AND ib.statusid = tf.statusid
+			  LEFT JOIN transferred_to tt ON ib.warehouseid = tt.warehouseid AND ib.rawmaterialid = tt.rawmaterialid AND ib.statusid = tt.statusid
              LEFT JOIN rr_adjustments rr ON ib.warehouseid = rr.warehouseid AND ib.rawmaterialid = rr.rawmaterialid
              LEFT JOIN status_adjustments_conta cs ON ib.warehouseid = cs.warehouseid AND ib.rawmaterialid = cs.rawmaterialid
              LEFT JOIN status_adjustments_eval eval ON ib.warehouseid = eval.warehouseid AND eval.rawmaterialid = cs.rawmaterialid
              LEFT JOIN status_adjustments_rejec rej ON ib.warehouseid = rej.warehouseid AND ib.rawmaterialid = rej.rawmaterialid
              LEFT JOIN status_adjustments_good good ON ib.warehouseid = good.warehouseid AND ib.rawmaterialid = good.rawmaterialid
+
         UNION ALL
          SELECT hs.rawmaterialid,
             hs.rmcode,
@@ -311,16 +291,9 @@
             hs.status,
             hs.statusid
            FROM held_status_details hs
-        UNION ALL
-         SELECT tf.rawmaterialid,
-            tf.rmcode,
-            tf.warehouseid,
-            tf.warehousename,
-            tf.warehousenumber,
-            tf.new_beginning_balance,
-            tf.status,
-            tf.statusid
-           FROM transfer_form_details tf
+
+
+
   ORDER BY 2, 4, 5, 7 NULLS FIRST
         )
  SELECT computed_statement.rawmaterialid,

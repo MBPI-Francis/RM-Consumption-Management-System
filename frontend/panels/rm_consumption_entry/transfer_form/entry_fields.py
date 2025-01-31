@@ -132,11 +132,6 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
-        status_name = status_combobox.get()
-
-        if status_name == 'good':
-            status_id = None
-
         # Check if the record is existing in the inventory
         # Call the check_raw_material function
         result = check_raw_material(rm_code_id, warehouse_from_id, status_id)
