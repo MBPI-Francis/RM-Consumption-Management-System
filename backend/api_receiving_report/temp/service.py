@@ -10,6 +10,7 @@ from backend.api_stock_on_hand.v1.models import StockOnHand
 from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
+from sqlalchemy import text
 
 
 # These are the code for the app to communicate to the database
@@ -20,8 +21,6 @@ class TempReceivingReportCRUD(AppCRUD):
         """
         Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
         """
-
-
 
         return (
             self.db.query(StockOnHand)
@@ -35,6 +34,49 @@ class TempReceivingReportCRUD(AppCRUD):
 
 
     def create_receiving_report(self, receiving_report: TempReceivingReportCreate):
+
+
+        status_query = text(""" SELECT id FROM tbl_droplist WHERE name = 'good' """)
+
+        status_record = self.db.execute(status_query).fetchone()  # or .fetchall() if expecting multiple rows
+        status_result = status_record
+
+        if status_result:
+            status_id = status_result[0]
+
+        else:
+            print("There is an error with getting the status ID")
+            return
+
+        # Check if the status id is null
+        query = text("""SELECT * FROM view_beginning_soh
+                        WHERE warehouseid = :warehouse_id
+                              AND rawmaterialid = :rm_code_id
+                              AND statusid = :status_id""")
+
+
+
+        record = self.db.execute(query, {
+            "warehouse_id": receiving_report.warehouse_id,
+            "rm_code_id": receiving_report.rm_code_id,
+            "status_id": status_id
+        }).fetchone()  # or .fetchall() if expecting multiple rows
+        result = record
+
+        # This feature is required for the calculation
+        if not result:
+            # Create a new StockOnHand record
+            new_stock = StockOnHand(
+                rm_code_id=receiving_report.rm_code_id,
+                warehouse_id=receiving_report.warehouse_id,
+                rm_soh=0.00,
+                status_id=status_id
+            )
+            self.db.add(new_stock)
+            self.db.commit()
+            self.db.refresh(new_stock)
+            print('NAKAPAG CREATE KA NG RECORD PARE KO ', new_stock)
+
 
         # Get the latest StockOnHand record ID
         latest_soh_record = self.get_latest_soh_record(

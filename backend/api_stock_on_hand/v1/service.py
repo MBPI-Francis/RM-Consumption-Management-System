@@ -14,6 +14,7 @@ class StockOnHandCRUD(AppCRUD):
         rm_soh_item = StockOnHand(rm_code_id=rm_soh.rm_code_id,
                                   warehouse_id=rm_soh.warehouse_id,
                                   rm_soh=rm_soh.rm_soh,
+                                  status_id = rm_soh.status_id,
                                    description=rm_soh.description,
                                    updated_by_id=rm_soh.updated_by_id,
                                    created_by_id=rm_soh.created_by_id)

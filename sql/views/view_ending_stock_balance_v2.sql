@@ -94,7 +94,7 @@
             sum(
                 CASE
                     WHEN new_status.name::text ~~ 'held : contaminated'::text THEN hf.qty_kg
-                    WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
+                    WHEN new_status.name::text ~~ 'held : reject'::text THEN hf.qty_kg
                     ELSE 0::numeric
                 END) AS total_held,
             sum(
@@ -115,7 +115,7 @@
             sum(
                 CASE
                     WHEN new_status.name::text ~~ 'held : under evaluation'::text THEN hf.qty_kg
-                    WHEN new_status.name::text ~~ 'held : rejected'::text THEN hf.qty_kg
+                    WHEN new_status.name::text ~~ 'held : reject'::text THEN hf.qty_kg
                     ELSE 0::numeric
                 END) AS total_held,
             sum(
@@ -151,7 +151,7 @@
              JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
              JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
              JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
-          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : rejected'::text OR current_status.name::text = 'held : rejected'::text)
+          WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : reject'::text OR current_status.name::text = 'held : reject'::text)
           GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
         ), status_adjustments_good AS (
          SELECT hf.warehouse_id AS warehouseid,
@@ -204,18 +204,18 @@
 			- COALESCE(pf.total_prepared, 0::numeric)
 -- 			+ COALESCE(tf.total_transferred_quantity, 0::numeric)
 			+ CASE
-				WHEN ib.statusname::text = 'held : rejected'::text THEN
+				WHEN ib.statusname::text = 'held : reject'::text THEN
 					- COALESCE(rej.total_held, 0::numeric)
 					- COALESCE(rej.total_released, 0::numeric)
 					+ COALESCE(
 						CASE
-							WHEN tf.statusname = 'held : rejected'::text
+							WHEN tf.statusname = 'held : reject'::text
 								THEN tf.transferred_from_qty
 						END, 0)
 
 					+ COALESCE(
 						CASE
-							WHEN tt.statusname = 'held : rejected'::text
+							WHEN tt.statusname = 'held : reject'::text
 								THEN tt.transferred_to_qty
 						END, 0)
 
