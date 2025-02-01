@@ -18,6 +18,9 @@ lot_number_var = StringVar()
 product_kind_var = StringVar()
 stock_change_date_var = StringVar()
 
+# Track selected row ID
+selected_row_id = None
+
 # Function to fetch and display data in TableView
 def fetch_data():
     response = requests.get(API_BASE_URL)
@@ -46,45 +49,58 @@ def create_note():
     if response.status_code == 201:
         fetch_data()
 
-import requests
-from tkinter import messagebox
-
 # Function to delete a note
 def delete_note():
     API_DELETE_URL = "http://127.0.0.1:8000/api/notes/temp/delete"
 
-    selected_items = table.view.selection()  # Get selected row IDs
-    if not selected_items:
+    if selected_row_id is None:
         messagebox.showwarning("Warning", "No item selected.")
         return
 
-    # Fetch the first selected item and get its ID
-    note_id = table.view.item(selected_items[0])["values"][0]
-    print("This is the ID that you are DELETING: ", note_id)
-
-    response = requests.delete(f"{API_DELETE_URL}/{note_id}")
+    response = requests.delete(f"{API_DELETE_URL}/{selected_row_id}")
     if response.status_code == 204:  # 204 means successful deletion
         messagebox.showinfo("Success", "Record deleted successfully!")
         fetch_data()  # Refresh table after deletion
+        hide_buttons()  # Hide buttons after deletion
     else:
         messagebox.showerror("Error", "Failed to delete record.")
 
 # Function to update a note
 def update_note():
     API_UPDATE_URL = "http://127.0.0.1:8000/api/notes/temp/update"
-    selected_item = table.view.selection()  # Get selected row IDs
-    if selected_item:
-        note_id = table.view.item(selected_item[0])["values"][0]
-        print("This is the ID that you are UPDATING: ", note_id)
+    if selected_row_id is not None:
         payload = {
             "product_code": product_code_var.get(),
             "lot_number": lot_number_var.get(),
             "product_kind_id": product_kind_var.get(),
             "stock_change_date": stock_change_date_var.get()
         }
-        response = requests.put(f"{API_UPDATE_URL}/{note_id}", json=payload)
+        response = requests.put(f"{API_UPDATE_URL}/{selected_row_id}", json=payload)
         if response.status_code == 200:
             fetch_data()
+            hide_buttons()  # Hide buttons after update
+        else:
+            messagebox.showerror("Error", "Failed to update record.")
+
+# Function to handle row click event
+def on_row_click(event):
+    global selected_row_id
+    selected_item = table.view.selection()
+    if selected_item:
+        selected_row_id = table.view.item(selected_item[0])["values"][0]
+        show_buttons()  # Show buttons when a row is clicked
+    else:
+        hide_buttons()  # Hide buttons if no row is selected
+
+# Function to show the buttons
+def show_buttons():
+    btn_update.grid(row=0, column=1, padx=5, pady=5)
+    btn_delete.grid(row=0, column=2, padx=5, pady=5)
+
+# Function to hide the buttons
+def hide_buttons():
+    btn_update.grid_forget()
+    btn_delete.grid_forget()
 
 # UI Components
 frame = ttk.Frame(root)
@@ -107,30 +123,34 @@ ttk.Combobox(frame, textvariable=product_kind_var, values=kinds).grid(row=2, col
 ttk.Label(frame, text="Stock Change Date:").grid(row=3, column=0, padx=5, pady=5)
 ttk.Entry(frame, textvariable=stock_change_date_var).grid(row=3, column=1, padx=5, pady=5)
 
-# Buttons
+# Buttons frame
 btn_frame = ttk.Frame(root)
 btn_frame.pack(pady=10)
 
 btn_add = tb.Button(btn_frame, text="Add", command=create_note, bootstyle="success")
-btn_add.pack(side="left", padx=5)
+btn_add.grid(row=0, column=0, padx=5)
 
 btn_update = tb.Button(btn_frame, text="Update", command=update_note, bootstyle="warning")
-btn_update.pack(side="left", padx=5)
-
 btn_delete = tb.Button(btn_frame, text="Delete", command=delete_note, bootstyle="danger")
-btn_delete.pack(side="left", padx=5)
 
+# Initially hide the Update and Delete buttons
+btn_update.grid_forget()
+btn_delete.grid_forget()
+
+# Refresh button
 btn_refresh = tb.Button(btn_frame, text="Refresh", command=fetch_data, bootstyle="info")
-btn_refresh.pack(side="left", padx=5)
+btn_refresh.grid(row=0, column=3, padx=5)
 
 # TableView to display notes
 table_columns = ["ID", "Product Code", "Lot Number", "Product Kind", "Stock Change Date"]
 table = Tableview(root, coldata=table_columns, searchable=True, bootstyle="primary")
 table.pack(fill="both", expand=True, padx=10, pady=10)
 
-# This is the code for hiding the ID in the TableView
-table.hide_selected_column(event=None,cid=0)
+# Bind the click event on the table rows
+table.view.bind("<ButtonRelease-1>", on_row_click)
 
+# Initially hide the buttons if no row is selected
+hide_buttons()
 
 fetch_data()
 root.mainloop()
