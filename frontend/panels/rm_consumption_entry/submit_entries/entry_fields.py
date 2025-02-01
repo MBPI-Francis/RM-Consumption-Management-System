@@ -223,7 +223,7 @@ def create_soh_whse_excel(date_entry_value, data):
                     "",  # qty per packing (blank)
                     "",  # Excess column (blank)
                     float(record["new_beginning_balance"]),  # Total
-                    record["status"],  # Status
+                    "" if record["status"].lower() == "good" else record["status"],  # Store blank if status is 'good'
                     ""  # Drop list (blank)
                 ]
                 sheet.append(row)
