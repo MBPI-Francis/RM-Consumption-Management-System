@@ -8,14 +8,14 @@ from backend.settings.database import Base  # Assuming Base is imported from you
 
 # Parent Model: Department
 class TempReceivingReport(Base):
-    __tablename__ = "tbl_receiving_reports_temp"
+    __tablename__ = "tbl_receiving_reports"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
-    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
+    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
 
-    ref_number = Column(String(50), nullable=False, unique=True)
+    ref_number = Column(String(50), nullable=False, unique=False)
     receiving_date = Column(Date,nullable=False)
     qty_kg = Column(Numeric(10, 2), nullable=False)
     is_deleted = Column(Boolean, default=False)
@@ -26,6 +26,8 @@ class TempReceivingReport(Base):
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
+    date_computed = Column(Date, nullable=True)
+    is_cleared = Column(Boolean, default=False)
 
 
     # Relationships for created_by, updated_by, and deleted_by

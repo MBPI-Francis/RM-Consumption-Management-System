@@ -4,14 +4,17 @@ from backend.api_stock_on_hand.v1.main import AppCRUD, AppService
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate
 from uuid import UUID
-
+from backend.api_receiving_report.temp.service import TempReceivingReportCRUD
+from sqlalchemy import desc
 
 # These are the code for the app to communicate to the database
 class StockOnHandCRUD(AppCRUD):
+
     def create_rm_soh(self, rm_soh: StockOnHandCreate):
         rm_soh_item = StockOnHand(rm_code_id=rm_soh.rm_code_id,
                                   warehouse_id=rm_soh.warehouse_id,
                                   rm_soh=rm_soh.rm_soh,
+                                  status_id = rm_soh.status_id,
                                    description=rm_soh.description,
                                    updated_by_id=rm_soh.updated_by_id,
                                    created_by_id=rm_soh.created_by_id)
@@ -20,11 +23,11 @@ class StockOnHandCRUD(AppCRUD):
         self.db.refresh(rm_soh_item)
         return rm_soh_item
 
-    def get_rm_soh(self):
+    def all_rm_soh(self):
         rm_soh_item = self.db.query(StockOnHand).all()
         if rm_soh_item:
             return rm_soh_item
-        return None
+        return []
 
 
     def update_rm_soh(self, rm_soh_id: UUID, rm_soh_update: StockOnHandUpdate):
@@ -83,9 +86,17 @@ class StockOnHandService(AppService):
 
         return rm_soh_item
 
-    def get_rm_soh(self):
+    def all_rm_soh(self):
         try:
-            rm_soh_item = StockOnHandCRUD(self.db).get_rm_soh()
+            rm_soh_item = StockOnHandCRUD(self.db).all_rm_soh()
+
+        except Exception as e:
+            raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")
+        return rm_soh_item
+
+    def get_rm_soh(self, warehouse_id: UUID, rm_code_id: UUID):
+        try:
+            rm_soh_item = TempReceivingReportCRUD(self.db).get_latest_soh_record(warehouse_id, rm_code_id)
 
         except Exception as e:
             raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")

@@ -23,7 +23,7 @@ class ProductKindCRUD(AppCRUD):
         product_kind_item = self.db.query(ProductKind).all()
         if product_kind_item:
             return product_kind_item
-        return None
+        return []
 
 
     def update_product_kind(self, product_kind_id, product_kind_update: ProductKindUpdate):

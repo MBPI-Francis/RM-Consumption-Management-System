@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
-from backend.api_outgoing_report.temp.schemas import TempOutgoingReportCreate, TempOutgoingReportUpdate, TempOutgoingReportResponse
+from backend.api_outgoing_report.temp.schemas import TempOutgoingReportCreate, TempOutgoingReportUpdate, TempOutgoingReportResponse, TempOutgoingReport
 from backend.api_outgoing_report.temp.service import TempOutgoingReportService
 from backend.settings.database import get_db
 from uuid import UUID
 
 router = APIRouter(prefix="/api/outgoing_reports/temp")
 
-@router.post("/create/", response_model=TempOutgoingReportResponse)
+@router.post("/create/", response_model=TempOutgoingReport)
 async def create_outgoing_report(outgoing_report: TempOutgoingReportCreate, db: get_db = Depends()):
     result = TempOutgoingReportService(db).create_outgoing_report(outgoing_report)
     return result

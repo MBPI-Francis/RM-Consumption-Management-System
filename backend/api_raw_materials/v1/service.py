@@ -3,6 +3,8 @@ from backend.api_raw_materials.v1.exceptions import RawMaterialCreateException, 
 from backend.api_raw_materials.v1.main import AppCRUD, AppService
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_raw_materials.v1.schemas import RawMaterialCreate, RawMaterialUpdate
+from backend.api_users.v1.models import User
+from sqlalchemy.sql import func
 from uuid import UUID
 
 
@@ -19,10 +21,40 @@ class RawMaterialCRUD(AppCRUD):
         self.db.refresh(raw_material_item)
         return raw_material_item
 
-    def get_raw_material(self):
+    def all_raw_material(self):
         raw_material_item = self.db.query(RawMaterial).all()
         if raw_material_item:
             return raw_material_item
+        return []
+
+    def all_transformed_raw_material(self):
+        # Join tables
+        stmt = (
+            self.db.query(
+                RawMaterial.id.label("id"),
+                RawMaterial.rm_code,
+                RawMaterial.created_at,
+                RawMaterial.updated_at,
+                func.concat(User.first_name, " ", User.last_name).label("created_by")
+
+            )
+            .outerjoin(User,
+                       User.id == RawMaterial.created_by_id)  # Left join StockOnHand with ReceivingReport
+
+        )
+
+        # Return All the result
+        return stmt.all()
+
+    def get_raw_material(self, rm_code):
+
+        computed_detail_item = (
+            self.db.query(RawMaterial).filter(
+                RawMaterial.rm_code == rm_code
+            ).first()
+        )
+        if computed_detail_item:
+            return computed_detail_item
         return None
 
 
@@ -82,13 +114,32 @@ class RawMaterialService(AppService):
 
         return raw_material_item
 
-    def get_raw_material(self):
+    def all_raw_material(self):
         try:
-            raw_material_item = RawMaterialCRUD(self.db).get_raw_material()
+            raw_material_item = RawMaterialCRUD(self.db).all_raw_material()
 
         except Exception as e:
             raise RawMaterialNotFoundException(detail=f"Error: {str(e)}")
         return raw_material_item
+
+    def all_transformed_raw_material(self):
+        try:
+            raw_material_item = RawMaterialCRUD(self.db).all_transformed_raw_material()
+
+        except Exception as e:
+            raise RawMaterialNotFoundException(detail=f"Error: {str(e)}")
+        return raw_material_item
+
+
+
+    def get_raw_material(self, rm_code: str):
+        try:
+            raw_material_item = RawMaterialCRUD(self.db).get_raw_material(rm_code)
+
+        except Exception as e:
+            raise RawMaterialNotFoundException(detail=f"Error: {str(e)}")
+        return raw_material_item
+
 
     # This is the service/business logic in updating the raw_material.
     def update_raw_material(self, rm_id: UUID, raw_material_update: RawMaterialUpdate):

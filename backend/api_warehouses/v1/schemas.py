@@ -16,8 +16,23 @@ class WarehouseCreate(WarehouseBase):
 
 class WarehouseUpdate(WarehouseBase):
     pass
-class WarehouseResponse(WarehouseBase):
-    pass
+
+
+class WarehouseResponse(BaseModel):
+    id: UUID
+    wh_number: int
+    wh_name: str
+
+    class Config:
+        from_attributes = True
+
+class TransformedWarehouseResponse(BaseModel):
+    id: UUID
+    wh_number: int
+    wh_name: Optional[str]
+    created_at: datetime
+    updated_at:datetime
+    created_by: Optional[str]
 
     class Config:
         from_attributes = True

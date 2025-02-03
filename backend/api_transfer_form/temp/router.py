@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_transfer_form.temp.schemas import TempTransferFormCreate, TempTransferFormUpdate, TempTransferFormResponse
+from backend.api_transfer_form.temp.schemas import TempTransferFormCreate, TempTransferFormUpdate, TempTransferFormResponse, TempTransferForm
 from backend.api_transfer_form.temp.service import TempTransferFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
 router = APIRouter(prefix="/api/transfer_forms/temp")
 
-@router.post("/create/", response_model=TempTransferFormResponse)
+@router.post("/create/", response_model=TempTransferForm)
 async def create_transfer_form(transfer_form: TempTransferFormCreate, db: get_db = Depends()):
     result = TempTransferFormService(db).create_transfer_form(transfer_form)
     return result

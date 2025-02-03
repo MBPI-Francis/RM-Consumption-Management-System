@@ -8,7 +8,8 @@ from datetime import datetime
 class StockOnHandBase(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
-    rm_soh : float
+    status_id: Optional[UUID] = None
+    rm_soh: float
 
 
 class StockOnHandCreate(StockOnHandBase):

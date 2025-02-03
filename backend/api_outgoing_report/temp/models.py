@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, SmallInteger, Date, Numeric
+from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Date, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -9,12 +9,12 @@ from backend.api_users.v1.models import User
 
 # Parent Model: Department
 class TempOutgoingReport(Base):
-    __tablename__ = "tbl_outgoing_reports_temp"
+    __tablename__ = "tbl_outgoing_reports"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
-    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=False)
+    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
 
     ref_number = Column(String(50), nullable=False, unique=False)
     outgoing_date = Column(Date,nullable=False)
@@ -27,6 +27,8 @@ class TempOutgoingReport(Base):
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
+    date_computed = Column(Date, nullable=True)
+    is_cleared = Column(Boolean, default=False)
 
 
     # Relationships for created_by, updated_by, and deleted_by

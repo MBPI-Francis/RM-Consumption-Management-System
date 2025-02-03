@@ -3,13 +3,12 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 
 class TempOutgoingReport(BaseModel):
     rm_code_id: UUID
     warehouse_id: UUID
-    rm_soh_id: UUID
     ref_number: str = Field(max_length=50, description="The reference number of the Outgoing Report")
     outgoing_date: date
     qty_kg: float
@@ -21,8 +20,17 @@ class TempOutgoingReportCreate(TempOutgoingReport):
 class TempOutgoingReportUpdate(TempOutgoingReport):
     pass
 
-class TempOutgoingReportResponse(TempOutgoingReport):
-    pass
+class TempOutgoingReportResponse(BaseModel):
+    raw_material: str
+    qty_kg: float
+    ref_number: str
+    wh_name: str
+    outgoing_date: date
+    soh_and_date: str
+    created_at: datetime
+    updated_at: datetime
+    created_by: Optional[UUID] = None
+    updated_by: Optional[UUID] = None
 
     class Config:
         from_attributes = True

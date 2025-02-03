@@ -19,7 +19,7 @@ class ComputedDetailCRUD(AppCRUD):
         computed_detail_item = self.db.query(ComputedDetail).all()
         if computed_detail_item:
             return computed_detail_item
-        return None
+        return []
 
     def get_computed_detail(self, computed_date, computed_by_id):
 

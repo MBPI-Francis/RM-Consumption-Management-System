@@ -1,8 +1,6 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .rm_code_tab import rm_code_tab
-from .rm_soh_tab import rm_soh_tab
-
+from .main_tab import rm_code_tab, rm_soh_tab
 
 
 class RawMaterialView:

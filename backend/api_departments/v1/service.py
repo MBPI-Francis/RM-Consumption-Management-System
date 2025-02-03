@@ -21,7 +21,7 @@ class DepartmentCRUD(AppCRUD):
         department_item = self.db.query(Department).all()
         if department_item:
             return department_item
-        return None
+        return []
 
 
     def update_department(self, department_id: UUID, department_update: DepartmentUpdate):

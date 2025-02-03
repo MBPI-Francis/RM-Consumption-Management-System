@@ -9,7 +9,7 @@ from backend.api_users.v1.models import User
 
 # Parent Model: Department
 class TempNotes(Base):
-    __tablename__ = "tbl_notes_temp"
+    __tablename__ = "tbl_notes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     product_code = Column(String(80), nullable=False)
@@ -24,6 +24,8 @@ class TempNotes(Base):
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deleted_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
+    date_computed = Column(Date, nullable=True)
+    is_cleared = Column(Boolean, default=False)
 
 
     # Relationships for created_by, updated_by, and deleted_by

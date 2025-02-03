@@ -16,7 +16,9 @@ class DropListCreate(DropListBase):
 class DropListUpdate(DropListBase):
     description: Optional[str] = None
 
-class DropListResponse(DropListBase):
+class DropListResponse(BaseModel):
+    id: UUID
+    name: str
     description: Optional[str] = None
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None

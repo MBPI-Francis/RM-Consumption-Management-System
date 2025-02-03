@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_receiving_report.temp.schemas import TempReceivingReportCreate, TempReceivingReportUpdate, TempReceivingReportResponse
+from backend.api_receiving_report.temp.schemas import TempReceivingReportCreate, TempReceivingReportUpdate, TempReceivingReportResponse, TempReceivingReport
 from backend.api_receiving_report.temp.service import TempReceivingReportService
 from backend.settings.database import get_db
 from uuid import UUID
 
 router = APIRouter(prefix="/api/receiving_reports/temp")
 
-@router.post("/create/", response_model=TempReceivingReportResponse)
+@router.post("/create/", response_model=TempReceivingReport)
 async def create_receiving_report(receiving_report: TempReceivingReportCreate, db: get_db = Depends()):
     result = TempReceivingReportService(db).create_receiving_report(receiving_report)
     return result

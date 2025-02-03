@@ -11,21 +11,15 @@ class Sidebar(ttk.Frame):
         style.configure("Sidebar.TFrame", background="#8B4513")  # Brown color
 
         # Navigation Buttons
-        ttk.Button(
-            self,
-            text="Warehouse",
-            command=lambda: navigate_callback("warehouse"),
-            bootstyle=PRIMARY,
-            width=18,
-        ).pack(pady=10)
 
-        ttk.Button(
-            self,
-            text="Department",
-            command=lambda: navigate_callback("department"),
-            bootstyle=SUCCESS,
-            width=18,
-        ).pack(pady=10)
+
+        # ttk.Button(
+        #     self,
+        #     text="Department",
+        #     command=lambda: navigate_callback("department"),
+        #     bootstyle=SUCCESS,
+        #     width=18,
+        # ).pack(pady=10)
 
         ttk.Button(
             self,
@@ -37,7 +31,15 @@ class Sidebar(ttk.Frame):
 
         ttk.Button(
             self,
-            text="Raw Material",
+            text="Warehouse",
+            command=lambda: navigate_callback("warehouse"),
+            bootstyle=PRIMARY,
+            width=18,
+        ).pack(pady=10)
+
+        ttk.Button(
+            self,
+            text="Raw Materials",
             command=lambda: navigate_callback("raw_material"),
             bootstyle=INFO,
             width=18,

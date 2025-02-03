@@ -18,7 +18,12 @@ class NotesCreate(NotesBase):
 class NotesUpdate(NotesBase):
     pass
 
-class NotesResponse(NotesBase):
+class NotesResponse(BaseModel):
+    id: UUID
+    product_code: str
+    lot_number: str
+    product_kind_id: str
+    stock_change_date: date
     created_at: datetime
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None

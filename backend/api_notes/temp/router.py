@@ -22,14 +22,13 @@ async def update_notes(notes_id: UUID, notes_update: NotesUpdate, db: get_db = D
     result = NotesService(db).update_notes(notes_id, notes_update)
     return result
 
-
 @router.put("/restore/{notes_id}/", response_model=NotesResponse)
 async def restore_notes(notes_id: UUID,  db: get_db = Depends()):
     result = NotesService(db).restore_notes(notes_id)
     return result
 
-
 @router.delete("/delete/{notes_id}/", response_model=NotesResponse)
 async def delete_notes(notes_id: UUID, db: get_db = Depends()):
     result = NotesService(db).soft_delete_notes(notes_id)
     return result
+
