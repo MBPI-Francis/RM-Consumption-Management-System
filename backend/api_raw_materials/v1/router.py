@@ -5,7 +5,7 @@ from backend.api_raw_materials.v1.service import RawMaterialService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/raw_materials/v1")
+router = APIRouter(prefix="/api/raw_materials")
 
 @router.post("/create/", response_model=RawMaterialResponse)
 async def create_raw_material(raw_material: RawMaterialCreate, db: get_db = Depends()):

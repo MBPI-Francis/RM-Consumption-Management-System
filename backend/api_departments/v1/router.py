@@ -5,7 +5,7 @@ from backend.api_departments.v1.service import DepartmentService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/departments/v1")
+router = APIRouter(prefix="/api/departments")
 
 @router.post("/create/", response_model=DepartmentResponse)
 async def create_department(department: DepartmentCreate, db: get_db = Depends()):

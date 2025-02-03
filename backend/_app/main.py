@@ -7,12 +7,25 @@ from backend.api_droplist.v1 import router as droplist_router
 from backend.api_stock_on_hand.v1 import router as soh_router
 from backend.api_product_kinds.v1 import router as product_kind_router
 from backend.api_auth_users.v1 import router as auth_router
-from backend.api_notes.v1 import router as notes_router
-from backend.api_receiving_report.v1 import router as receiving_report_router
-from backend.api_outgoing_report.v1 import router as outgoing_report_router
-from backend.api_transfer_form.v1 import router as transfer_form_router
-from backend.api_preparation_form.v1 import router as preparation_form_router
-from backend.api_held_form.v1 import router as held_form_router
+
+from backend.api_notes.temp import router as notes_router_temp
+from backend.api_notes.main import router as notes_router_main
+
+from backend.api_computed_details.v1 import router as computed_detail_router
+
+from backend.api_receiving_report.temp import router as temp_receiving_report_router
+from backend.api_receiving_report.main import router as main_receiving_report_router
+
+from backend.api_outgoing_report.temp import router as temp_outgoing_report_router
+from backend.api_outgoing_report.main import router as main_outgoing_report_router
+
+from backend.api_transfer_form.temp import router as temp_transfer_form_router
+from backend.api_transfer_form.main import router as main_form_router
+
+from backend.api_preparation_form.temp import router as temp_preparation_form_router
+from backend.api_preparation_form.main import router as main_preparation_form_router
+
+from backend.api_held_form.temp import router as held_form_router
 from backend.settings.database import engine, Base
 
 # Initialize FastAPI app
@@ -40,30 +53,42 @@ app.include_router(soh_router.router)
 # These code includes all the routers/endpoint of the api_product_kind
 app.include_router(product_kind_router.router)
 
-# These code includes all the routers/endpoint of the api_notes
-app.include_router(notes_router.router)
+# These code includes all the routers/endpoint of the api_computed_details
+app.include_router(computed_detail_router.router)
+
+# These code includes all the routers/endpoint of the api_notes_temp
+app.include_router(notes_router_temp.router)
+
+# These code includes all the routers/endpoint of the api_notes_main
+app.include_router(notes_router_main.router)
 
 # These code includes all the routers/endpoint of the api_auth_users
 app.include_router(auth_router.router)
 
 # These code includes all the routers/endpoint of the api_receiving_report
-app.include_router(receiving_report_router.router)
+app.include_router(temp_receiving_report_router.router)
+app.include_router(main_receiving_report_router.router)
 
 # These code includes all the routers/endpoint of the api_outgoing_report
-app.include_router(outgoing_report_router.router)
+app.include_router(temp_outgoing_report_router.router)
+app.include_router(main_outgoing_report_router.router)
 
 # These code includes all the routers/endpoint of the api_transfer_form
-app.include_router(transfer_form_router.router)
+app.include_router(temp_transfer_form_router.router)
+app.include_router(main_form_router.router)
 
 # These code includes all the routers/endpoint of the api_preparation_form
-app.include_router(preparation_form_router.router)
+app.include_router(temp_preparation_form_router.router)
+app.include_router(main_preparation_form_router.router)
 
 # These code includes all the routers/endpoint of the api_held_form
 app.include_router(held_form_router.router)
+
+
 
 # Code for Creating database tables
 Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Backend API Hello HAHAHAHA"}
+    return {"message": "Welcome to the Backend API Hello HAHAHAHA123213"}
