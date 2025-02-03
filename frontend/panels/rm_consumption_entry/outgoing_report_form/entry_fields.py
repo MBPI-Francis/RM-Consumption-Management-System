@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
 from ..preparation_form.validation import EntryValidation as PrepValidation
+import psycopg2
 from tkinter import StringVar
 
 
@@ -41,6 +42,23 @@ def entry_fields(note_form_tab):
         rm_codes_combobox.set("")
         qty_entry.delete(0, ttk.END)
 
+    def get_status_id():
+        query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
+        # Assuming you have a PostgreSQL connection (replace with your connection details)
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
+        # )
+
+        connection = psycopg2.connect(
+            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+        )
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+
+        return result[0] if result else None
+
 
     def submit_data():
 
@@ -50,6 +68,7 @@ def entry_fields(note_form_tab):
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
         outgoing_date = outgoing_date_entry.entry.get()
+        status_id = get_status_id()
 
 
         # Convert date to YYYY-MM-DD
@@ -81,7 +100,8 @@ def entry_fields(note_form_tab):
         validatation_result = PrepValidation.validate_soh_value(
             rm_code_id,
             warehouse_id,
-            qty
+            qty,
+            status_id
         )
 
         if validatation_result:

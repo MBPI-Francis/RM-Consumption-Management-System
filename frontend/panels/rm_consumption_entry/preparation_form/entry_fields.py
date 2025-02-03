@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
 from tkinter import StringVar
+import psycopg2
 
 
 def entry_fields(note_form_tab):
@@ -41,21 +42,25 @@ def entry_fields(note_form_tab):
         qty_prepared_entry.delete(0, ttk.END)
         qty_return_entry.delete(0, ttk.END)
 
+    def get_status_id():
+        query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
+        # Assuming you have a PostgreSQL connection (replace with your connection details)
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
+        # )
+
+        connection = psycopg2.connect(
+            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+        )
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+
+        return result[0] if result else None
 
 
-    # def get_selected_latest_rm_api():
-    #
-    #     url = server_ip + "/api/stock_on_hand/list/"
-    #     response = requests.get(url)
-    #
-    #     # Check if the request was successful
-    #     if response.status_code == 200:
-    #         # Parse JSON response
-    #         data = response.json()
-    #         print("Data fetched successfully!")
-    #         return data
-    #     else:
-    #         print(f"Failed to fetch data. Status code: {response.status_code}")
+
 
     def submit_data():
 
@@ -66,6 +71,7 @@ def entry_fields(note_form_tab):
         qty_prepared = qty_prepared_entry.get()
         qty_return = qty_return_entry.get()
         preparation_date = preparation_date_entry.entry.get()
+        status_id = get_status_id()
 
 
         # Convert date to YYYY-MM-DD
@@ -97,7 +103,7 @@ def entry_fields(note_form_tab):
             rm_code_id,
             warehouse_id,
             qty_prepared,
-            None
+            status_id
         )
         if validatation_result:
             # Send a POST request to the API

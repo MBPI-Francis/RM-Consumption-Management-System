@@ -62,7 +62,7 @@ def create_record(rm_code_id, warehouse_id, status_id, rm_soh):
 
 
 # Read the Excel file (assuming it's named 'data.xlsx')
-excel_file = r'C:\Users\Francis(Work)\Desktop\TEST DATA\wh4_soh_data.xlsx'
+excel_file = r'C:\Users\Francis(Work)\Desktop\TEST DATA\Sir Elton\Sample_2\wh1_soh_data.xlsx'
 df = pd.read_excel(excel_file)
 
 # Loop through each row in the Excel file
