@@ -45,13 +45,13 @@ def entry_fields(note_form_tab):
     def get_status_id():
         query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
         # Assuming you have a PostgreSQL connection (replace with your connection details)
-        # connection = psycopg2.connect(
-        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
-        # )
-
         connection = psycopg2.connect(
-            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+            dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
         )
+
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+        # )
         cursor = connection.cursor()
         cursor.execute(query)
         result = cursor.fetchone()
@@ -72,6 +72,11 @@ def entry_fields(note_form_tab):
         qty_return = qty_return_entry.get()
         preparation_date = preparation_date_entry.entry.get()
         status_id = get_status_id()
+
+
+        # If the user didn't enter a value in the qty return field, then it will store 0.00 value in the variable
+        if qty_return == None or qty_return == '':
+            qty_return = float(0.00)
 
 
         # Convert date to YYYY-MM-DD

@@ -184,7 +184,7 @@ def entry_fields(note_form_tab):
     rm_codes_combobox = ttk.Combobox(
         form_frame,
         values=rm_names,
-        state="readonly",
+        state="normal",
         width=30,
     )
 

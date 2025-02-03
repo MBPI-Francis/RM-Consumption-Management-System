@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import  sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import psycopg2
 
 # This is the connection string (also known as a database URL) used to specify
 # How to connect to your PostgreSQL database.
@@ -31,3 +32,7 @@ def get_db():
 
 
 server_ip = "http://127.0.0.1:8000"
+
+# connection = psycopg2.connect(
+#     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
+# )
