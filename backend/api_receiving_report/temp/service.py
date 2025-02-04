@@ -118,6 +118,7 @@ class TempReceivingReportCRUD(AppCRUD):
         # Join tables
         stmt = (
             self.db.query(
+                TempReceivingReport.id,
                 RawMaterial.rm_code.label("raw_material"),
                 TempReceivingReport.qty_kg,
                 TempReceivingReport.ref_number,
@@ -172,7 +173,7 @@ class TempReceivingReportCRUD(AppCRUD):
                 setattr(receiving_report, key, value)
             self.db.commit()
             self.db.refresh(receiving_report)
-            return receiving_report
+            return self.get_receiving_report()
 
         except Exception as e:
             raise TempReceivingReportUpdateException(detail=f"Error: {str(e)}")
@@ -186,7 +187,8 @@ class TempReceivingReportCRUD(AppCRUD):
             receiving_report.is_deleted = True
             self.db.commit()
             self.db.refresh(receiving_report)
-            return receiving_report
+            rr_list = self.get_receiving_report()
+            return rr_list
 
         except Exception as e:
             raise TempReceivingReportSoftDeleteException(detail=f"Error: {str(e)}")

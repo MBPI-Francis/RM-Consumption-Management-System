@@ -4,9 +4,8 @@ import requests
 from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
-from datetime import datetime as d_datetime
+from datetime import datetime, timedelta
 from .table import NoteTable
-import datetime
 from .validation import EntryValidation
 
 
@@ -25,11 +24,6 @@ def entry_fields(note_form_tab):
         product_code_entry.delete(0, ttk.END)
         lot_number_entry.delete(0, ttk.END)
         product_kind_combobox.set("")
-        yesterday_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%m/%d/%Y")
-        date_entry.config(state="normal")
-        date_entry.delete(0, ttk.END)
-        date_entry.insert(0, yesterday_date)
-        date_entry.config(state="readonly")
 
     def submit_data():
 
@@ -37,11 +31,11 @@ def entry_fields(note_form_tab):
         product_code = product_code_entry.get()
         lot_number = lot_number_entry.get()
         product_kind_id = get_selected_product_kind_id()
-        consumption_date = date_entry.get()
+        consumption_date = date_entry.entry.get()
 
         # Convert date to YYYY-MM-DD
         try:
-            consumption_date = d_datetime.strptime(consumption_date, "%m/%d/%Y").strftime("%Y-%m-%d")
+            consumption_date = datetime.strptime(consumption_date, "%m/%d/%Y").strftime("%Y-%m-%d")
         except ValueError:
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
@@ -66,7 +60,7 @@ def entry_fields(note_form_tab):
             if response.status_code == 200:  # Successfully created
                 clear_fields()
 
-                note_table.refresh_table()
+                note_table.load_data()
                 # refresh_table()  # Refresh the table
         except requests.exceptions.RequestException as e:
             Messagebox.show_info(e, "Data Entry Error")
@@ -117,10 +111,17 @@ def entry_fields(note_form_tab):
     date_label = ttk.Label(form_frame, text="Consumption Date:", font=("Helvetica", 10, "bold"))
     date_label.grid(row=0, column=5, padx=5, pady=5, sticky=W)
 
-    yesterday_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%m/%d/%Y")
-    date_entry = ttk.Entry(form_frame, width=20)
-    date_entry.insert(0, yesterday_date)
-    date_entry.config(state="readonly")
+    # Calculate yesterday's date
+    yesterday_date = datetime.now() - timedelta(days=1)
+
+    date_entry = ttk.DateEntry(
+        form_frame,
+        bootstyle=PRIMARY,
+        dateformat="%m/%d/%Y",
+        startdate=yesterday_date,  # Set yesterday's date
+        width=30
+    )
+
     date_entry.grid(row=1, column=5, padx=5, pady=5, sticky=W)
     ToolTip(date_entry, text="This is the date when raw materials stock moved")
 
