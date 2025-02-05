@@ -22,11 +22,18 @@ class NoteTable:
         self.search_entry.pack(side=LEFT, fill=X, expand=YES)
         self.search_entry.bind("<Return>", self.search_data)
 
+        # Define a style for the Treeview Header
+        style = ttk.Style()
+        style.configure("Custom.Treeview.Heading", font=("Arial", 10, "bold"), foreground="white",
+                        background="#0078D4")  # Header color
+        style.configure("Custom.Treeview", rowheight=25)  # Adjust row height for better visibility
+
+
         # Treeview setup
         self.tree = ttk.Treeview(
             master=self.root,
             columns=("Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date"),
-            show='headings'
+            show='headings', style="Custom.Treeview"
         )
         self.tree.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 

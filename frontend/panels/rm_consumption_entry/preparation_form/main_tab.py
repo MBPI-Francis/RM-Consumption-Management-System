@@ -11,9 +11,9 @@ def preparation_form_tab(notebook):
     # Populate the Raw Materials Tab
     preparation_form_label = ttk.Label(
         preparation_form_tab,
-        text="Preparation Form Entry",
-        font=("Helvetica", 14),
-        bootstyle=INFO,
+        text="Preparation Form",
+        font=("Helvetica", 14, "bold"),
+        bootstyle=PRIMARY,
     )
     preparation_form_label.pack(pady=20, padx=20)
 

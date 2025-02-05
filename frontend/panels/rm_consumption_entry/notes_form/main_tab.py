@@ -11,9 +11,9 @@ def notes_form_tab(notebook):
     # Populate the Raw Materials Tab
     note_form_label = ttk.Label(
         note_form_tab,
-        text="Note Form Entry",
-        font=("Helvetica", 14),
-        bootstyle=INFO,
+        text="Note Form",
+        font=("Helvetica", 14, "bold"),
+        bootstyle=PRIMARY,
     )
     note_form_label.pack(pady=20, padx=20)
 

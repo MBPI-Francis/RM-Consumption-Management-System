@@ -23,9 +23,18 @@ class NoteTable:
         self.search_entry.pack(side=LEFT, fill=X, expand=YES)
         self.search_entry.bind("<Return>", self.search_data)
 
+
+
+        # Define a style for the Treeview Header
+        style = ttk.Style()
+        style.configure("Custom.Treeview.Heading", font=("Arial", 10, "bold"), foreground="white",
+                        background="#0078D4")  # Header color
+        style.configure("Custom.Treeview", rowheight=25)  # Adjust row height for better visibility
+
         self.tree = ttk.Treeview(root,
                                  columns=("Raw Material", "Warehouse", "Ref No.", "Quantity(kg)", "Receiving Date"),
-                                 show='headings')
+                                 show='headings',
+                                 style="Custom.Treeview")
 
         # Define columns
         for col in self.tree['columns']:
@@ -197,7 +206,7 @@ class NoteTable:
             except requests.exceptions.RequestException as e:
                 messagebox.showerror("Error", f"Failed to update: {e}")
 
-        ttk.Button(edit_window, text="Save", command=update_record).grid(row=len(fields), column=0, columnspan=2,
+        ttk.Button(edit_window, text="Save", command=update_record, width=30).grid(row=len(fields), column=0, columnspan=2,
                                                                          pady=10)
     def confirm_delete(self, item_id):
         """Show confirmation before deleting record."""

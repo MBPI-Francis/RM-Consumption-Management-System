@@ -30,10 +30,18 @@ class NoteTable:
         self.search_entry.pack(side=LEFT, fill=X, expand=YES)
         self.search_entry.bind("<Return>", self.search_data)
 
+        # Define a style for the Treeview Header
+        style = ttk.Style()
+        style.configure("Custom.Treeview.Heading", font=("Arial", 10, "bold"), foreground="white",
+                        background="#0078D4")  # Header color
+        style.configure("Custom.Treeview", rowheight=25)  # Adjust row height for better visibility
+
+        # Create Treeview with custom style
         self.tree = ttk.Treeview(self.root, columns=(
             "Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
-            "Current Status", "New Status", "Change Status Date", "Entry Date"),
-             show="headings")
+            "Current Status", "New Status", "Change Status Date", "Entry Date"
+        ), show="headings", style="Custom.Treeview")
+
 
         # Define column headings
         for col in self.tree["columns"]:
@@ -88,7 +96,8 @@ class NoteTable:
         edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
 
-        fields = ["Warehouse", "Reference No.", "Raw Material",  "Quantity(kg)", "Current Status", "New Status", "Change Status Date",]
+        fields = ["Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
+            "Current Status", "New Status", "Change Status Date",]
         entries = {}
 
 
@@ -116,7 +125,7 @@ class NoteTable:
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
-            elif field == "Outgoing Date":
+            elif field == "Change Status Date":
                 entry = DateEntry(edit_window, dateformat="%m/%d/%Y", width=30)
                 entry.entry.delete(0, "end")
                 formatted_date = datetime.strptime(record[idx], "%Y-%m-%d").strftime("%m/%d/%Y")
@@ -179,18 +188,36 @@ class NoteTable:
             else:
                 return None
 
+        def get_selected_current_status_id():
+            selected_name = entries["Current Status"].get()
+            selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
+            if selected_id:
+                return selected_id
+            else:
+                return None
+
+        def get_selected_new_status_id():
+            selected_name = entries["New Status"].get()
+            selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
+            if selected_id:
+                return selected_id
+            else:
+                return None
+
         def update_record():
             # Convert date to YYYY-MM-DD
             try:
-                outgoing_date = datetime.strptime(entries["Outgoing Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
+                change_status_date = datetime.strptime(entries["Change Status Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
             except ValueError:
                 Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
                 return
             data = {
                 "rm_code_id": get_selected_rm_code_id(),
                 "warehouse_id": get_selected_warehouse_id(),
-                "ref_number": entries["Ref No."].get(),
-                "outgoing_date":  outgoing_date,
+                "current_status_id": get_selected_current_status_id(),
+                "new_status_id": get_selected_new_status_id(),
+                "ref_number": entries["Reference No."].get(),
+                "change_status_date":  change_status_date,
                 "qty_kg": entries["Quantity(kg)"].get(),
             }
 
@@ -205,7 +232,7 @@ class NoteTable:
                 get_selected_rm_code_id(),
                 get_selected_warehouse_id(),
                 entries["Quantity(kg)"].get(),
-
+                get_selected_current_status_id()
 
             )
 
@@ -230,10 +257,7 @@ class NoteTable:
                     "Data Entry Error")
                 return
 
-
-
-
-        ttk.Button(edit_window, text="Save", command=update_record).grid(row=len(fields), column=0, columnspan=2,
+        ttk.Button(edit_window, text="Save", command=update_record, width=30).grid(row=len(fields), column=0, columnspan=2,
                                                                          pady=10)
 
     def delete_entry(self, entry_id):
