@@ -267,10 +267,12 @@ class NoteTable:
     def get_status_id(self):
         query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
         # Assuming you have a PostgreSQL connection (replace with your connection details)
-        connection = psycopg2.connect(
-            dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
-        )
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
+        # )
 
+        connection = psycopg2.connect(
+            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432")
 
         cursor = connection.cursor()
         cursor.execute(query)

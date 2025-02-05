@@ -23,6 +23,7 @@ class TempTransferFormUpdate(TempTransferForm):
     pass
 
 class TempTransferFormResponse(BaseModel):
+    id: UUID
     raw_material: str
     from_warehouse: str
     to_warehouse: str

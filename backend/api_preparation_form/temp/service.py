@@ -119,7 +119,7 @@ class TempPreparationFormCRUD(AppCRUD):
                 setattr(preparation_form, key, value)
             self.db.commit()
             self.db.refresh(preparation_form)
-            return preparation_form
+            return self.get_preparation_form()
 
         except Exception as e:
             raise TempPreparationFormUpdateException(detail=f"Error: {str(e)}")
@@ -133,7 +133,7 @@ class TempPreparationFormCRUD(AppCRUD):
             preparation_form.is_deleted = True
             self.db.commit()
             self.db.refresh(preparation_form)
-            return preparation_form
+            return self.get_preparation_form()
 
         except Exception as e:
             raise TempPreparationFormSoftDeleteException(detail=f"Error: {str(e)}")

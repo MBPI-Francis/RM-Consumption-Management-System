@@ -17,7 +17,7 @@ async def read_transfer_form(db: get_db = Depends()):
     result = TempTransferFormService(db).get_transfer_form()
     return result
 
-@router.put("/update/{transfer_form_id}/", response_model=TempTransferFormResponse)
+@router.put("/update/{transfer_form_id}/", response_model=list[TempTransferFormResponse])
 async def update_transfer_form(transfer_form_id: UUID, transfer_form_update: TempTransferFormUpdate, db: get_db = Depends()):
     result = TempTransferFormService(db).update_transfer_form(transfer_form_id, transfer_form_update)
     return result
@@ -27,7 +27,7 @@ async def restore_transfer_form(transfer_form_id: UUID,  db: get_db = Depends())
     result = TempTransferFormService(db).restore_transfer_form(transfer_form_id)
     return result
 
-@router.delete("/delete/{transfer_form_id}/", response_model=TempTransferFormResponse)
+@router.delete("/delete/{transfer_form_id}/", response_model=list[TempTransferFormResponse])
 async def delete_transfer_form(transfer_form_id: UUID, db: get_db = Depends()):
     result = TempTransferFormService(db).soft_delete_transfer_form(transfer_form_id)
     return result

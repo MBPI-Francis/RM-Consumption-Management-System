@@ -292,7 +292,7 @@ def entry_fields(note_form_tab):
 
 
     # Date Entry field
-    date_label = ttk.Label(form_frame, text="Outgoing Date:", font=("Helvetica", 10, "bold"))
+    date_label = ttk.Label(form_frame, text="Transfer Date:", font=("Helvetica", 10, "bold"))
     date_label.grid(row=4, column=3, padx=5, pady=5, sticky=W)
 
     # Calculate yesterday's date

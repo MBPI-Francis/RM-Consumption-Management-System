@@ -16,7 +16,7 @@ async def read_preparation_form(db: get_db = Depends()):
     result = TempPreparationFormService(db).get_preparation_form()
     return result
 
-@router.put("/update/{preparation_form_id}/", response_model=TempPreparationFormResponse)
+@router.put("/update/{preparation_form_id}/", response_model=list[TempPreparationFormResponse])
 async def update_preparation_form(preparation_form_id: UUID, preparation_form_update: TempPreparationFormUpdate, db: get_db = Depends()):
     result = TempPreparationFormService(db).update_preparation_form(preparation_form_id, preparation_form_update)
     return result
@@ -26,7 +26,7 @@ async def restore_preparation_form(preparation_form_id: UUID,  db: get_db = Depe
     result = TempPreparationFormService(db).restore_preparation_form(preparation_form_id)
     return result
 
-@router.delete("/delete/{preparation_form_id}/", response_model=TempPreparationFormResponse)
+@router.delete("/delete/{preparation_form_id}/", response_model=list[TempPreparationFormResponse])
 async def delete_preparation_form(preparation_form_id: UUID, db: get_db = Depends()):
     result = TempPreparationFormService(db).soft_delete_preparation_form(preparation_form_id)
     return result

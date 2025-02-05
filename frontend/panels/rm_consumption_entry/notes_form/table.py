@@ -12,20 +12,19 @@ from datetime import datetime
 
 class NoteTable:
     def __init__(self, root):
-        self.note_form_tab = root
+        self.root = root
 
         # Frame for search
-        self.search_var = ttk.StringVar()
-        search_frame = ttk.Frame(self.note_form_tab)
+        search_frame = ttk.Frame(self.root)
         search_frame.pack(fill=X, padx=10, pady=5)
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
-        search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
-        search_entry.pack(side=LEFT, fill=X, expand=YES)
-        search_entry.bind("<KeyRelease>", self.filter_data)
+        self.search_entry = ttk.Entry(search_frame)
+        self.search_entry.pack(side=LEFT, fill=X, expand=YES)
+        self.search_entry.bind("<Return>", self.search_data)
 
         # Treeview setup
         self.tree = ttk.Treeview(
-            master=self.note_form_tab,
+            master=self.root,
             columns=("Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date"),
             show='headings'
         )
@@ -95,7 +94,7 @@ class NoteTable:
         if not record:
             return
 
-        edit_window = Toplevel(self.note_form_tab)
+        edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
         edit_window.geometry("300x225")
 
@@ -224,4 +223,17 @@ class NoteTable:
             return data
         else:
             print(f"Failed to fetch data. Status code: {response.status_code}")
+
+
+    def search_data(self, event=None):
+        """Search for data when Enter is pressed."""
+        search_term = self.search_entry.get().strip().lower()
+        for item in self.tree.get_children():
+            values = [str(val).lower() for val in self.tree.item(item)["values"]]
+            if any(search_term in val for val in values):
+                self.tree.selection_set(item)
+                self.tree.focus(item)
+                self.tree.see(item)
+                return
+        messagebox.showinfo("Search", "No matching record found.")
 
