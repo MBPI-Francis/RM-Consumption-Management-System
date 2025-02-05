@@ -10,6 +10,7 @@ from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_droplist.v1.models import DropList
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import aliased
+from sqlalchemy import text
 
 # These are the code for the app to communicate to the database
 class TempHeldFormCRUD(AppCRUD):
@@ -32,6 +33,36 @@ class TempHeldFormCRUD(AppCRUD):
 
 
     def create_held_form(self, held_form: TempHeldFormCreate):
+        
+        
+        # Check if the status id is null
+        query = text("""SELECT * FROM view_beginning_soh
+                        WHERE warehouseid = :warehouse_id
+                              AND rawmaterialid = :rm_code_id
+                              AND statusid = :status_id""")
+
+
+
+        record = self.db.execute(query, {
+            "warehouse_id": held_form.warehouse_id,
+            "rm_code_id": held_form.rm_code_id,
+            "status_id": held_form.new_status_id
+        }).fetchone()  # or .fetchall() if expecting multiple rows
+        result = record
+
+        # This feature is required for the calculation
+        if not result:
+            # Create a new StockOnHand record
+            new_stock = StockOnHand(
+                rm_code_id=held_form.rm_code_id,
+                warehouse_id=held_form.warehouse_id,
+                rm_soh=0.00,
+                status_id=held_form.new_status_id
+            )
+            self.db.add(new_stock)
+            self.db.commit()
+            self.db.refresh(new_stock)
+        
         # Get the latest StockOnHand record ID
         latest_soh_record = self.get_latest_soh_record(
             warehouse_id=held_form.warehouse_id,
@@ -79,6 +110,7 @@ class TempHeldFormCRUD(AppCRUD):
         # Join tables
         stmt = (
             self.db.query(
+                TempHeldForm.id,
                 RawMaterial.rm_code.label("raw_material"),
                 TempHeldForm.qty_kg,
                 TempHeldForm.ref_number,
@@ -139,7 +171,7 @@ class TempHeldFormCRUD(AppCRUD):
                 setattr(held_form, key, value)
             self.db.commit()
             self.db.refresh(held_form)
-            return held_form
+            return self.get_held_form()
 
         except Exception as e:
             raise TempHeldFormUpdateException(detail=f"Error: {str(e)}")
@@ -153,7 +185,7 @@ class TempHeldFormCRUD(AppCRUD):
             held_form.is_deleted = True
             self.db.commit()
             self.db.refresh(held_form)
-            return held_form
+            return self.get_held_form()
 
         except Exception as e:
             raise TempHeldFormSoftDeleteException(detail=f"Error: {str(e)}")

@@ -18,6 +18,18 @@ class NoteTable:
     def __init__(self, root):
         self.root = root
 
+        # self.search_entry = ttk.Entry(self.root)
+        # self.search_entry.pack(pady=5)
+        # self.search_entry.bind("<Return>", self.search_data)
+
+        # Frame for search
+        search_frame = ttk.Frame(self.root)
+        search_frame.pack(fill=X, padx=10, pady=5)
+        ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
+        self.search_entry = ttk.Entry(search_frame)
+        self.search_entry.pack(side=LEFT, fill=X, expand=YES)
+        self.search_entry.bind("<Return>", self.search_data)
+
         self.tree = ttk.Treeview(self.root, columns=(
             "Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
             "Beginning Balance", "Outgoing Date", "Entry Date"
@@ -32,10 +44,6 @@ class NoteTable:
         self.tree.bind("<Button-3>", self.show_context_menu)  # Right-click menu
 
         self.refresh_table()
-
-        self.search_entry = ttk.Entry(self.root)
-        self.search_entry.pack(pady=5)
-        self.search_entry.bind("<Return>", self.search_data)
 
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
@@ -267,12 +275,12 @@ class NoteTable:
     def get_status_id(self):
         query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
         # Assuming you have a PostgreSQL connection (replace with your connection details)
-        # connection = psycopg2.connect(
-        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
-        # )
-
         connection = psycopg2.connect(
-            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432")
+            dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
+        )
+
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432")
 
         cursor = connection.cursor()
         cursor.execute(query)

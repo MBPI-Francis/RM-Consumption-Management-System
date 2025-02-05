@@ -17,13 +17,12 @@ class NoteTable:
         self.root = root
 
         # Frame for search
-        self.search_var = ttk.StringVar()
         search_frame = ttk.Frame(self.root)
         search_frame.pack(fill=X, padx=10, pady=5)
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
-        search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
-        search_entry.pack(side=LEFT, fill=X, expand=YES)
-        search_entry.bind("<KeyRelease>", self.root)
+        self.search_entry = ttk.Entry(search_frame)
+        self.search_entry.pack(side=LEFT, fill=X, expand=YES)
+        self.search_entry.bind("<Return>", self.search_data)
 
         self.tree = ttk.Treeview(root,
                                  columns=("Raw Material", "Warehouse", "Reference No.",
@@ -292,16 +291,28 @@ class NoteTable:
     def get_status_id(self):
         query = f"SELECT id FROM tbl_droplist WHERE name = 'good'"
         # Assuming you have a PostgreSQL connection (replace with your connection details)
-        # connection = psycopg2.connect(
-        #     dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
-        # )
-
         connection = psycopg2.connect(
-            dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+            dbname="RMManagementSystemDB", user="postgres", password="mbpi", host="192.168.1.13", port="5432"
         )
+
+        # connection = psycopg2.connect(
+        #     dbname="RMManagementSystemDB", user="postgres", password="331212", host="localhost", port="5432"
+        # )
         cursor = connection.cursor()
         cursor.execute(query)
         result = cursor.fetchone()
         connection.close()
 
         return result[0] if result else None
+
+    def search_data(self, event=None):
+        """Search for data when Enter is pressed."""
+        search_term = self.search_entry.get().strip().lower()
+        for item in self.tree.get_children():
+            values = [str(val).lower() for val in self.tree.item(item)["values"]]
+            if any(search_term in val for val in values):
+                self.tree.selection_set(item)
+                self.tree.focus(item)
+                self.tree.see(item)
+                return
+        messagebox.showinfo("Search", "No matching record found.")

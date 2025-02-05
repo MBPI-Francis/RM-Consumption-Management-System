@@ -24,6 +24,7 @@ class TempHeldFormUpdate(TempHeldForm):
     pass
 
 class TempHeldFormResponse(BaseModel):
+    id: UUID
     raw_material: str
     wh_name: str
     ref_number: str

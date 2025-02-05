@@ -237,3 +237,5 @@ class NoteTable:
                 return
         messagebox.showinfo("Search", "No matching record found.")
 
+
+
