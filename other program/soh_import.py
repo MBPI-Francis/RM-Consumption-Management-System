@@ -3,7 +3,7 @@ import pandas as pd
 import psycopg2
 
 # API Base URL (Replace with your actual API endpoint)
-API_BASE_URL = "http://127.0.0.1:8000/api/rm_stock_on_hand/temp/create/"
+API_BASE_URL = "http://192.168.1.13:8000/api/rm_stock_on_hand/temp/create/"
 
 
 # Function to get raw material ID from the database
@@ -55,14 +55,14 @@ def create_record(rm_code_id, warehouse_id, status_id, rm_soh):
     response = requests.post(API_BASE_URL, json=payload)
     if response.status_code == 200:
         print(f"Record for RM Code ID {rm_code_id} saved successfully.")
-        print(f"Record for RM Code ID {status_id} saved successfully.")
+        print(f"Status: {status_id} saved successfully.")
         print(f" ")
     else:
         print(f"Failed to save record for RM Code ID {rm_code_id}. Status Code: {response.status_code}")
 
 
 # Read the Excel file (assuming it's named 'data.xlsx')
-excel_file = r'C:\Users\Administrator\Desktop\MBPI-Projects\RM-Consumption-Management-System\TEST DATA\Sir Elton\Sample_3\wh4_soh_data.xlsx'
+excel_file = r'C:\Users\Administrator\Desktop\MBPI-Projects\Files\TEST DATA\Sir Elton\Sample_3\wh1_soh_data.xlsx'
 df = pd.read_excel(excel_file)
 
 # Loop through each row in the Excel file
