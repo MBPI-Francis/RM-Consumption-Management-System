@@ -71,6 +71,9 @@ def entry_fields(note_form_tab):
         preparation_date = preparation_date_entry.entry.get()
         status_id = get_status_id()
 
+        # Set focus to the Entry field
+        rm_codes_combobox.focus_set()
+
 
         # If the user didn't enter a value in the qty return field, then it will store 0.00 value in the variable
         if qty_return == None or qty_return == '':
@@ -94,7 +97,7 @@ def entry_fields(note_form_tab):
             "qty_return": qty_return,
         }
 
-        print("This is the data: ", data)
+
 
         # Validate the data entries in front-end side
         if EntryValidation.entry_validation(data):
@@ -183,9 +186,17 @@ def entry_fields(note_form_tab):
     rm_names = list(code_to_id.keys())
 
 
+    # Function to convert typed input to uppercase
+    def on_combobox_key_release(event):
+        # Get the current text in the combobox
+        current_text = rm_codes_combobox.get()
+        # Convert the text to uppercase and set it back
+        rm_codes_combobox.set(current_text.upper())
+
     # Combobox for RM CODE Drop Down
     rm_codes_label = ttk.Label(form_frame, text="Raw Material:", font=("Helvetica", 10, "bold"))
     rm_codes_label.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+
     rm_codes_combobox = ttk.Combobox(
         form_frame,
         values=rm_names,
@@ -193,8 +204,12 @@ def entry_fields(note_form_tab):
         width=30,
     )
 
+    # Bind the key release event to the combobox to trigger uppercase conversion
+    rm_codes_combobox.bind("<KeyRelease>", on_combobox_key_release)
+
     rm_codes_combobox.grid(row=5, column=0, columnspan=2, pady=10, padx=10)
     ToolTip(rm_codes_combobox, text="Choose a raw material")
+
 
     # Register the validation command
 
@@ -265,10 +280,10 @@ def get_warehouse_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
+
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
+        return []
 
 
 
@@ -280,10 +295,10 @@ def get_rm_code_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
+
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
+        return []
 
 
 

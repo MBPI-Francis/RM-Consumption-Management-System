@@ -42,7 +42,6 @@ class NoteTable:
             response.raise_for_status()
 
             data = response.json()
-            print(data)
 
             # Format data for the table
             rowdata = [
@@ -56,7 +55,7 @@ class NoteTable:
             ]
             return rowdata
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching data from API: {e}")
+            # print(f"Error fetching data from API: {e}")
             return []
 
 

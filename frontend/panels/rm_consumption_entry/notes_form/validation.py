@@ -1,6 +1,3 @@
-
-
-
 class EntryValidation:
     def entry_validation(entries: dict):
         text_list = []

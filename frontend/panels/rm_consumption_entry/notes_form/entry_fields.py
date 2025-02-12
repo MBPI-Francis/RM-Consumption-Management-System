@@ -10,13 +10,6 @@ from .validation import EntryValidation
 
 
 def entry_fields(note_form_tab):
-    def get_selected_product_kind_id():
-        selected_name = product_kind_combobox.get()
-        selected_id = name_to_id.get(selected_name)  # Get the corresponding ID
-        if selected_id:
-            return selected_id
-        else:
-            return None
 
         # Function to clear all entry fields
     def clear_fields():
@@ -30,8 +23,12 @@ def entry_fields(note_form_tab):
         # Collect the form data
         product_code = product_code_entry.get()
         lot_number = lot_number_entry.get()
-        product_kind_id = get_selected_product_kind_id()
+        product_kind_id = product_kind_combobox.get()
         consumption_date = date_entry.entry.get()
+
+        # Set focus to the Entry field
+        product_code_entry.focus_set()
+
 
         # Convert date to YYYY-MM-DD
         try:
@@ -76,24 +73,46 @@ def entry_fields(note_form_tab):
     form_frame = ttk.Frame(note_form_tab)
     form_frame.pack(fill=X, pady=10, padx=20)
 
+
+    # Function to convert typed input to uppercase
+    def on_key_release(event):
+        # Get the current text in the entry field
+        prod_code_current_text = product_code_var.get()
+
+        # Convert the text to uppercase and set it back
+        product_code_var.set(prod_code_current_text.upper())
+
+        # Get the current text in the combobox
+        lot_num_current_text = lot_number_var.get()
+
+        # Convert the text to uppercase and set it back
+        lot_number_var.set(lot_num_current_text.upper())
+
+
     # Product Code Entry Field
+
+    product_code_var = ttk.StringVar(value="")
     product_code_label = ttk.Label(form_frame, text="Product Code:", font=("Helvetica", 10, "bold"))
     product_code_label.grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    product_code_entry = ttk.Entry(form_frame, width=30)
+    product_code_entry = ttk.Entry(form_frame, width=30, textvariable=product_code_var)
     product_code_entry.grid(row=1, column=0, padx=5, pady=5)
     ToolTip(product_code_entry, text="Enter the product code")
+    # Bind the key release event to the combobox to trigger uppercase conversion
+    product_code_entry.bind("<KeyRelease>", on_key_release)
 
     # Lot Number Entry Field
+    lot_number_var = ttk.StringVar(value="")
     lot_number_label = ttk.Label(form_frame, text="Lot Number:", font=("Helvetica", 10, "bold"))
     lot_number_label.grid(row=0, column=1, padx=5, pady=5, sticky=W)
-    lot_number_entry = ttk.Entry(form_frame, width=30)
+    lot_number_entry = ttk.Entry(form_frame, width=30, textvariable=lot_number_var)
     lot_number_entry.grid(row=1, column=1, padx=5, pady=5)
     ToolTip(lot_number_entry, text="Enter the lot number")
+    lot_number_entry.bind("<KeyRelease>", on_key_release)
 
     # Product Kind JSON-format choices (coming from the API)
     product_kinds = get_product_kinds_api()
     name_to_id = {item["name"]: item["id"] for item in product_kinds}
-    product_kind_names = list(name_to_id.keys())
+    product_kind_names = list(name_to_id.values())
 
     # Combobox for Product Kind Drop Down
     product_kind_label = ttk.Label(form_frame, text="Product Kind:", font=("Helvetica", 10, "bold"))
@@ -137,6 +156,8 @@ def entry_fields(note_form_tab):
     note_table = NoteTable(note_form_tab)
 
 
+
+
 def get_product_kinds_api():
     url = server_ip + "/api/product_kinds/temp/list/"
     response = requests.get(url)
@@ -145,10 +166,9 @@ def get_product_kinds_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
+        return []
 
 
 

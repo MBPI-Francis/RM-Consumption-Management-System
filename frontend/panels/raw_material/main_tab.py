@@ -73,7 +73,7 @@ def rm_soh_tab(notebook):
                 response.raise_for_status()
 
                 data = response.json()
-                print(data)
+
 
                 # Format data for the table
                 rowdata = [
@@ -88,7 +88,6 @@ def rm_soh_tab(notebook):
                 ]
                 return rowdata
             except requests.exceptions.RequestException as e:
-                print(f"Error fetching data from API: {e}")
                 return []
 
             # Return both buttons as a tuple
