@@ -70,6 +70,7 @@ class TempOutgoingReportCRUD(AppCRUD):
         # Join tables
         stmt = (
             self.db.query(
+                TempOutgoingReport.id ,
                 RawMaterial.rm_code.label("raw_material"),
                 TempOutgoingReport.qty_kg,
                 TempOutgoingReport.ref_number,
@@ -118,7 +119,7 @@ class TempOutgoingReportCRUD(AppCRUD):
                 setattr(outgoing_report, key, value)
             self.db.commit()
             self.db.refresh(outgoing_report)
-            return outgoing_report
+            return self.get_outgoing_report()
 
         except Exception as e:
             raise TempOutgoingReportUpdateException(detail=f"Error: {str(e)}")
@@ -132,7 +133,7 @@ class TempOutgoingReportCRUD(AppCRUD):
             outgoing_report.is_deleted = True
             self.db.commit()
             self.db.refresh(outgoing_report)
-            return outgoing_report
+            return self.get_outgoing_report()
 
         except Exception as e:
             raise TempOutgoingReportSoftDeleteException(detail=f"Error: {str(e)}")

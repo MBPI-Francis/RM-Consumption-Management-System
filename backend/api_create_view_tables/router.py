@@ -182,7 +182,7 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
             }
             for row in result
         ]
-        print("The data: ", records)
+
         # Step 2: Transform and insert the data into the database
         for record in records:
             rm_soh_item = StockOnHand(rm_code_id=record["rawmaterialid"],
@@ -233,18 +233,50 @@ def clear_table_func(table, db):
         raise HTTPException(status_code=500, detail=f"Failed to update table {table.__tablename__}: {e}")
 
 @router.post("/clear-table-data")
-async def clear_table_data(db: get_db = Depends()):
+async def clear_table_data(tbl: str, db: get_db = Depends()):
     """
     Updates the `is_cleared` column to True for all specified tables.
     """
-    tables = [
-        TempNotes,
-        TempPreparationForm,
-        TempTransferForm,
-        TempOutgoingReport,
-        TempReceivingReport,
-        TempHeldForm,
-    ]
+
+    if tbl == 'notes':
+        tables = [
+            TempNotes,
+           ]
+
+    elif tbl == 'preparation forms':
+        tables = [
+            TempPreparationForm,
+        ]
+
+    elif tbl == 'transfer forms':
+        tables = [
+            TempTransferForm,
+        ]
+
+    elif tbl == 'outgoing forms':
+        tables = [
+            TempOutgoingReport,
+        ]
+
+    elif tbl == 'receiving forms':
+        tables = [
+            TempReceivingReport,
+        ]
+
+    elif tbl == 'change status forms':
+        tables = [
+            TempHeldForm,
+        ]
+
+    elif tbl == 'all':
+        tables = [
+            TempNotes,
+            TempPreparationForm,
+            TempTransferForm,
+            TempOutgoingReport,
+            TempReceivingReport,
+            TempHeldForm,
+        ]
 
     updated_tables = []
 
@@ -256,13 +288,10 @@ async def clear_table_data(db: get_db = Depends()):
     return {"message": "Update successful", "updated_tables": updated_tables}
 
 
-
 @router.get("/check/rm-stock-value/")
 async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, status_id: Optional[UUID]=None, db: get_db = Depends()):
     try:
 
-
-        print(status_id)
         # Check if the status id is null
         if status_id:
             query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
@@ -273,6 +302,45 @@ async def check_stock(rm_id: UUID, warehouse_id: UUID, entered_qty: float, statu
 
         else:
             query = text(f"""SELECT new_beginning_balance FROM public.view_ending_stocks_balance
+                            WHERE warehouseid = '{warehouse_id}'
+                                    AND rawmaterialid = '{rm_id}'
+                                    AND statusid IS NULL""")
+        result = db.execute(query)
+        beginning_balance = result.fetchone()
+        # Check if there is a record after executing the query
+
+
+        if beginning_balance:
+            # Check if the entered_qty is less or equal than the beginning balance
+            #  Returns true if the entered quantity is less or equal
+            # Returns false if the entered quantity exceeds
+
+            if float(entered_qty) <= float(beginning_balance[0]):
+                return True
+
+            else:
+                return False
+
+        else:
+            return False
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@router.get("/check/rm-stock-value/for-update/")
+async def check_stock_for_update(rm_id: UUID, warehouse_id: UUID, entered_qty: float, status_id: Optional[UUID]=None, db: get_db = Depends()):
+    try:
+        # Check if the status id is null
+        if status_id:
+            query = text(f"""SELECT beginningbalance FROM public.view_beginning_soh
+                                       WHERE warehouseid = '{warehouse_id}'
+                                               AND statusid = '{status_id}'
+                                               AND rawmaterialid = '{rm_id}'
+                                                """)
+
+        else:
+            query = text(f"""SELECT beginningbalance FROM public.view_beginning_soh
                             WHERE warehouseid = '{warehouse_id}'
                                     AND rawmaterialid = '{rm_id}'
                                     AND statusid IS NULL""")

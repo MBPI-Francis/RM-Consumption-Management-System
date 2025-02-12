@@ -21,6 +21,7 @@ class TempOutgoingReportUpdate(TempOutgoingReport):
     pass
 
 class TempOutgoingReportResponse(BaseModel):
+    id: UUID
     raw_material: str
     qty_kg: float
     ref_number: str

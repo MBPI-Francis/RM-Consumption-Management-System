@@ -1,11 +1,10 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from sidebar.sidebar import Sidebar
-from panels.warehouse.main_view import WarehouseView
-from panels.department.department_view import DepartmentView
-from panels.user.user_view import UserView
-from panels.raw_material.main_view import RawMaterialView
-from panels.rm_consumption_entry.main_view import ConsumptionEntryView
+from frontend.sidebar.sidebar import Sidebar
+from frontend.panels.warehouse.main_view import WarehouseView
+from frontend.panels.user.user_view import UserView
+from frontend.panels.raw_material.main_view import RawMaterialView
+from frontend.panels.rm_consumption_entry.main_view import ConsumptionEntryView
 
 class App(ttk.Window):
     def __init__(self):

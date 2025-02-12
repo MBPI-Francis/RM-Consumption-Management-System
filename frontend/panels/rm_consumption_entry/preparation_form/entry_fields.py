@@ -60,8 +60,6 @@ def entry_fields(note_form_tab):
         return result[0] if result else None
 
 
-
-
     def submit_data():
 
         # Collect the form data

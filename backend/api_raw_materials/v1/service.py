@@ -6,20 +6,53 @@ from backend.api_raw_materials.v1.schemas import RawMaterialCreate, RawMaterialU
 from backend.api_users.v1.models import User
 from sqlalchemy.sql import func
 from uuid import UUID
+from sqlalchemy.exc import IntegrityError
 
 
 # These are the code for the app to communicate to the database
 class RawMaterialCRUD(AppCRUD):
     def create_raw_material(self, raw_material: RawMaterialCreate):
-        raw_material_item = RawMaterial(rm_code=raw_material.rm_code,
-                                   description=raw_material.description,
-                                   rm_name=raw_material.rm_name,
-                                   updated_by_id=raw_material.updated_by_id,
-                                   created_by_id=raw_material.created_by_id)
-        self.db.add(raw_material_item)
-        self.db.commit()
-        self.db.refresh(raw_material_item)
-        return raw_material_item
+        # Normalize the input: Remove spaces and convert to uppercase
+        normalized_rm_code = raw_material.rm_code.replace(" ", "").upper()
+
+        # Check if an existing raw material has the same normalized rm_code
+        existing_rm = self.db.query(RawMaterial).filter(
+            func.replace(func.upper(RawMaterial.rm_code), " ", "") == normalized_rm_code
+        ).first()
+
+        if existing_rm:
+            raise Exception(status_code=400, detail="Raw material code already exists.")
+
+
+        else:
+            # If no duplicate, proceed with creation
+            raw_material_item = RawMaterial(
+                rm_code=raw_material.rm_code,
+                description=raw_material.description,
+                rm_name=raw_material.rm_name,
+                updated_by_id=raw_material.updated_by_id,
+                created_by_id=raw_material.created_by_id
+            )
+
+            try:
+                self.db.add(raw_material_item)
+                self.db.commit()
+                self.db.refresh(raw_material_item)
+                return raw_material_item
+            except IntegrityError:
+                self.db.rollback()
+                raise Exception(status_code=500, detail="Error while creating raw material.")
+
+
+        # raw_material_item = RawMaterial(rm_code=raw_material.rm_code,
+        #                            description=raw_material.description,
+        #                            rm_name=raw_material.rm_name,
+        #                            updated_by_id=raw_material.updated_by_id,
+        #                            created_by_id=raw_material.created_by_id)
+        # self.db.add(raw_material_item)
+        # self.db.commit()
+        # self.db.refresh(raw_material_item)
+        # return raw_material_item
 
     def all_raw_material(self):
         raw_material_item = self.db.query(RawMaterial).all()

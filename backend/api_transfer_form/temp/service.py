@@ -141,6 +141,7 @@ class TempTransferFormCRUD(AppCRUD):
         """
         stmt = (
             self.db.query(
+                TempTransferForm.id,
                 RawMaterial.rm_code.label("raw_material"),
                 TempTransferForm.qty_kg,
                 TempTransferForm.ref_number,
@@ -188,7 +189,7 @@ class TempTransferFormCRUD(AppCRUD):
                 setattr(transfer_form, key, value)
             self.db.commit()
             self.db.refresh(transfer_form)
-            return transfer_form
+            return self.get_transfer_form()
 
         except Exception as e:
             raise TempTransferFormUpdateException(detail=f"Error: {str(e)}")
@@ -202,7 +203,7 @@ class TempTransferFormCRUD(AppCRUD):
             transfer_form.is_deleted = True
             self.db.commit()
             self.db.refresh(transfer_form)
-            return transfer_form
+            return self.get_transfer_form()
 
         except Exception as e:
             raise TempTransferFormSoftDeleteException(detail=f"Error: {str(e)}")

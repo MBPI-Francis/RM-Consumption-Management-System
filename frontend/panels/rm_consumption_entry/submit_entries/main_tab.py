@@ -11,8 +11,8 @@ def submit_entries_tab(notebook):
     submit_entries_label = ttk.Label(
         submit_entries_tab,
         text="Click the Button to Submit and Compute your Entries",
-        font=("Helvetica", 14),
-        bootstyle=INFO,
+        font=("Helvetica", 14, "bold"),
+        bootstyle=PRIMARY,
     )
     submit_entries_label.pack(pady=20, padx=20)
 

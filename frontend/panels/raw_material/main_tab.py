@@ -15,9 +15,9 @@ def rm_code_tab(notebook):
     # Populate the Raw Materials Tab
     raw_material_label = ttk.Label(
         raw_material_tab,
-        text="Raw Materials Content Here",
+        text="Raw Materials",
         font=("Helvetica", 14),
-        bootstyle=INFO,
+        bootstyle=PRIMARY,
     )
     raw_material_label.pack(pady=20, padx=20)
     entry_fields(raw_material_tab)
@@ -32,7 +32,7 @@ def rm_soh_tab(notebook):
         soh_tab,
         text="Overall Latest Raw Material Stocks",
         font=("Helvetica", 14),
-        bootstyle=INFO,
+        bootstyle=PRIMARY,
     )
     raw_material_label.pack(pady=20, padx=20)
 
