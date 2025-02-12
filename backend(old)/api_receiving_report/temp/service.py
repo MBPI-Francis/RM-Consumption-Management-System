@@ -75,6 +75,7 @@ class TempReceivingReportCRUD(AppCRUD):
             self.db.add(new_stock)
             self.db.commit()
             self.db.refresh(new_stock)
+            print('NAKAPAG CREATE KA NG RECORD PARE KO ', new_stock)
 
 
         # Get the latest StockOnHand record ID
@@ -163,49 +164,6 @@ class TempReceivingReportCRUD(AppCRUD):
 
 
     def update_receiving_report(self, receiving_report_id: UUID, receiving_report_update: TempReceivingReportUpdate):
-
-        # Get the ID of the good status
-        status_query = text(""" SELECT id FROM tbl_droplist WHERE name = 'good' """)
-        status_record = self.db.execute(status_query).fetchone()  # or .fetchall() if expecting multiple rows
-        status_result = status_record
-        if status_result:
-            status_id = status_result[0]
-
-        else:
-            print("There is an error with getting the status ID")
-            return
-
-
-        # Check if the record is existing in the SOH
-        query = text("""SELECT * FROM view_beginning_soh
-                        WHERE warehouseid = :warehouse_id
-                              AND rawmaterialid = :rm_code_id
-                              AND statusid = :status_id""")
-
-
-
-        record = self.db.execute(query, {
-            "warehouse_id": receiving_report_update.warehouse_id,
-            "rm_code_id": receiving_report_update.rm_code_id,
-            "status_id": status_id
-        }).fetchone()  # or .fetchall() if expecting multiple rows
-        result = record
-
-        # This feature is required for the calculation.
-        # Create a SOH record if there is no RM existing
-        if not result:
-            # Create a new StockOnHand record
-            new_stock = StockOnHand(
-                rm_code_id=receiving_report_update.rm_code_id,
-                warehouse_id=receiving_report_update.warehouse_id,
-                rm_soh=0.00,
-                status_id=status_id
-            )
-            self.db.add(new_stock)
-            self.db.commit()
-            self.db.refresh(new_stock)
-
-
         try:
             receiving_report = self.db.query(TempReceivingReport).filter(TempReceivingReport.id == receiving_report_id).first()
             if not receiving_report or receiving_report.is_deleted:
