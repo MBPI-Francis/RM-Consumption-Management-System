@@ -12,6 +12,9 @@ import psycopg2
 # DATABASE_URL = "postgresql://postgres:mbpi@192.168.1.13:5432/RMManagementSystemDB"
 
 # Uncomment this if you want to use the RMManagementSystemDB Database in your own computer/laptop. This is the database for development
+# DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
+
+# This url is for sir Elton. You can uncomment this
 DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
 
 
@@ -40,5 +43,5 @@ def get_db():
 server_ip = "http://127.0.0.1:8000"
 
 
-# Uncomment this if you are deploying the API in your Server
+# Uncomment this if you are deploying the API using company's Server
 # server_ip = "http://192.168.1.13:8000"
