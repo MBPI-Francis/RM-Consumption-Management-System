@@ -25,7 +25,19 @@ UPDATES - The "RUN THIS TO START API SERVER" file
 3. Note: Closing the terminal will stop the API server, which will impact the entire program. The program might not function properly or run at all.
 
 
+
+UPDATES - The "Runnable Warehouse Program EXE" folder
+1. The "Runnable Warehouse Program EXE" folder only works on computers within the Masterbatch network. It will not function on computers 
+outside the network because the executable file is specifically configured to run only on Masterbatch computers.
+
+
+2. To run the program you can go to this path: "frontend/main.py"
+Run the main.py that is located inside the frontend folder
+
+
+
 ===========================================================================================================================================================
+
 
 There are two backend folders. These backend folders are where the APIs are located.
 1. backend - This is the latest version of the API. Bugs are fixed
