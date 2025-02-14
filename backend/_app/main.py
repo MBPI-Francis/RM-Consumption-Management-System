@@ -74,4 +74,4 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Backend API Hello HAHAHAHA44444"}
+    return {"message": "The Warehouse Program API is perfectly working!"}

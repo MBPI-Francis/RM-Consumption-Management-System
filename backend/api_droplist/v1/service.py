@@ -24,6 +24,12 @@ class DropListCRUD(AppCRUD):
             return droplist_item
         return []
 
+    def get_good_status(self):
+        droplist_item = self.db.query(DropList).all()
+        if droplist_item:
+            return droplist_item
+        return []
+
 
     def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):
         try:
@@ -89,6 +95,16 @@ class DropListService(AppService):
         except Exception as e:
             raise DropListNotFoundException(detail=f"Error: {str(e)}")
         return droplist_item
+
+
+    def get_good_status(self):
+        try:
+            droplist_item = DropListCRUD(self.db).get_good_status()
+
+        except Exception as e:
+            raise DropListNotFoundException(detail=f"Error: {str(e)}")
+        return droplist_item
+
 
     # This is the service/business logic in updating the droplist.
     def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):

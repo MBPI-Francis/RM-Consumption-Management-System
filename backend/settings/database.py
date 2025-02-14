@@ -3,7 +3,7 @@ from sqlalchemy.orm import  sessionmaker, declarative_base
 # from sqlalchemy.ext.declarative import declarative_base
 import psycopg2
 
-# This is the connection string (also known as a database URL) used to specify how to connect to your PostgreSQL database.
+# The DATABASE_URL variable is the connection string (also known as a database URL) used to specify how to connect to your PostgreSQL database.
 
 # Uncomment this if you want to use the RMDummyDB Database. This is the database for development
 # DATABASE_URL = "postgresql://postgres:mbpi@192.168.1.13:5432/RMDummyDB"
