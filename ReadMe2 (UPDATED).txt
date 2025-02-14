@@ -2,7 +2,7 @@ UPDATES: 02/14/2025
 
 
 
-The two environments are REMOVED:
+UPDATES - The two environments are REMOVED:
 This action is necessary since there are several reasons to not include the environments in the repository.
 
 1. The venv/ folder contains system-specific paths and compiled binaries that work only on the machine where it was created.
@@ -11,6 +11,21 @@ This action is necessary since there are several reasons to not include the envi
 4. Pushing it to GitHub bloats the repository, making cloning and pulling much slower.
 
 
+
+UPDATES - environment.yml
+- The developer already created environment.yml so that it can be use to create a conda environment
+
+
+
+UPDATES - The "RUN THIS TO START API SERVER" file
+1. This is a batch file that you can double-click to start the server.
+
+2.  After running it, a terminal/command prompt will appear on your screen.
+
+3. Note: Closing the terminal will stop the API server, which will impact the entire program. The program might not function properly or run at all.
+
+
+===========================================================================================================================================================
 
 There are two backend folders. These backend folders are where the APIs are located.
 1. backend - This is the latest version of the API. Bugs are fixed
