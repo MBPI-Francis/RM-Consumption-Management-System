@@ -14,8 +14,11 @@ import psycopg2
 # Uncomment this if you want to use the RMManagementSystemDB Database in your own computer/laptop. This is the database for development
 # DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
 
-# This url is for sir Elton. You can uncomment this
-# DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
+# This url is for sir Elton. You can uncomment  (With Password)
+DATABASE_URL = "postgresql://postgres:newpassword@localhost:5432/RMManagementSystemDB"
+
+# This url is for sir Elton. You can uncomment this (Without Password)
+# DATABASE_URL = "postgresql://postgres@localhost:5432/RMManagementSystemDB"
 
 
 # The engine is responsible for managing low-level details like connecting to
