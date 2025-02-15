@@ -15,7 +15,7 @@ import psycopg2
 # DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
 
 # This url is for sir Elton. You can uncomment this
-DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
+# DATABASE_URL = "postgresql://postgres:331212@localhost:5432/RMManagementSystemDB"
 
 
 # The engine is responsible for managing low-level details like connecting to
