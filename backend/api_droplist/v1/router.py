@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_droplist.v1.schemas import DropListCreate, DropListUpdate, DropListResponse
+from backend.api_droplist.v1.schemas import DropListCreate, DropListUpdate, DropListResponse, StatusResponse
 from backend.api_droplist.v1.service import DropListService
 from backend.settings.database import get_db
 from uuid import UUID
+from typing import List
 
 router = APIRouter(prefix="/api/droplist")
 
@@ -17,9 +18,10 @@ async def read_droplist(db: get_db = Depends()):
     result = DropListService(db).get_droplist()
     return result
 
-@router.get("/get/good/status/", response_model=list[DropListResponse])
-async def read_droplist(db: get_db = Depends()):
-    result = DropListService(db).get_good_status()
+
+@router.get("/transformed_list/", response_model=list[DropListResponse])
+async def read_transformed_raw_material(db: get_db = Depends()):
+    result = DropListService(db).all_transformed_droplist()
     return result
 
 @router.put("/update/{droplist_id}/", response_model=DropListResponse)
@@ -36,4 +38,10 @@ async def restore_droplist(droplist_id: UUID,  db: get_db = Depends()):
 @router.delete("/delete/{droplist_id}/", response_model=DropListResponse)
 async def delete_droplist(droplist_id: UUID, db: get_db = Depends()):
     result = DropListService(db).soft_delete_droplist(droplist_id)
+    return result
+
+
+@router.get("/search_status/", response_model=StatusResponse)
+async def search_status(name: str = None, db: get_db = Depends()):
+    result = DropListService(db).get_status(name)
     return result

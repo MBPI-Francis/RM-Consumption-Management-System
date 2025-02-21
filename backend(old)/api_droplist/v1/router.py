@@ -17,6 +17,11 @@ async def read_droplist(db: get_db = Depends()):
     result = DropListService(db).get_droplist()
     return result
 
+@router.get("/get/good/status/", response_model=list[DropListResponse])
+async def read_droplist(db: get_db = Depends()):
+    result = DropListService(db).get_good_status()
+    return result
+
 @router.put("/update/{droplist_id}/", response_model=DropListResponse)
 async def update_droplist(droplist_id: UUID, droplist_update: DropListUpdate, db: get_db = Depends()):
     result = DropListService(db).update_droplist(droplist_id, droplist_update)

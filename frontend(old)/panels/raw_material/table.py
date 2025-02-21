@@ -12,11 +12,10 @@ class NoteTable:
         self.note_form_tab = root
 
         self.coldata = [
-            {"text": "ID", "stretch": True, "anchor": "w"},
+            # {"text": "ID", "stretch": True, "anchor": "w"},
             {"text": "Raw Material Code", "stretch": True, "anchor": "w"},
             {"text": "Created by", "stretch": True},
             {"text": "Date Created", "stretch": True},
-            {"text": "Action", "stretch": True}
         ]
         self.rowdata = self.fetch_and_format_data()
 
@@ -42,12 +41,12 @@ class NoteTable:
             response.raise_for_status()
 
             data = response.json()
-            print(data)
+
 
             # Format data for the table
             rowdata = [
                 (
-                    item["id"],
+                    # item["id"],
                     item["rm_code"],
                     item["created_by"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p")
@@ -56,7 +55,6 @@ class NoteTable:
             ]
             return rowdata
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching data from API: {e}")
             return []
 
         # Return both buttons as a tuple

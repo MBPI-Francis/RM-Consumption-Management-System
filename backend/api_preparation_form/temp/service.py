@@ -6,62 +6,32 @@ from backend.api_preparation_form.temp.schemas import TempPreparationFormCreate,
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
+from backend.api_droplist.v1.models import DropList
 from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
+
 from uuid import UUID
 
 
 # These are the code for the app to communicate to the database
 class TempPreparationFormCRUD(AppCRUD):
 
-    def get_latest_soh_record(self, warehouse_id, rm_code_id):
-        """
-        Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
-        """
-        return (
-            self.db.query(StockOnHand)
-            .filter(
-                StockOnHand.warehouse_id == warehouse_id,
-                StockOnHand.rm_code_id == rm_code_id,
-            )
-            .order_by(desc(StockOnHand.stock_change_date))  # Assuming 'date' is the column for the latest date
-            .first()
-        )
-
-
     def create_preparation_form(self, preparation_form: TempPreparationFormCreate):
 
-        # Get the latest StockOnHand record ID
-        latest_soh_record = self.get_latest_soh_record(
-            warehouse_id=preparation_form.warehouse_id,
-            rm_code_id=preparation_form.rm_code_id,
-        )
-
-        if latest_soh_record:
-            latest_soh_record_id = latest_soh_record.id
-            preparation_form_item = TempPreparationForm(rm_code_id=preparation_form.rm_code_id,
+        preparation_form_item = TempPreparationForm(rm_code_id=preparation_form.rm_code_id,
                                                     warehouse_id=preparation_form.warehouse_id,
-                                                    rm_soh_id=latest_soh_record_id ,
                                                     ref_number=preparation_form.ref_number,
                                                     preparation_date=preparation_form.preparation_date,
                                                     qty_prepared=preparation_form.qty_prepared,
-                                                    qty_return=preparation_form.qty_return
+                                                    qty_return=preparation_form.qty_return,
+                                                    status_id=preparation_form.status_id
                                                     )
 
-        else:
-            preparation_form_item = TempPreparationForm(rm_code_id=preparation_form.rm_code_id,
-                                                        warehouse_id=preparation_form.warehouse_id,
-                                                        ref_number=preparation_form.ref_number,
-                                                        preparation_date=preparation_form.preparation_date,
-                                                        qty_prepared=preparation_form.qty_prepared,
-                                                        qty_return=preparation_form.qty_return
-                                                        )
         self.db.add(preparation_form_item)
         self.db.commit()
         self.db.refresh(preparation_form_item)
         return preparation_form_item
-
 
     def get_preparation_form(self):
 
@@ -77,15 +47,16 @@ class TempPreparationFormCRUD(AppCRUD):
                 TempPreparationForm.qty_return,
                 TempPreparationForm.ref_number,
                 Warehouse.wh_name,
+                DropList.name.label("status"),
                 TempPreparationForm.preparation_date,
                 TempPreparationForm.created_at,
                 TempPreparationForm.updated_at
 
             )
-            .outerjoin(StockOnHand,
-                       StockOnHand.id == TempPreparationForm.rm_soh_id)  # Left join StockOnHand with ReceivingReport
+
             .join(RawMaterial, TempPreparationForm.rm_code_id == RawMaterial.id)  # Join TempPreparationForm with RawMaterial
             .join(Warehouse, TempPreparationForm.warehouse_id == Warehouse.id)  # Join TempPreparationForm with Warehouse
+            .join(DropList, TempPreparationForm.status_id == DropList.id)
             .filter(
                 # Filter for records where is_cleared or is_deleted is NULL or False
                 or_(
@@ -102,11 +73,6 @@ class TempPreparationFormCRUD(AppCRUD):
         # Return All the result
         return stmt.all()
 
-
-        # preparation_form_item = self.db.query(TempPreparationForm).all()
-        # if preparation_form_item:
-        #     return preparation_form_item
-        # return []
 
 
     def update_preparation_form(self, preparation_form_id: UUID, preparation_form_update: TempPreparationFormUpdate):

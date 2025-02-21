@@ -3,6 +3,8 @@ from backend.api_droplist.v1.exceptions import DropListCreateException, DropList
 from backend.api_droplist.v1.main import AppCRUD, AppService
 from backend.api_droplist.v1.models import DropList
 from backend.api_droplist.v1.schemas import DropListCreate, DropListUpdate
+from backend.api_users.v1.models import User
+from sqlalchemy.sql import func
 from uuid import UUID
 
 
@@ -24,11 +26,38 @@ class DropListCRUD(AppCRUD):
             return droplist_item
         return []
 
-    def get_good_status(self):
-        droplist_item = self.db.query(DropList).all()
-        if droplist_item:
-            return droplist_item
-        return []
+    # FIX THIS ERROR. THIS HAS ERROR
+    def get_status(self, name):
+        droplist = (
+            self.db.query(DropList.id, DropList.name)
+            .filter(DropList.name == name)
+            .first()
+        )
+
+        if droplist:
+            return droplist
+
+        return []  # Return None if no match is found
+
+    
+    
+    def all_transformed_droplist(self):
+        # Join tables
+        stmt = (
+            self.db.query(
+                DropList.id,
+                DropList.name,
+                DropList.description,
+                DropList.created_at,
+                DropList.updated_at,
+                func.concat(User.first_name, " ", User.last_name).label("created_by")
+            )
+            .outerjoin(User,
+                       User.id == DropList.created_by_id)  # Left join StockOnHand with ReceivingReport
+        )
+
+        # Return All the result
+        return stmt.all()
 
 
     def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):
@@ -97,14 +126,34 @@ class DropListService(AppService):
         return droplist_item
 
 
-    def get_good_status(self):
+
+    def get_status(self, name):
         try:
-            droplist_item = DropListCRUD(self.db).get_good_status()
+            status_item = DropListCRUD(self.db).get_status(name)
+
+            if not status_item:
+                raise DropListNotFoundException(detail="Status not found.")
+
+            # Filter only required fields
+            filtered_status = {
+                "id": status_item.id,
+                "name": status_item.name,
+            }
+
+            return filtered_status
 
         except Exception as e:
             raise DropListNotFoundException(detail=f"Error: {str(e)}")
-        return droplist_item
 
+    
+    
+    def all_transformed_droplist(self):
+        try:
+            warehouse_item = DropListCRUD(self.db).all_transformed_droplist()
+
+        except Exception as e:
+            raise DropListNotFoundException(detail=f"Error: {str(e)}")
+        return warehouse_item
 
     # This is the service/business logic in updating the droplist.
     def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):

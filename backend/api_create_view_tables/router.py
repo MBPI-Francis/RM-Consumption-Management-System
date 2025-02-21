@@ -195,7 +195,7 @@ async def update_stock_on_hand(params_date: str, db=Depends(get_db)):
             db.refresh(rm_soh_item)
 
         # Return a success message upon successful insertion
-        return {"message": "StockOnHand records updated successfully."}
+        return {"message": "The raw material stock updated successfully."}
 
     except Exception as e:
         # Handle any unexpected exceptions and return a 500 error with details

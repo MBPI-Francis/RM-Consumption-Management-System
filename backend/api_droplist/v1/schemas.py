@@ -16,12 +16,20 @@ class DropListCreate(DropListBase):
 class DropListUpdate(DropListBase):
     description: Optional[str] = None
 
+
+class StatusResponse(BaseModel):
+    id: UUID
+    name: str
+
 class DropListResponse(BaseModel):
     id: UUID
     name: str
+    created_by: Optional[str] = None
     description: Optional[str] = None
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
+    updated_at: datetime
+    created_at: datetime
 
     class Config:
         from_attributes = True

@@ -7,6 +7,8 @@ from backend.api_users.v1.models import User
 from sqlalchemy.sql import func
 from uuid import UUID
 from sqlalchemy.exc import IntegrityError
+import io
+import pandas as pd
 
 
 # These are the code for the app to communicate to the database
@@ -43,16 +45,14 @@ class RawMaterialCRUD(AppCRUD):
                 self.db.rollback()
                 raise Exception(status_code=500, detail="Error while creating raw material.")
 
-
-        # raw_material_item = RawMaterial(rm_code=raw_material.rm_code,
-        #                            description=raw_material.description,
-        #                            rm_name=raw_material.rm_name,
-        #                            updated_by_id=raw_material.updated_by_id,
-        #                            created_by_id=raw_material.created_by_id)
-        # self.db.add(raw_material_item)
-        # self.db.commit()
-        # self.db.refresh(raw_material_item)
-        # return raw_material_item
+    def import_raw_material(self, rm_code):
+        # Insert data into the StockOnHand table
+        new_raw_material = RawMaterial(
+            rm_code=rm_code
+        )
+        self.db.add(new_raw_material)
+        self.db.commit()
+        self.db.refresh(new_raw_material)
 
     def all_raw_material(self):
         raw_material_item = self.db.query(RawMaterial).all()
@@ -190,7 +190,46 @@ class RawMaterialService(AppService):
         raw_material = RawMaterialCRUD(self.db).restore_raw_material(rm_id)
         return raw_material
 
+    def import_raw_material(self, content):
+        # Convert bytes to a BytesIO stream
+        excel_data = io.BytesIO(content)
 
+        # Read the Excel file
+        df = pd.read_excel(excel_data, engine='openpyxl')
+
+        # Check if the required "rm_code" column exists and is the only column
+        if list(df.columns) != ["rm_code"]:
+            raise ValueError("Invalid file format. The Excel file must contain only one column named 'rm_code'.")
+
+        # Get existing rm_codes from the database
+        existing_rm_codes = {item.rm_code for item in self.db.query(RawMaterial.rm_code).all()}
+
+        # Track successful and skipped inserts
+        success_count = 0
+        skipped_count = 0
+
+        # Process each row
+        for _, row in df.iterrows():
+            rm_code = str(row["rm_code"]).strip()  # Ensure it's a string and remove whitespace
+
+            if rm_code in existing_rm_codes:
+                skipped_count += 1  # Skip existing rm_codes
+                continue
+
+            try:
+                new_raw_material = RawMaterial(rm_code=rm_code)
+                self.db.add(new_raw_material)
+                self.db.commit()
+                success_count += 1
+                existing_rm_codes.add(rm_code)  # Add to existing set to prevent further duplicates
+            except Exception:
+                self.db.rollback()
+
+        return {
+            "message": "Data import completed.",
+            "successful_inserts": success_count,
+            "skipped_duplicates": skipped_count,
+        }
 
 
 

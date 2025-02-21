@@ -5,10 +5,10 @@ from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
-from .table import NoteTable
-from .validation import EntryValidation as TranferValidation
+from frontend.panels.rm_consumption_entry.transfer_form.table import NoteTable
+from frontend.panels.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 from tkinter import StringVar
-from ..preparation_form.validation import EntryValidation as PrepValidation
+from frontend.panels.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation
 from uuid import  UUID
 
 def entry_fields(note_form_tab):
@@ -108,6 +108,10 @@ def entry_fields(note_form_tab):
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
         transfer_date = transfer_date_entry.entry.get()
+
+
+        # Set focus to the Entry field
+        rm_codes_combobox.focus_set()
 
         # Convert date to YYYY-MM-DD
         try:
@@ -241,9 +245,17 @@ def entry_fields(note_form_tab):
     rm_names = list(code_to_id.keys())
 
 
+    # Function to convert typed input to uppercase
+    def on_combobox_key_release(event):
+        # Get the current text in the combobox
+        current_text = rm_codes_combobox.get()
+        # Convert the text to uppercase and set it back
+        rm_codes_combobox.set(current_text.upper())
+
     # Combobox for RM CODE Drop Down
     rm_codes_label = ttk.Label(form_frame, text="Raw Material:", font=("Helvetica", 10, "bold"))
     rm_codes_label.grid(row=4, column=0, padx=5, pady=5, sticky=W)
+
     rm_codes_combobox = ttk.Combobox(
         form_frame,
         values=rm_names,
@@ -251,8 +263,12 @@ def entry_fields(note_form_tab):
         width=30,
     )
 
-    rm_codes_combobox.grid(row=5, column=0, pady=5, padx=5, sticky=W)
+    # Bind the key release event to the combobox to trigger uppercase conversion
+    rm_codes_combobox.bind("<KeyRelease>", on_combobox_key_release)
+
+    rm_codes_combobox.grid(row=5, column=0, columnspan=2, pady=5, padx=5, sticky=W)
     ToolTip(rm_codes_combobox, text="Choose a raw material")
+
 
 
 
@@ -331,10 +347,9 @@ def get_warehouse_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
+        return []
 
 
 
@@ -346,10 +361,9 @@ def get_rm_code_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
+        return []
 
 
 def get_status_api():
@@ -360,15 +374,7 @@ def get_status_api():
     if response.status_code == 200:
         # Parse JSON response
         data = response.json()
-        print("Data fetched successfully!")
         return data
     else:
-        print(f"Failed to fetch data. Status code: {response.status_code}")
-
-
-
-
-
-
-
+        return []
 

@@ -15,23 +15,6 @@ from sqlalchemy import text
 # These are the code for the app to communicate to the database
 class TempHeldFormCRUD(AppCRUD):
 
-    def get_latest_soh_record(self, warehouse_id, rm_code_id):
-        """
-        Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
-        """
-        return (
-            self.db.query(StockOnHand)
-            .filter(
-                StockOnHand.warehouse_id == warehouse_id,
-                StockOnHand.rm_code_id == rm_code_id,
-            )
-            .order_by(desc(StockOnHand.stock_change_date))  # Assuming 'date' is the column for the latest date
-            .first()
-        )
-
-
-
-
     def create_held_form(self, held_form: TempHeldFormCreate):
         
         
@@ -62,35 +45,17 @@ class TempHeldFormCRUD(AppCRUD):
             self.db.add(new_stock)
             self.db.commit()
             self.db.refresh(new_stock)
-        
-        # Get the latest StockOnHand record ID
-        latest_soh_record = self.get_latest_soh_record(
-            warehouse_id=held_form.warehouse_id,
+
+        held_form_item = TempHeldForm(
             rm_code_id=held_form.rm_code_id,
+            warehouse_id=held_form.warehouse_id,
+            ref_number=held_form.ref_number,
+            change_status_date=held_form.change_status_date,
+            qty_kg=held_form.qty_kg,
+            current_status_id=held_form.current_status_id,
+            new_status_id=held_form.new_status_id
         )
 
-        if latest_soh_record:
-            latest_soh_record_id = latest_soh_record.id
-
-            held_form_item = TempHeldForm(rm_code_id=held_form.rm_code_id,
-                                                warehouse_id=held_form.warehouse_id,
-                                                ref_number=held_form.ref_number,
-                                                rm_soh_id=latest_soh_record_id,
-                                                change_status_date=held_form.change_status_date,
-                                                qty_kg=held_form.qty_kg,
-                                                current_status_id=held_form.current_status_id,
-                                                new_status_id=held_form.new_status_id
-                                                    )
-
-        else:
-            held_form_item = TempHeldForm(rm_code_id=held_form.rm_code_id,
-                                                warehouse_id=held_form.warehouse_id,
-                                                ref_number=held_form.ref_number,
-                                                change_status_date=held_form.change_status_date,
-                                                qty_kg=held_form.qty_kg,
-                                                current_status_id=held_form.current_status_id,
-                                                new_status_id=held_form.new_status_id
-                                                    )
         self.db.add(held_form_item)
         self.db.commit()
         self.db.refresh(held_form_item)
@@ -122,8 +87,6 @@ class TempHeldFormCRUD(AppCRUD):
                 TempHeldForm.updated_at
 
             )
-            .outerjoin(StockOnHand,
-                       StockOnHand.id == TempHeldForm.rm_soh_id)  # Left join StockOnHand with ReceivingReport
             .join(RawMaterial, TempHeldForm.rm_code_id == RawMaterial.id)  # Join TempHeldForm with RawMaterial
             .join(Warehouse, TempHeldForm.warehouse_id == Warehouse.id)  # Join TempHeldForm with Warehouse
             .join(CurrentStatus, TempHeldForm.current_status_id == CurrentStatus.id)  # Join TempHeldForm with CurrentStatus

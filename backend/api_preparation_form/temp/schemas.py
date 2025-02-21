@@ -13,8 +13,16 @@ class TempPreparationForm(BaseModel):
     preparation_date: date
     qty_prepared: float
     qty_return: float
+    status_id: UUID
 
-class TempPreparationFormCreate(TempPreparationForm):
+class TempPreparationFormCreate(BaseModel):
+    rm_code_id: UUID
+    warehouse_id: UUID
+    ref_number: str = Field(max_length=50, description="The reference number of the Preparation Form")
+    preparation_date: date
+    qty_prepared: float
+    qty_return: float
+    status_id: UUID
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
 
@@ -28,6 +36,7 @@ class TempPreparationFormResponse(BaseModel):
     qty_return: float
     ref_number: str
     wh_name: str
+    status: str
     preparation_date: date
     created_at: datetime
     updated_at: datetime

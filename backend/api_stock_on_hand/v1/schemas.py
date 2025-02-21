@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
+from typing import List
 
 class StockOnHandBase(BaseModel):
     rm_code_id: UUID
@@ -20,6 +21,10 @@ class StockOnHandCreate(StockOnHandBase):
 class StockOnHandUpdate(StockOnHandBase):
     rm_soh: Optional[str] = None
     description: Optional[str] = None
+
+
+class StockOnHandCreateBulk(BaseModel):
+    items: List[StockOnHandCreate]
 
 
 class StockOnHandResponse(StockOnHandBase):

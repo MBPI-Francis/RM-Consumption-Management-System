@@ -14,7 +14,7 @@ class TempPreparationForm(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
-    rm_soh_id = Column(UUID(as_uuid=True), ForeignKey("tbl_stock_on_hand.id"), nullable=True)
+    status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
 
     ref_number = Column(String(50), nullable=False, unique=False)
     preparation_date = Column(Date,nullable=False)
@@ -37,8 +37,9 @@ class TempPreparationForm(Base):
     updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_preparation_form_temp")
     deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_preparation_form_temp")
     rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_preparation_form_temp")
-    rm_soh = relationship("StockOnHand", foreign_keys=[rm_soh_id], backref="soh_preparation_form_temp")
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_preparation_form_temp")
+    status = relationship("DropList", foreign_keys=[status_id], backref="status_preparation_form_temp")
+
 
 
 

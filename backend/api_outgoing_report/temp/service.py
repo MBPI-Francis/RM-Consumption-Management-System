@@ -14,47 +14,15 @@ from sqlalchemy.types import String
 # These are the code for the app to communicate to the database
 class TempOutgoingReportCRUD(AppCRUD):
 
-    def get_latest_soh_record(self, warehouse_id, rm_code_id):
-        """
-        Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
-        """
-        return (
-            self.db.query(StockOnHand)
-            .filter(
-                StockOnHand.warehouse_id == warehouse_id,
-                StockOnHand.rm_code_id == rm_code_id,
-            )
-            .order_by(desc(StockOnHand.stock_change_date))  # Assuming 'date' is the column for the latest date
-            .first()
-        )
-    
-    
+
     def create_outgoing_report(self, outgoing_report: TempOutgoingReportCreate):
 
-        # Get the latest StockOnHand record ID
-        latest_soh_record = self.get_latest_soh_record(
-            warehouse_id=outgoing_report.warehouse_id,
-            rm_code_id=outgoing_report.rm_code_id,
-        )
-        
-        if latest_soh_record:
-            latest_soh_record_id = latest_soh_record.id
-
-            outgoing_report_item = TempOutgoingReport(rm_code_id=outgoing_report.rm_code_id,
-                                                warehouse_id=outgoing_report.warehouse_id,
-                                                rm_soh_id=latest_soh_record_id,
-                                                ref_number=outgoing_report.ref_number,
-                                                outgoing_date=outgoing_report.outgoing_date,
-                                                qty_kg=outgoing_report.qty_kg
-                                                )
-
-        else:
-            outgoing_report_item = TempOutgoingReport(rm_code_id=outgoing_report.rm_code_id,
-                                                warehouse_id=outgoing_report.warehouse_id,
-                                                ref_number=outgoing_report.ref_number,
-                                                outgoing_date=outgoing_report.outgoing_date,
-                                                qty_kg=outgoing_report.qty_kg
-                                                )
+        outgoing_report_item = TempOutgoingReport(rm_code_id=outgoing_report.rm_code_id,
+                                            warehouse_id=outgoing_report.warehouse_id,
+                                            ref_number=outgoing_report.ref_number,
+                                            outgoing_date=outgoing_report.outgoing_date,
+                                            qty_kg=outgoing_report.qty_kg
+                                            )
 
 
         self.db.add(outgoing_report_item)
@@ -70,27 +38,17 @@ class TempOutgoingReportCRUD(AppCRUD):
         # Join tables
         stmt = (
             self.db.query(
-                TempOutgoingReport.id ,
+                TempOutgoingReport.id,
                 RawMaterial.rm_code.label("raw_material"),
                 TempOutgoingReport.qty_kg,
                 TempOutgoingReport.ref_number,
                 Warehouse.wh_name,
                 TempOutgoingReport.outgoing_date,
                 TempOutgoingReport.created_at,
-                case(
-                    (StockOnHand.id == None, "No Beginning Balance"),  # If no StockOnHand record, show "No Balance"
-                    else_=func.concat(
-                        cast(StockOnHand.rm_soh, String),
-                        "(kg) - ",
-                        func.to_char(StockOnHand.stock_change_date, "MM/DD/YYYY")
-                    )
-                ).label("soh_and_date"),
-                TempOutgoingReport.created_at,
                 TempOutgoingReport.updated_at
 
             )
-            .outerjoin(StockOnHand,
-                       StockOnHand.id == TempOutgoingReport.rm_soh_id)  # Left join StockOnHand with ReceivingReport
+
             .join(RawMaterial, TempOutgoingReport.rm_code_id == RawMaterial.id)  # Join TempOutgoingReport with RawMaterial
             .join(Warehouse, TempOutgoingReport.warehouse_id == Warehouse.id)  # Join TempOutgoingReport with Warehouse
             .filter(

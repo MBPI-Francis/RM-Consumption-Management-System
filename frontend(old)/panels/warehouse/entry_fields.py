@@ -30,7 +30,6 @@ def entry_fields(note_form_tab):
             "wh_name": wh_name
         }
 
-        print("This is the data: ", data)
 
         # Validate the data entries in front-end side
         if EntryValidation.entry_validation(data):

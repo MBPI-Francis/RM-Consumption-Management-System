@@ -1,3 +1,5 @@
+
+
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from .main_tab import warehouse_tab

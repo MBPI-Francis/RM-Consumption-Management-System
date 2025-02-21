@@ -1,10 +1,13 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+
+from frontend.droplist.main_view import StatusView
 from frontend.sidebar import Sidebar
-from frontend.panels.warehouse.main_view import WarehouseView
-from frontend.panels.user.user_view import UserView
-from frontend.panels.raw_material.main_view import RawMaterialView
-from frontend.panels.rm_consumption_entry.main_view import ConsumptionEntryView
+from frontend.warehouse.main_view import WarehouseView
+from frontend.user.user_view import UserView
+from frontend.raw_material.main_view import RawMaterialView
+from frontend.rm_consumption_entry.main_view import ConsumptionEntryView
+from frontend.stock_on_hand.main_view import StockOnHandView
 from tkinter import StringVar, N, S, E, W, VERTICAL
 
 
@@ -42,10 +45,12 @@ class App(ttk.Window):
 
         # Initialize Views
         self.views = {
+            "status": StatusView(self.content_frame),
             "warehouse": WarehouseView(self.content_frame),
             "raw_material": RawMaterialView(self.content_frame),
             "user": UserView(self.content_frame),
-            "consumption_entry": ConsumptionEntryView(self.content_frame)
+            "consumption_entry": ConsumptionEntryView(self.content_frame),
+            "stock_on_hand": StockOnHandView(self.content_frame)
         }
 
         # Default View

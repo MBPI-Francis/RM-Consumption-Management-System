@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate, StockOnHandResponse
 from backend.api_stock_on_hand.v1.service import StockOnHandService
 from backend.settings.database import get_db
 from uuid import UUID
+from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/api/rm_stock_on_hand/temp")
 
@@ -43,3 +44,14 @@ async def restore_rm_soh(rm_soh_id: UUID,  db: get_db = Depends()):
 async def delete_rm_soh(rm_soh_id: UUID, db: get_db = Depends()):
     result = StockOnHandService(db).soft_delete_rm_soh(rm_soh_id)
     return result
+
+
+@router.post("/import_stock_data/")
+async def import_stock_data(file: UploadFile = File(...), db: get_db = Depends()):
+    try:
+        # Process the Excel file and insert data
+        content = await file.read()
+        StockOnHandService(db).import_rm_soh(content)
+        return JSONResponse(content={"message": "Data imported successfully!"}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=400)

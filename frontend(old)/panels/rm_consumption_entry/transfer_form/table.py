@@ -10,38 +10,72 @@ from uuid import UUID
 from tkinter import simpledialog
 from ttkbootstrap.widgets import DateEntry
 from ttkbootstrap.dialogs import Messagebox
-from ..preparation_form.validation import EntryValidation as PrepValidation
-from .validation import EntryValidation as TranferValidation
+from frontend.panels.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation
+from frontend.panels.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 
 
 class NoteTable:
     def __init__(self, root):
         self.root = root
 
+        # Frame for search
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(fill=X, padx=10, pady=5)
+        search_frame.pack(fill=X, padx=10, pady=(15, 0))
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
-        self.search_entry = ttk.Entry(search_frame)
-        self.search_entry.pack(side=LEFT, fill=X, expand=YES)
+        self.search_entry = ttk.Entry(search_frame, width=50)
+        self.search_entry.pack(side=LEFT)
         self.search_entry.bind("<Return>", self.search_data)
 
 
-        # Define a style for the Treeview Header
-        style = ttk.Style()
-        style.configure("Custom.Treeview.Heading", font=("Arial", 10, "bold"), foreground="white",
-                        background="#0078D4")  # Header color
-        style.configure("Custom.Treeview", rowheight=25)  # Adjust row height for better visibility
+        # Add button to clear data
+        btn_clear = ttk.Button(
+            search_frame,
+            text="Clear All Data",
+            command=self.confirmation_panel_clear,
+            bootstyle=WARNING,
+        )
+        btn_clear.pack(side=RIGHT)
+        ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
 
+        # self.tree = ttk.Treeview(self.root, columns=(
+        #     "Raw Material", "Reference No.", "Quantity(kg)",
+        #     "Warehouse (FROM)", "Warehouse (TO)", "Status",
+        #     "Transfer Date", "Entry Date"
+        # ), show="headings", style="Custom.Treeview")
 
-        self.tree = ttk.Treeview(self.root, columns=(
-            "Raw Material", "Reference No.", "Quantity(kg)",
-            "Warehouse (FROM)", "Warehouse (TO)", "Status",
-            "Transfer Date", "Entry Date"
-        ), show="headings", style="Custom.Treeview")
+        # Create a frame to hold the Treeview and Scrollbars
+        tree_frame = ttk.Frame(self.root)
+        tree_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        # First, define self.tree before using it
+        self.tree = ttk.Treeview(
+            master=tree_frame,
+            columns=(
+                    "Raw Material", "Reference No.", "Quantity(kg)",
+                    "Warehouse (FROM)", "Warehouse (TO)", "Status",
+                    "Transfer Date", "Entry Date"),
+            show='headings',
+            bootstyle=PRIMARY
+        )
+
+        # Create a vertical scrollbar and attach it to the treeview
+        tree_scroll_y = ttk.Scrollbar(tree_frame, orient=VERTICAL, command=self.tree.yview)
+        tree_scroll_y.pack(side=RIGHT, fill=Y)
+
+        # Create a horizontal scrollbar (optional)
+        tree_scroll_x = ttk.Scrollbar(tree_frame, orient=HORIZONTAL, command=self.tree.xview)
+        tree_scroll_x.pack(side=BOTTOM, fill=X)
+
+        # Pack the Treeview inside the frame
+        self.tree.pack(fill=BOTH, expand=YES)
+
+        # Configure the Treeview to use the scrollbars
+        self.tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
+
 
         # Define column headings
         for col in self.tree["columns"]:
-            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c, False))
+            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c, False), anchor=W)
             self.tree.column(col, width=150, anchor="w")
 
         self.tree.pack(fill=BOTH, expand=YES, padx=10, pady=10)
@@ -54,13 +88,28 @@ class NoteTable:
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
         url = server_ip + "/api/transfer_forms/temp/list/"
+        self.original_data = []
+
         try:
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
             self.tree.delete(*self.tree.get_children())  # Clear existing data
             for item in data:
-                self.tree.insert("", "end", values=(
+                # self.tree.insert("", "end", values=(
+                #     item["raw_material"],
+                #     item["ref_number"],
+                #     item["qty_kg"],
+                #     item["from_warehouse"],
+                #     item["to_warehouse"],
+                #     item["status"],
+                #     item["transfer_date"],
+                #     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
+                # ), iid=item["id"])
+
+
+                record = (
+                    item["id"],  # Store ID
                     item["raw_material"],
                     item["ref_number"],
                     item["qty_kg"],
@@ -69,9 +118,11 @@ class NoteTable:
                     item["status"],
                     item["transfer_date"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
-                ), iid=item["id"])
+                )
+                self.original_data.append(record)  # Save record
+                self.tree.insert("", END, iid=record[0], values=record[1:])
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching data: {e}")
+            return []
 
     def show_context_menu(self, event):
         """Show right-click menu with Edit/Delete options."""
@@ -118,7 +169,7 @@ class NoteTable:
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
-                entry = ttk.Combobox(edit_window, values=warehouse_names, state="readonly", width=30)
+                entry = ttk.Combobox(edit_window, values=warehouse_names, state="disabled", width=30)
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
@@ -129,7 +180,7 @@ class NoteTable:
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
-                entry = ttk.Combobox(edit_window, values=warehouse_names, state="readonly", width=30)
+                entry = ttk.Combobox(edit_window, values=warehouse_names, state="disabled", width=30)
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
@@ -237,10 +288,10 @@ class NoteTable:
             if result:
 
                 # Validate if the entry value exceeds the stock
-                validatation_result = PrepValidation.validate_soh_value(
+                validatation_result = PrepValidation.validate_soh_value_for_update(
                     get_selected_rm_code_id(),
                     get_selected_warehouse_from_id(),
-                    entries["Quantity(kg)"].get(),
+                    float(entries["Quantity(kg)"].get()),
                     get_selected_status_id()
 
                 )
@@ -251,9 +302,9 @@ class NoteTable:
                         url = server_ip + f"/api/transfer_forms/temp/update/{item}/"
                         response = requests.put(url, json=data)
                         if response.status_code == 200:
-                            messagebox.showinfo("Success", "Record updated successfully")
                             self.refresh_table()
                             edit_window.destroy()
+                            messagebox.showinfo("Success", "Record updated successfully")
 
                         else:
                             messagebox.showerror("Error", f"Failed to update record - {response.status_code}")
@@ -266,8 +317,9 @@ class NoteTable:
                         "Data Entry Error")
                     return
 
-
-
+            else:
+                Messagebox.show_error(f"The raw material record is not existing in the database.", "Failed Transfer.", alert=True)
+                return
 
         save_button = ttk.Button(edit_window,
                                  text="Save",
@@ -286,18 +338,6 @@ class NoteTable:
             else:
                 messagebox.showerror("Error", "Failed to delete entry.")
 
-    def search_data(self, event=None):
-        """Search for data when Enter is pressed."""
-        search_term = self.search_entry.get().strip().lower()
-        for item in self.tree.get_children():
-            values = [str(val).lower() for val in self.tree.item(item)["values"]]
-            if any(search_term in val for val in values):
-                self.tree.selection_set(item)
-                self.tree.focus(item)
-                self.tree.see(item)
-                return
-        messagebox.showinfo("Search", "No matching record found.")
-
     def sort_column(self, col, reverse):
         """Sort Treeview column in ascending/descending order."""
         data = [(self.tree.set(k, col), k) for k in self.tree.get_children("")]
@@ -314,10 +354,8 @@ class NoteTable:
 
         if response.status_code == 200:
             data = response.json()
-            print("Data fetched successfully!")
             return data
         else:
-            print(f"Failed to fetch data. Status code: {response.status_code}")
             return []
 
     def get_warehouse_api(self):
@@ -328,10 +366,9 @@ class NoteTable:
         if response.status_code == 200:
             # Parse JSON response
             data = response.json()
-            print("Data fetched successfully!")
             return data
         else:
-            print(f"Failed to fetch data. Status code: {response.status_code}")
+            return []
 
     def get_status_api(self):
         url = server_ip + "/api/droplist/list/"
@@ -341,10 +378,10 @@ class NoteTable:
         if response.status_code == 200:
             # Parse JSON response
             data = response.json()
-            print("Data fetched successfully!")
+
             return data
         else:
-            print(f"Failed to fetch data. Status code: {response.status_code}")
+            return []
 
     def check_raw_material(self, rm_id: UUID, warehouse_id: UUID, status_id: UUID = None):
         url = f"{server_ip}/api/check/raw_material/"  # Replace with the actual URL of your FastAPI server
@@ -375,3 +412,155 @@ class NoteTable:
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return False
+
+    def search_data(self, event=None):
+        """Filter and display only matching records in the Treeview."""
+        search_term = self.search_entry.get().strip().lower()
+
+        # Clear current records
+        self.tree.delete(*self.tree.get_children())
+
+        # If search is empty, reload original data
+        if not search_term:
+            self.populate_treeview(self.original_data)
+            return
+
+        # Filter and display matching records
+        filtered_data = [
+            record for record in self.original_data
+            if any(search_term in str(value).lower() for value in record[1:])  # Ignore ID
+        ]
+
+        if filtered_data:
+            self.populate_treeview(filtered_data)
+        else:
+            messagebox.showinfo("Search", "No matching record found.")
+
+    def populate_treeview(self, data):
+        """Helper function to insert data into the Treeview."""
+        for record in data:
+            self.tree.insert("", END, iid=record[0], values=record[1:])
+
+    def confirmation_panel_clear(self):
+        # confirmation_window = ttk.Toplevel(form_frame)
+        # confirmation_window.title("Confirm Action")
+        # confirmation_window.geometry("450x410")
+        # confirmation_window.resizable(True, True)
+
+        confirmation_window = ttk.Toplevel(self.root)
+        confirmation_window.title("Confirm Action")
+
+        # Get the screen width and height
+        screen_width = confirmation_window.winfo_screenwidth()
+        screen_height = confirmation_window.winfo_screenheight()
+
+        # Set a dynamic size (proportional to the screen size)
+        window_width = int(screen_width * 0.38)  # Adjust width as needed
+        window_height = int(screen_height * 0.32)  # Adjust height as needed
+
+        # Calculate position for centering
+        x_position = (screen_width - window_width) // 2
+        y_position = (screen_height - window_height) // 3  # Position slightly higher
+
+        # Apply geometry dynamically
+        confirmation_window.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
+        # Allow resizing but maintain proportions
+        confirmation_window.resizable(True, True)
+
+        # Expand and fill widgets inside the window
+        confirmation_window.grid_columnconfigure(0, weight=1)
+        confirmation_window.grid_rowconfigure(0, weight=1)
+
+        # Message Label
+        message_label = ttk.Label(
+            confirmation_window,
+            text="\n\nARE YOU SURE?",
+            justify="center",
+            font=("Helvetica", 12, "bold"),
+            bootstyle=WARNING
+
+        )
+        message_label.pack(pady=5)
+
+        # Message Label
+        message_label = ttk.Label(
+            confirmation_window,
+            text=(
+                "This form's data will be cleared, but it won't be deleted from the database.\n"
+                "Make sure the data you're clearing is unimportant before proceeding.\n"
+            ),
+            justify="left",
+            font=("Helvetica", 10),
+        )
+        message_label.pack(pady=5)
+
+        # Message Label
+        message_label = ttk.Label(
+            confirmation_window,
+            text=("To proceed, type 'YES' in the confirmation box."),
+            justify="center",
+            font=("Helvetica", 10),
+        )
+        message_label.pack(pady=5)
+
+        # Entry field
+        confirm_entry = ttk.Entry(confirmation_window, font=("Arial", 12),
+                                  justify="center")
+        confirm_entry.pack(padx=20, pady=5)
+
+        # Frame for buttons
+        button_frame = ttk.Frame(confirmation_window)
+        button_frame.pack(fill="x", padx=10, pady=10)  # Expand the frame horizontally
+
+        # Configure button frame columns
+        button_frame.columnconfigure(0, weight=1)  # Left side (Cancel)
+        button_frame.columnconfigure(1, weight=1)  # Right side (Submit)
+
+        # Cancel Button (Left)
+        cancel_button = ttk.Button(
+            button_frame,
+            text="Cancel",
+            bootstyle=DANGER,
+            command=confirmation_window.destroy
+        )
+        cancel_button.grid(row=0, column=0, padx=5, sticky="w")  # Align to left
+
+        # Submit Button (Right, Initially Disabled)
+        submit_button = ttk.Button(
+            button_frame,
+            text="Submit",
+            bootstyle=SUCCESS,
+            state=DISABLED,
+            command=lambda: [clear_all_notes_form_data(), confirmation_window.destroy()]
+        )
+        submit_button.grid(row=0, column=1, padx=5, sticky="e")  # Align to right
+
+        # Function to validate entry field
+        def validate_entry(event):
+            if confirm_entry.get().strip() == "YES":
+                submit_button.config(state=NORMAL)
+            else:
+                submit_button.config(state=DISABLED)
+
+        confirm_entry.bind("<KeyRelease>", validate_entry)
+
+        def clear_all_notes_form_data():
+            """Fetch data from API and format for table rowdata."""
+            url = f"{server_ip}/api/clear-table-data"
+            params = {"tbl": "transfer forms"}  # Send tbl as a query parameter
+            try:
+                # Send another POST request to clear data
+                response = requests.post(url, params=params)
+                if response.status_code == 200:  # Check if the stock view was successfully created
+                    self.refresh_table()
+                    Messagebox.show_info("Data is successfully cleared!", "Data Clearing")
+
+                else:
+                    Messagebox.show_error(f"There must be a mistake, the status code is {response.status_code}",
+                                          "Data Clearing Error")
+
+            except requests.exceptions.RequestException as e:
+                return False
+
+

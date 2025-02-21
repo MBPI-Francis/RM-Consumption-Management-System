@@ -27,7 +27,6 @@ class TempOutgoingReportResponse(BaseModel):
     ref_number: str
     wh_name: str
     outgoing_date: date
-    soh_and_date: str
     created_at: datetime
     updated_at: datetime
     created_by: Optional[UUID] = None

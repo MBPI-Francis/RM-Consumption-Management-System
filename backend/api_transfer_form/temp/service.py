@@ -19,22 +19,6 @@ from sqlalchemy.orm import aliased
 # These are the code for the app to communicate to the database
 class TempTransferFormCRUD(AppCRUD):
 
-    def get_latest_soh_record(self, warehouse_id, rm_code_id):
-        """
-        Get the latest stock-on-hand record based on warehouse_id, rm_code_id, and latest date.
-        """
-
-        return (
-            self.db.query(StockOnHand)
-            .filter(
-                StockOnHand.warehouse_id == warehouse_id,
-                StockOnHand.rm_code_id == rm_code_id,
-            )
-            .order_by(desc(StockOnHand.stock_change_date))  # Assuming 'date' is the column for the latest date
-            .first()
-        )
-
-
     def create_transfer_form(self, transfer_form: TempTransferFormCreate):
 
         # Check if the status id is null
@@ -62,65 +46,17 @@ class TempTransferFormCRUD(AppCRUD):
             self.db.add(new_stock)
             self.db.commit()
             self.db.refresh(new_stock)
-            print('NAKAPAG CREATE KA NG RECORD PARE KO ', new_stock)
 
-        # Get the latest StockOnHand record ID
-        latest_soh_from = self.get_latest_soh_record(
-            warehouse_id=transfer_form.from_warehouse_id,
+
+        transfer_form_item = TempTransferForm(
             rm_code_id=transfer_form.rm_code_id,
+            from_warehouse_id=transfer_form.from_warehouse_id,
+            to_warehouse_id=transfer_form.to_warehouse_id,
+            ref_number=transfer_form.ref_number,
+            transfer_date=transfer_form.transfer_date,
+            qty_kg=transfer_form.qty_kg,
+            status_id=transfer_form.status_id
         )
-
-        latest_soh_to = self.get_latest_soh_record(
-            warehouse_id=transfer_form.to_warehouse_id,
-            rm_code_id=transfer_form.rm_code_id,
-        )
-
-
-        if latest_soh_from and latest_soh_to:
-            transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
-                                                    from_warehouse_id=transfer_form.from_warehouse_id,
-                                                    to_warehouse_id=transfer_form.to_warehouse_id,
-                                                    from_rm_soh_id=latest_soh_from.id,
-                                                    to_rm_soh_id=latest_soh_to.id,
-                                                    ref_number=transfer_form.ref_number,
-                                                    transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg,
-                                                    status_id=transfer_form.status_id
-                                                  )
-
-
-        elif not latest_soh_from and latest_soh_to:
-            transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
-                                                    from_warehouse_id=transfer_form.from_warehouse_id,
-                                                    to_warehouse_id=transfer_form.to_warehouse_id,
-                                                    to_rm_soh_id=latest_soh_to.id,
-                                                    ref_number=transfer_form.ref_number,
-                                                    transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg,
-                                                    status_id = transfer_form.status_id
-                                                    )
-
-        elif latest_soh_from and not latest_soh_to:
-            transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
-                                                    from_warehouse_id=transfer_form.from_warehouse_id,
-                                                    to_warehouse_id=transfer_form.to_warehouse_id,
-                                                    from_rm_soh_id=latest_soh_from.id,
-                                                    ref_number=transfer_form.ref_number,
-                                                    transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg,
-                                                    status_id=transfer_form.status_id
-                                                    )
-
-
-        elif not latest_soh_from and not latest_soh_to:
-            transfer_form_item = TempTransferForm(rm_code_id=transfer_form.rm_code_id,
-                                                    from_warehouse_id=transfer_form.from_warehouse_id,
-                                                    to_warehouse_id=transfer_form.to_warehouse_id,
-                                                    ref_number=transfer_form.ref_number,
-                                                    transfer_date=transfer_form.transfer_date,
-                                                    qty_kg=transfer_form.qty_kg,
-                                                    status_id=transfer_form.status_id
-                                                    )
 
 
         self.db.add(transfer_form_item)
@@ -134,8 +70,6 @@ class TempTransferFormCRUD(AppCRUD):
         FromWarehouse = aliased(Warehouse, name="from_warehouse")
         ToWarehouse = aliased(Warehouse, name="to_warehouse")
 
-        FromStockOnHand = aliased(StockOnHand, name="from_soh")
-        ToStockOnHand = aliased(StockOnHand, name="to_soh")
         """
         Join StockOnHand, TransferForm, Warehouse, and RawMaterial tables.
         """
@@ -152,10 +86,7 @@ class TempTransferFormCRUD(AppCRUD):
                 TempTransferForm.created_at,
                 TempTransferForm.updated_at
             )
-            .outerjoin(FromStockOnHand,
-                       FromStockOnHand.id == TempTransferForm.from_rm_soh_id)  # Left join StockOnHand with TransferForm
-            .outerjoin(ToStockOnHand,
-                       ToStockOnHand.id == TempTransferForm.to_rm_soh_id)  # Left join StockOnHand with TransferForm
+
             .outerjoin(DropList, DropList.id == TempTransferForm.status_id)  # Left join DropList with TransferForm
             .join(RawMaterial, TempTransferForm.rm_code_id == RawMaterial.id)  # Join StockOnHand with RawMaterial
             .join(FromWarehouse,

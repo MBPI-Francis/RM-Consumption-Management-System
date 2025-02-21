@@ -17,9 +17,19 @@ from backend.api_preparation_form.temp import router as temp_preparation_form_ro
 from backend.api_held_form.temp import router as temp_held_form_router
 from backend.api_create_view_tables import router as create_view_router
 from backend.settings.database import engine, Base
+from backend.settings.create_view_table import create_ending_view_table, create_beginning_view_table
+from backend.settings.create_product_kind import create_product_kind
 
 # Initialize FastAPI app
 app = FastAPI(title="Warehouse Program API")
+
+@app.on_event("startup")
+def startup_event():
+    """Runs automatically when FastAPI starts."""
+    create_beginning_view_table()  # Automatically create the view
+    create_ending_view_table()
+    create_product_kind()
+
 
 # These code includes all the routers/endpoint of the api_departments
 app.include_router(department_router.router)
@@ -74,4 +84,4 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    return {"message": "The Warehouse Program API is perfectly working!"}
+    return {"message": "Welcome to the Backend API Hello HAHAHAHA44444"}
