@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from frontend.droplist.main_view import StatusView
+from frontend.historical_data.main_view import HistoricalDataView   
 from frontend.sidebar import Sidebar
 from frontend.warehouse.main_view import WarehouseView
 from frontend.user.user_view import UserView
@@ -49,7 +50,8 @@ class App(ttk.Window):
             "raw_material": RawMaterialView(self.content_frame),
             "user": UserView(self.content_frame),
             "consumption_entry": ConsumptionEntryView(self.content_frame),
-            "stock_on_hand": StockOnHandView(self.content_frame)
+            "stock_on_hand": StockOnHandView(self.content_frame),
+            "historical_data": HistoricalDataView(self.content_frame)
         }
 
         # Default View

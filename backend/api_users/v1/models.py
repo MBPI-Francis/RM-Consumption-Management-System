@@ -26,13 +26,6 @@ class User(Base):
     updated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
     deavtivated_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)
 
-    # Foreign Key to Department
-    department_id = Column(UUID(as_uuid=True), ForeignKey("tbl_departments.id"), nullable=True)
-
-    # Relationship with Department
-    department = relationship("Department", back_populates="users")
-
-
 
     # Relationships for created_by, deactivated_by and updated_by
     created_by = relationship("User", remote_side=[id], foreign_keys=[created_by_id], backref="created_users")

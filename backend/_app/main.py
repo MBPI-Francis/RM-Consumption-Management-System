@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from backend.api_departments.v1 import router as department_router
 from backend.api_users.v1 import router as user_router
 from backend.api_warehouses.v1 import router as warehouse_router
 from backend.api_raw_materials.v1 import router as raw_material_router
@@ -7,7 +6,6 @@ from backend.api_droplist.v1 import router as droplist_router
 from backend.api_stock_on_hand.v1 import router as soh_router
 from backend.api_product_kinds.v1 import router as product_kind_router
 from backend.api_auth_users.v1 import router as auth_router
-
 from backend.api_notes.temp import router as notes_router_temp
 from backend.api_computed_details.v1 import router as computed_detail_router
 from backend.api_receiving_report.temp import router as temp_receiving_report_router
@@ -31,8 +29,6 @@ def startup_event():
     create_product_kind()
 
 
-# These code includes all the routers/endpoint of the api_departments
-app.include_router(department_router.router)
 
 # These code includes all the routers/endpoint of the api_users
 app.include_router(user_router.router)

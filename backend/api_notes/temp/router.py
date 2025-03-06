@@ -17,6 +17,18 @@ async def read_notes(db: get_db = Depends()):
     result = NotesService(db).get_notes()
     return result
 
+
+@router.get("/list/deleted/", response_model=list[NotesResponse])
+async def get_deleted_list(db: get_db = Depends()):
+    result = NotesService(db).get_deleted_notes()
+    return result
+
+
+@router.get("/list/historical/", response_model=list[NotesResponse])
+async def get_historical_list(db: get_db = Depends()):
+    result = NotesService(db).get_historical_notes()
+    return result
+
 @router.put("/update/{notes_id}/", response_model=NotesResponse)
 async def update_notes(notes_id: UUID, notes_update: NotesUpdate, db: get_db = Depends()):
     result = NotesService(db).update_notes(notes_id, notes_update)

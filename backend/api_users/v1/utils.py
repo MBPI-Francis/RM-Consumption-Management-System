@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from settings.database import Base  # Assuming Base is imported from your database setup
+from backend.settings.database import Base  # Assuming Base is imported from your database setup
 
 
 # Parent Model: Department

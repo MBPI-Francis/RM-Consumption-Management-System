@@ -1,6 +1,5 @@
 from backend.api_users.v1.exceptions import UserNotFoundException, UserCreateException, \
     UserUpdateException, UserRestoreException, UserDeactivateException
-from backend.api_departments.v1.main import AppCRUD, AppService
 from backend.api_users.v1.models import User
 from backend.api_users.v1.schemas import UserCreate, UserUpdate
 from uuid import UUID

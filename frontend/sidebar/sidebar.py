@@ -45,6 +45,15 @@ class Sidebar(ttk.Frame):
             width=18,
         ).pack(pady=10)
 
+
+        ttk.Button(
+            self,
+            text="Historical Data",
+            command=lambda: navigate_callback("historical_data"),
+            bootstyle="primary",
+            width=18,
+        ).pack(pady=10)
+
         ttk.Button(
             self,
             text="Consumption Entry",
