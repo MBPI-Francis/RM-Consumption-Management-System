@@ -78,7 +78,7 @@ class NoteTable:
 
     def load_data(self):
         """Fetch data from API and populate treeview."""
-        url = server_ip + "/api/notes/temp/list/"
+        url = server_ip + "/api/notes/v1/list/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -173,7 +173,7 @@ class NoteTable:
                     return None
 
             def get_product_kinds_api():
-                url = server_ip + "/api/product_kinds/temp/list/"
+                url = server_ip + "/api/product_kinds/v1/list/"
                 response = requests.get(url)
 
                 # Check if the request was successful
@@ -211,7 +211,7 @@ class NoteTable:
                 return
 
             note_id = item
-            url = f"{server_ip}/api/notes/temp/update/{note_id}/"
+            url = f"{server_ip}/api/notes/v1/update/{note_id}/"
             response = requests.put(url, json=data)
             if response.status_code == 200:
                 messagebox.showinfo("Success", "Record updated successfully")
@@ -229,7 +229,7 @@ class NoteTable:
 
     def delete_record(self, note_id):
         """Send DELETE request to API."""
-        url = f"{server_ip}/api/notes/temp/delete/{note_id}/"
+        url = f"{server_ip}/api/notes/v1/delete/{note_id}/"
         response = requests.delete(url)
         if response.status_code == 200:
             messagebox.showinfo("Success", "Record deleted successfully")
@@ -238,7 +238,7 @@ class NoteTable:
             messagebox.showerror("Error", "Failed to delete record")
 
     def get_product_kinds_api(self):
-        url = server_ip + "/api/product_kinds/temp/list/"
+        url = server_ip + "/api/product_kinds/v1/list/"
         response = requests.get(url)
 
         # Check if the request was successful

@@ -76,7 +76,7 @@ class OutgoingFormTable:
 
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
-        url = server_ip + "/api/outgoing_reports/temp/list/"
+        url = server_ip + "/api/outgoing_reports/v1/list/"
         self.original_data = []  # Store all records
         try:
             response = requests.get(url)
@@ -227,7 +227,7 @@ class OutgoingFormTable:
             if validatation_result:
 
                 try:
-                    url = server_ip + f"/api/outgoing_reports/temp/update/{item}/"
+                    url = server_ip + f"/api/outgoing_reports/v1/update/{item}/"
                     response = requests.put(url, json=data)
                     if response.status_code == 200:
                         messagebox.showinfo("Success", "Record updated successfully")
@@ -254,7 +254,7 @@ class OutgoingFormTable:
     def delete_entry(self, entry_id):
         """Delete selected entry via API."""
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this entry?"):
-            url = server_ip + f"/api/outgoing_reports/temp/delete/{entry_id}/"
+            url = server_ip + f"/api/outgoing_reports/v1/delete/{entry_id}/"
             response = requests.delete(url)
             if response.status_code == 200:
                 self.tree.delete(entry_id)
@@ -273,7 +273,7 @@ class OutgoingFormTable:
 
 
     def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/list/"
+        url = server_ip + "/api/raw_materials/v1/list/"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -283,7 +283,7 @@ class OutgoingFormTable:
             return []
 
     def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/list/"
+        url = server_ip + "/api/warehouses/v1/list/"
         response = requests.get(url)
 
         # Check if the request was successful
@@ -295,7 +295,7 @@ class OutgoingFormTable:
             return []
 
     def get_status_id(self):
-        url = server_ip + "/api/droplist/search_status/"
+        url = server_ip + "/api/status/search_status/"
         params = {"name": "good"}  # Send name as a query parameter
         response = requests.get(url, params=params)
 

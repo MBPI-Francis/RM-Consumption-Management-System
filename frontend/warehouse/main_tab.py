@@ -9,7 +9,7 @@ from frontend.warehouse.generate_warehouse.confirm_messages import ConfirmationM
 
 
 def warehouse_tab(notebook):
-    url = server_ip + "/api/warehouses/transformed_list/"
+    url = server_ip + "/api/warehouses/v1/transformed_list/"
     response = requests.get(url)
     response.raise_for_status()
     warehouse_records = response.json()

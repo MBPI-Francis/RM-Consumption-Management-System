@@ -53,7 +53,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/notes/temp/create/", json=data)
+            response = requests.post(f"{server_ip}/api/notes/v1/create/", json=data)
             if response.status_code == 200:  # Successfully created
                 clear_fields()
 
@@ -159,7 +159,7 @@ def entry_fields(note_form_tab):
 
 
 def get_product_kinds_api():
-    url = server_ip + "/api/product_kinds/temp/list/"
+    url = server_ip + "/api/product_kinds/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful

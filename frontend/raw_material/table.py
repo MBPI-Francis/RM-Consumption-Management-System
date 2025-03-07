@@ -35,7 +35,7 @@ class RawMaterialTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/raw_materials/transformed_list/"
+        url = server_ip + "/api/raw_materials/v1/transformed_list/"
         try:
             response = requests.get(url)
             response.raise_for_status()

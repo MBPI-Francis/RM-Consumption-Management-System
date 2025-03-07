@@ -81,7 +81,7 @@ class NoteTable:
 
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
-        url = server_ip + "/api/transfer_forms/temp/list/"
+        url = server_ip + "/api/transfer_forms/v1/list/"
         self.original_data = []
 
         try:
@@ -282,7 +282,7 @@ class NoteTable:
                 if validatation_result:
 
                     try:
-                        url = server_ip + f"/api/transfer_forms/temp/update/{item}/"
+                        url = server_ip + f"/api/transfer_forms/v1/update/{item}/"
                         response = requests.put(url, json=data)
                         if response.status_code == 200:
                             self.refresh_table()
@@ -313,7 +313,7 @@ class NoteTable:
     def delete_entry(self, entry_id):
         """Delete selected entry via API."""
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this entry?"):
-            url = server_ip + f"/api/transfer_forms/temp/delete/{entry_id}/"
+            url = server_ip + f"/api/transfer_forms/v1/delete/{entry_id}/"
             response = requests.delete(url)
             if response.status_code == 200:
                 self.tree.delete(entry_id)
@@ -332,7 +332,7 @@ class NoteTable:
 
 
     def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/list/"
+        url = server_ip + "/api/raw_materials/v1/list/"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -342,7 +342,7 @@ class NoteTable:
             return []
 
     def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/list/"
+        url = server_ip + "/api/warehouses/v1/list/"
         response = requests.get(url)
 
         # Check if the request was successful
@@ -354,7 +354,7 @@ class NoteTable:
             return []
 
     def get_status_api(self):
-        url = server_ip + "/api/droplist/list/"
+        url = server_ip + "/api/status/v1/list/"
         response = requests.get(url)
 
         # Check if the request was successful

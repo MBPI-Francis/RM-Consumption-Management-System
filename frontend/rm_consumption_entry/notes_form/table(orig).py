@@ -38,7 +38,7 @@ class NoteTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/notes/temp/list/"
+        url = server_ip + "/api/notes/v1/list/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -104,7 +104,7 @@ class NoteTable:
 
 def get_notes_data_api():
     """API request for fetching note data."""
-    url = server_ip + "/api/notes/temp/list/"
+    url = server_ip + "/api/notes/v1/list/"
 
     try:
         response = requests.get(url)

@@ -77,7 +77,7 @@ class NoteTable:
 
     def fetch_data(self):
         """Fetch data from API."""
-        url = server_ip + "/api/receiving_reports/temp/list/"
+        url = server_ip + "/api/receiving_reports/v1/list/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -223,7 +223,7 @@ class NoteTable:
                 Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
                 return
 
-            url = server_ip + f"/api/receiving_reports/temp/update/{item}/"
+            url = server_ip + f"/api/receiving_reports/v1/update/{item}/"
             try:
                 response = requests.put(url, json=data)
                 if response.status_code == 200:
@@ -244,7 +244,7 @@ class NoteTable:
 
     def delete_record(self, item_id):
         """Send DELETE request to API."""
-        url = server_ip + f"/api/receiving_reports/temp/delete/{item_id}/"
+        url = server_ip + f"/api/receiving_reports/v1/delete/{item_id}/"
         response = requests.delete(url)
         if response.status_code == 200:
             self.refresh_table()
@@ -254,7 +254,7 @@ class NoteTable:
             messagebox.showerror("Error", "Failed to delete record")
 
     def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/list/"
+        url = server_ip + "/api/raw_materials/v1/list/"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -264,7 +264,7 @@ class NoteTable:
             return []
 
     def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/list/"
+        url = server_ip + "/api/warehouses/v1/list/"
         response = requests.get(url)
 
         # Check if the request was successful

@@ -28,7 +28,7 @@ class GenerateWarehouse:
             }
         ]
 
-        url = f"{server_ip}/api/warehouses/create/"
+        url = f"{server_ip}/api/warehouses/v1/create/"
         try:
             for warehouse in warehouses:
 

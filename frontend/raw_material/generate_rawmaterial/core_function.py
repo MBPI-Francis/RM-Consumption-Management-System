@@ -32,7 +32,7 @@ class GenerateRawMaterial:
 
     def upload_file(self, file_path):
         """Uploads the file to the FastAPI backend."""
-        url = f"{server_ip}/api/raw_materials/import_raw_materials/"
+        url = f"{server_ip}/api/raw_materials/v1/import_raw_materials/"
 
         try:
             with open(file_path, 'rb') as f:

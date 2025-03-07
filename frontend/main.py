@@ -1,6 +1,6 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from frontend.droplist.main_view import StatusView
+from frontend.status.main_view import StatusView
 from frontend.historical_data.main_view import HistoricalDataView   
 from frontend.sidebar import Sidebar
 from frontend.warehouse.main_view import WarehouseView

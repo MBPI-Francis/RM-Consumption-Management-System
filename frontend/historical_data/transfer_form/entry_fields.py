@@ -340,7 +340,7 @@ def entry_fields(note_form_tab):
 
 
 def get_warehouse_api():
-    url = server_ip + "/api/warehouses/list/"
+    url = server_ip + "/api/warehouses/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful
@@ -354,7 +354,7 @@ def get_warehouse_api():
 
 
 def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/list/"
+    url = server_ip + "/api/raw_materials/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful
@@ -367,7 +367,7 @@ def get_rm_code_api():
 
 
 def get_status_api():
-    url = server_ip + "/api/droplist/list/"
+    url = server_ip + "/api/status/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful

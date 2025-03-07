@@ -111,7 +111,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
             try:
-                response = requests.post(f"{server_ip}/api/held_forms/temp/create/", json=data)
+                response = requests.post(f"{server_ip}/api/held_forms/v1/create/", json=data)
                 if response.status_code == 200:  # Successfully created
                     clear_fields()
                     note_table.refresh_table()
@@ -291,7 +291,7 @@ def entry_fields(note_form_tab):
 
 
 def get_warehouse_api():
-    url = server_ip + "/api/warehouses/list/"
+    url = server_ip + "/api/warehouses/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful
@@ -305,7 +305,7 @@ def get_warehouse_api():
 
 
 def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/list/"
+    url = server_ip + "/api/raw_materials/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful
@@ -318,7 +318,7 @@ def get_rm_code_api():
 
 
 def get_status_api():
-    url = server_ip + "/api/droplist/list/"
+    url = server_ip + "/api/status/v1/list/"
     response = requests.get(url)
 
     # Check if the request was successful

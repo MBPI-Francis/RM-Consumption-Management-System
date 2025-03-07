@@ -6,7 +6,7 @@ from backend.settings.database import get_db
 from uuid import UUID
 from fastapi.responses import JSONResponse
 
-router = APIRouter(prefix="/api/rm_stock_on_hand/temp")
+router = APIRouter(prefix="/api/rm_stock_on_hand/v1")
 
 @router.post("/create/", response_model=StockOnHandResponse)
 async def create_rm_soh(rm_soh: StockOnHandCreate, db: get_db = Depends()):

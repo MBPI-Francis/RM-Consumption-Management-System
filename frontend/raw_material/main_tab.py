@@ -13,7 +13,7 @@ from frontend.raw_material.generate_rawmaterial.confirm_messages import Confirma
 def rm_code_tab(notebook):
 
 
-    url = server_ip + "/api/raw_materials/transformed_list/"
+    url = server_ip + "/api/raw_materials/v1/transformed_list/"
     response = requests.get(url)
     response.raise_for_status()
 

@@ -35,7 +35,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
         try:
-            response = requests.post(f"{server_ip}/api/raw_materials/create/", json=data)
+            response = requests.post(f"{server_ip}/api/raw_materials/v1/create/", json=data)
             if response.status_code == 200:  # Successfully created
                 clear_fields()
 

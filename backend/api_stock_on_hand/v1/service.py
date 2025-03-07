@@ -1,6 +1,6 @@
 from pydantic_core import to_jsonable_python
 
-from backend.api_droplist.v1.models import DropList
+from backend.api_status.v1.models import DropList
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_stock_on_hand.v1.exceptions import StockOnHandCreateException, StockOnHandNotFoundException, \
     StockOnHandUpdateException, StockOnHandSoftDeleteException, StockOnHandRestoreException
@@ -8,7 +8,7 @@ from backend.api_stock_on_hand.v1.main import AppCRUD, AppService
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate, StockOnHandCreateBulk
 from uuid import UUID
-from backend.api_receiving_report.temp.service import TempReceivingReportCRUD
+from backend.api_receiving_report.v1.service import TempReceivingReportCRUD
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import Depends, HTTPException
