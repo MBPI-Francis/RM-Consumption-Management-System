@@ -14,7 +14,7 @@ class GenerateStatus:
     def generate_status(self):
         statuses = ["good", "held : under evaluation", "held : contaminated", "held : reject"]
 
-        url = f"{server_ip}/api/droplist/create/"
+        url = f"{server_ip}/api/status/v1/create/"
 
         try:
             for status in statuses:

@@ -3,41 +3,41 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.tooltip import ToolTip
 from .table import StatusTable
-from frontend.status.shared import droplist_api
-from frontend.status.generate_droplist.confirm_messages import ConfirmationMessage
+from frontend.status.shared import status_api
+from frontend.status.generate_status.confirm_messages import ConfirmationMessage
 import requests
 
 def status_tab(notebook):
-    status_records = droplist_api()
+    status_records = status_api()
     status_tab = ttk.Frame(notebook)
     notebook.add(status_tab, text="Statuses")
     # Populate the Raw Materials Tab
-    droplist_label = ttk.Label(
+    status_label = ttk.Label(
         status_tab,
         text="List of Status",
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    droplist_label.pack(pady=(20,0), padx=20)
+    status_label.pack(pady=(20,0), padx=20)
 
 
     if status_records:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             status_tab,
             text="The statuses listed below are essential for the system's functionality. Modifying them may lead to errors.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
     else:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             status_tab,
             text="Click the 'Generate all the required Statuses' button to generate statuses automatically.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
 
     btn_generate = ttk.Button(

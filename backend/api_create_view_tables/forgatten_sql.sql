@@ -23,7 +23,7 @@
                     INNER JOIN tbl_warehouses AS WH
                         ON SOH.warehouse_id = WH.id
 
-                    LEFT JOIN tbl_droplist AS STATUS
+                    LEFT JOIN tbl_status AS STATUS
                         ON SOH.status_id = STATUS.id
                 )
                 SELECT
@@ -156,10 +156,10 @@
                 INNER JOIN tbl_warehouses AS wh
                     ON hf.warehouse_id = wh.id
 
-                INNER JOIN tbl_droplist AS current_status
+                INNER JOIN tbl_status AS current_status
                     ON hf.current_status_id = current_status.id
 
-                INNER JOIN tbl_droplist AS new_status
+                INNER JOIN tbl_status AS new_status
                     ON hf.new_status_id = new_status.id
 
                 LEFT JOIN InitialBalance AS ib
@@ -190,7 +190,7 @@
                     ON hf.rm_code_id = rm.id
                 INNER JOIN tbl_warehouses AS wh
                     ON hf.warehouse_id = wh.id
-                INNER JOIN tbl_droplist AS new_status
+                INNER JOIN tbl_status AS new_status
                     ON hf.new_status_id = new_status.id
 
                 WHERE

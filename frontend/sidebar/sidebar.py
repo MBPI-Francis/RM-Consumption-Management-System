@@ -14,7 +14,7 @@ class Sidebar(ttk.Frame):
         # Navigation Buttons
         ttk.Button(
             self,
-            text="Droplist",
+            text="Statuses",
             command=lambda: navigate_callback("status"),
             bootstyle="primary",
             width=18,

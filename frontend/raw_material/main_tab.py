@@ -32,22 +32,22 @@ def rm_code_tab(notebook):
     raw_material_label.pack(pady=(20,0), padx=20)
     
     if raw_material_records:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             raw_material_tab,
             text="The raw material codes listed below are essential for the system's functionality. Modifying them may lead to errors.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
     else:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             raw_material_tab,
             text="Click the 'Generate all the required raw material codes' button to generate raw material codes automatically.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
 
 

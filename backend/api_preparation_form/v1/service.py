@@ -6,7 +6,7 @@ from backend.api_preparation_form.v1.schemas import TempPreparationFormCreate, T
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
-from backend.api_status.v1.models import DropList
+from backend.api_status.v1.models import Status
 from sqlalchemy import desc, or_
 from sqlalchemy.sql import func, cast, case
 from sqlalchemy.types import String
@@ -47,7 +47,7 @@ class TempPreparationFormCRUD(AppCRUD):
                 TempPreparationForm.qty_return,
                 TempPreparationForm.ref_number,
                 Warehouse.wh_name,
-                DropList.name.label("status"),
+                Status.name.label("status"),
                 TempPreparationForm.preparation_date,
                 TempPreparationForm.created_at,
                 TempPreparationForm.updated_at
@@ -56,7 +56,7 @@ class TempPreparationFormCRUD(AppCRUD):
 
             .join(RawMaterial, TempPreparationForm.rm_code_id == RawMaterial.id)  # Join TempPreparationForm with RawMaterial
             .join(Warehouse, TempPreparationForm.warehouse_id == Warehouse.id)  # Join TempPreparationForm with Warehouse
-            .join(DropList, TempPreparationForm.status_id == DropList.id)
+            .join(Status, TempPreparationForm.status_id == Status.id)
             .filter(
                 # Filter for records where is_cleared or is_deleted is NULL or False
                 or_(

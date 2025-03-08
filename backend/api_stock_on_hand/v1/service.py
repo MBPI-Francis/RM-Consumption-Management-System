@@ -1,6 +1,6 @@
 from pydantic_core import to_jsonable_python
 
-from backend.api_status.v1.models import DropList
+from backend.api_status.v1.models import Status
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_stock_on_hand.v1.exceptions import StockOnHandCreateException, StockOnHandNotFoundException, \
     StockOnHandUpdateException, StockOnHandSoftDeleteException, StockOnHandRestoreException
@@ -159,7 +159,7 @@ class StockOnHandService(AppService):
                 return rm_code_record.id if rm_code_record else None
 
             def get_status_id(status_name):
-                status_record = self.db.query(DropList.id).filter(DropList.name == status_name).first()
+                status_record = self.db.query(Status.id).filter(Status.name == status_name).first()
                 return status_record.id if status_record else None
 
 

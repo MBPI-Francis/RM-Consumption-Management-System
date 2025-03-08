@@ -26,22 +26,22 @@ def warehouse_tab(notebook):
     warehouse_label.pack(pady=(20,0), padx=20)
 
     if warehouse_records:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             warehouse_tab,
             text="The warehouses listed below are essential for the system's functionality. Modifying them may lead to errors.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
     else:
-        droplist_label = ttk.Label(
+        status_label = ttk.Label(
             warehouse_tab,
             text="Click the 'Generate all the required Warehouses' button to generate warehouses automatically.",
             font=("Helvetica", 10),
             bootstyle=SECONDARY
         )
-        droplist_label.pack(pady=0, padx=20)
+        status_label.pack(pady=0, padx=20)
 
 
 

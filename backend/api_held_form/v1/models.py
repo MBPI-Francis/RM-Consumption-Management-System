@@ -13,8 +13,8 @@ class TempHeldForm(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     rm_code_id = Column(UUID(as_uuid=True), ForeignKey("tbl_raw_materials.id"), nullable=False)
     warehouse_id = Column(UUID(as_uuid=True), ForeignKey("tbl_warehouses.id"), nullable=False)
-    current_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
-    new_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_droplist.id"), nullable=True)
+    current_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_status.id"), nullable=True)
+    new_status_id = Column(UUID(as_uuid=True), ForeignKey("tbl_status.id"), nullable=True)
     
 
     change_status_date = Column(Date,nullable=False)
@@ -38,8 +38,8 @@ class TempHeldForm(Base):
     deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_held_form_temp")
     rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_held_form_temp")
     warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_held_form_temp")
-    current_status = relationship("DropList", foreign_keys=[current_status_id], backref="current_status_held_form_temp")
-    new_status = relationship("DropList", foreign_keys=[new_status_id], backref="new_status_held_form_temp")
+    current_status = relationship("Status", foreign_keys=[current_status_id], backref="current_status_held_form_temp")
+    new_status = relationship("Status", foreign_keys=[new_status_id], backref="new_status_held_form_temp")
 
 
 

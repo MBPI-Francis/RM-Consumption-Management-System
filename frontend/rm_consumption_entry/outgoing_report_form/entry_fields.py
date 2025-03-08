@@ -43,7 +43,7 @@ def entry_fields(note_form_tab):
         qty_entry.delete(0, ttk.END)
 
     def get_status_id():
-        url = server_ip + "/api/status/search_status/"
+        url = server_ip + "/api/status/v1/search_status/"
         params = {"name": "good"}  # Send name as a query parameter
         response = requests.get(url, params=params)
 

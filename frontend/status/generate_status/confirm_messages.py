@@ -7,7 +7,7 @@ from tkinter import Toplevel, messagebox, StringVar
 from backend.settings.database import server_ip
 from tkinter import simpledialog
 from ttkbootstrap.dialogs import Messagebox
-from frontend.status.generate_droplist.core_function import GenerateStatus
+from frontend.status.generate_status.core_function import GenerateStatus
 
 
 class ConfirmationMessage:

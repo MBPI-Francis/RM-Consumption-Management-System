@@ -295,7 +295,7 @@ class OutgoingFormTable:
             return []
 
     def get_status_id(self):
-        url = server_ip + "/api/status/search_status/"
+        url = server_ip + "/api/status/v1/search_status/"
         params = {"name": "good"}  # Send name as a query parameter
         response = requests.get(url, params=params)
 

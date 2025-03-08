@@ -1,7 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.tableview import Tableview
 from ttkbootstrap.constants import *
-from frontend.status.shared import droplist_api
+from frontend.status.shared import status_api
 from datetime import datetime
 
 
@@ -35,7 +35,7 @@ class StatusTable:
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
         # Format data for the table
-        status_records = droplist_api()
+        status_records = status_api()
         rowdata = [
             (
                 # item["id"],

@@ -6,7 +6,7 @@ from backend.api_transfer_form.v1.schemas import TempTransferFormCreate, TempTra
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
-from backend.api_status.v1.models import DropList
+from backend.api_status.v1.models import Status
 from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.future import select
@@ -82,12 +82,12 @@ class TempTransferFormCRUD(AppCRUD):
                 FromWarehouse.wh_name.label("from_warehouse"),
                 ToWarehouse.wh_name.label("to_warehouse"),
                 TempTransferForm.transfer_date,
-                DropList.name.label("status"),
+                Status.name.label("status"),
                 TempTransferForm.created_at,
                 TempTransferForm.updated_at
             )
 
-            .outerjoin(DropList, DropList.id == TempTransferForm.status_id)  # Left join DropList with TransferForm
+            .outerjoin(Status, Status.id == TempTransferForm.status_id)  # Left join Status with TransferForm
             .join(RawMaterial, TempTransferForm.rm_code_id == RawMaterial.id)  # Join StockOnHand with RawMaterial
             .join(FromWarehouse,
                   TempTransferForm.from_warehouse_id == FromWarehouse.id)  # Join TempTransferForm with Warehouse

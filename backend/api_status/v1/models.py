@@ -8,8 +8,8 @@ from backend.api_users.v1.models import User
 
 
 # Parent Model: Department
-class DropList(Base):
-    __tablename__ = "tbl_droplist"
+class Status(Base):
+    __tablename__ = "tbl_status"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, index=True)
     
@@ -26,7 +26,7 @@ class DropList(Base):
 
 
     # Relationships for created_by, updated_by, and deleted_by
-    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_droplist")
-    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_droplist")
-    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_droplist")
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_status")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_status")
+    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_status")
 

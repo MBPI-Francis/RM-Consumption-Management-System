@@ -7,7 +7,7 @@ from uuid import UUID
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
-from backend.api_status.v1.models import DropList
+from backend.api_status.v1.models import Status
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import aliased
 from sqlalchemy import text
@@ -68,8 +68,8 @@ class TempHeldFormCRUD(AppCRUD):
              """
 
         # Create aliases for the Warehouse model
-        CurrentStatus = aliased(DropList, name="current_status")
-        NewStatus = aliased(DropList, name="new_status")
+        CurrentStatus = aliased(Status, name="current_status")
+        NewStatus = aliased(Status, name="new_status")
 
 
         # Join tables

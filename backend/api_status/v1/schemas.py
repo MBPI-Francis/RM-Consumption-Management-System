@@ -5,15 +5,15 @@ from uuid import UUID
 from typing import Optional
 from datetime import datetime
 
-class DropListBase(BaseModel):
+class StatusBase(BaseModel):
     name: str = Field(max_length=150, description="The name of the drop list")
 
-class DropListCreate(DropListBase):
+class StatusCreate(StatusBase):
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
     description: Optional[str] = None
 
-class DropListUpdate(DropListBase):
+class StatusUpdate(StatusBase):
     description: Optional[str] = None
 
 
@@ -21,7 +21,7 @@ class StatusResponse(BaseModel):
     id: UUID
     name: str
 
-class DropListResponse(BaseModel):
+class StatusResponse(BaseModel):
     id: UUID
     name: str
     created_by: Optional[str] = None

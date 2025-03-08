@@ -1,47 +1,47 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_status.v1.schemas import DropListCreate, DropListUpdate, DropListResponse, StatusResponse
-from backend.api_status.v1.service import DropListService
+from backend.api_status.v1.schemas import StatusCreate, StatusUpdate, StatusResponse, StatusResponse
+from backend.api_status.v1.service import StatusService
 from backend.settings.database import get_db
 from uuid import UUID
 from typing import List
 
 router = APIRouter(prefix="/api/status/v1")
 
-@router.post("/create/", response_model=DropListResponse)
-async def create_droplist(droplist: DropListCreate, db: get_db = Depends()):
-    result = DropListService(db).create_droplist(droplist)
+@router.post("/create/", response_model=StatusResponse)
+async def create_status(status: StatusCreate, db: get_db = Depends()):
+    result = StatusService(db).create_status(status)
     return result
 
-@router.get("/list/", response_model=list[DropListResponse])
-async def read_droplist(db: get_db = Depends()):
-    result = DropListService(db).get_droplist()
-    return result
-
-
-@router.get("/transformed_list/", response_model=list[DropListResponse])
-async def read_transformed_raw_material(db: get_db = Depends()):
-    result = DropListService(db).all_transformed_droplist()
-    return result
-
-@router.put("/update/{droplist_id}/", response_model=DropListResponse)
-async def update_droplist(droplist_id: UUID, droplist_update: DropListUpdate, db: get_db = Depends()):
-    result = DropListService(db).update_droplist(droplist_id, droplist_update)
-    return result
-
-@router.put("/restore/{droplist_id}/", response_model=DropListResponse)
-async def restore_droplist(droplist_id: UUID,  db: get_db = Depends()):
-    result = DropListService(db).restore_droplist(droplist_id)
+@router.get("/list/", response_model=list[StatusResponse])
+async def read_status(db: get_db = Depends()):
+    result = StatusService(db).get_status()
     return result
 
 
-@router.delete("/delete/{droplist_id}/", response_model=DropListResponse)
-async def delete_droplist(droplist_id: UUID, db: get_db = Depends()):
-    result = DropListService(db).soft_delete_droplist(droplist_id)
+@router.get("/transformed_list/", response_model=list[StatusResponse])
+async def read_transformed_status(db: get_db = Depends()):
+    result = StatusService(db).all_transformed_status()
+    return result
+
+@router.put("/update/{status_id}/", response_model=StatusResponse)
+async def update_status(status_id: UUID, status_update: StatusUpdate, db: get_db = Depends()):
+    result = StatusService(db).update_status(status_id, status_update)
+    return result
+
+@router.put("/restore/{status_id}/", response_model=StatusResponse)
+async def restore_status(status_id: UUID,  db: get_db = Depends()):
+    result = StatusService(db).restore_status(status_id)
+    return result
+
+
+@router.delete("/delete/{status_id}/", response_model=StatusResponse)
+async def delete_status(status_id: UUID, db: get_db = Depends()):
+    result = StatusService(db).soft_delete_status(status_id)
     return result
 
 
 @router.get("/search_status/", response_model=StatusResponse)
 async def search_status(name: str = None, db: get_db = Depends()):
-    result = DropListService(db).get_status(name)
+    result = StatusService(db).get_status(name)
     return result

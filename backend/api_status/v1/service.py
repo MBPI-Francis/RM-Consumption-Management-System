@@ -1,138 +1,138 @@
-from backend.api_status.v1.exceptions import DropListCreateException, DropListNotFoundException, \
-    DropListUpdateException, DropListSoftDeleteException, DropListRestoreException
+from backend.api_status.v1.exceptions import StatusCreateException, StatusNotFoundException, \
+    StatusUpdateException, StatusSoftDeleteException, StatusRestoreException
 from backend.api_status.v1.main import AppCRUD, AppService
-from backend.api_status.v1.models import DropList
-from backend.api_status.v1.schemas import DropListCreate, DropListUpdate
+from backend.api_status.v1.models import Status
+from backend.api_status.v1.schemas import StatusCreate, StatusUpdate
 from backend.api_users.v1.models import User
 from sqlalchemy.sql import func
 from uuid import UUID
 
 
 # These are the code for the app to communicate to the database
-class DropListCRUD(AppCRUD):
-    def create_droplist(self, droplist: DropListCreate):
-        droplist_item = DropList(name=droplist.name,
-                                   description=droplist.description,
-                                   updated_by_id=droplist.updated_by_id,
-                                   created_by_id=droplist.created_by_id)
-        self.db.add(droplist_item)
+class StatusCRUD(AppCRUD):
+    def create_status(self, status: StatusCreate):
+        status_item = Status(name=status.name,
+                                   description=status.description,
+                                   updated_by_id=status.updated_by_id,
+                                   created_by_id=status.created_by_id)
+        self.db.add(status_item)
         self.db.commit()
-        self.db.refresh(droplist_item)
-        return droplist_item
+        self.db.refresh(status_item)
+        return status_item
 
-    def get_droplist(self):
-        droplist_item = self.db.query(DropList).all()
-        if droplist_item:
-            return droplist_item
+    def get_status(self):
+        status_item = self.db.query(Status).all()
+        if status_item:
+            return status_item
         return []
 
     # FIX THIS ERROR. THIS HAS ERROR
-    def get_status(self, name):
-        droplist = (
-            self.db.query(DropList.id, DropList.name)
-            .filter(DropList.name == name)
+    def get_status_by_name(self, name):
+        status = (
+            self.db.query(Status.id, Status.name)
+            .filter(Status.name == name)
             .first()
         )
 
-        if droplist:
-            return droplist
+        if status:
+            return status
 
         return []  # Return None if no match is found
 
     
     
-    def all_transformed_droplist(self):
+    def all_transformed_status(self):
         # Join tables
         stmt = (
             self.db.query(
-                DropList.id,
-                DropList.name,
-                DropList.description,
-                DropList.created_at,
-                DropList.updated_at,
+                Status.id,
+                Status.name,
+                Status.description,
+                Status.created_at,
+                Status.updated_at,
                 func.concat(User.first_name, " ", User.last_name).label("created_by")
             )
             .outerjoin(User,
-                       User.id == DropList.created_by_id)  # Left join StockOnHand with ReceivingReport
+                       User.id == Status.created_by_id)  # Left join StockOnHand with ReceivingReport
         )
 
         # Return All the result
         return stmt.all()
 
 
-    def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):
+    def update_status(self, status_id: UUID, status_update: StatusUpdate):
         try:
-            droplist = self.db.query(DropList).filter(DropList.id == droplist_id).first()
-            if not droplist or droplist.is_deleted:
-                raise DropListNotFoundException(detail="Drop List not found or already deleted.")
+            status = self.db.query(Status).filter(Status.id == status_id).first()
+            if not status or status.is_deleted:
+                raise StatusNotFoundException(detail="Drop List not found or already deleted.")
 
-            for key, value in droplist_update.dict(exclude_unset=True).items():
-                setattr(droplist, key, value)
+            for key, value in status_update.dict(exclude_unset=True).items():
+                setattr(status, key, value)
             self.db.commit()
-            self.db.refresh(droplist)
-            return droplist
+            self.db.refresh(status)
+            return status
 
         except Exception as e:
-            raise DropListUpdateException(detail=f"Error: {str(e)}")
+            raise StatusUpdateException(detail=f"Error: {str(e)}")
 
-    def soft_delete_droplist(self, droplist_id: UUID):
+    def soft_delete_status(self, status_id: UUID):
         try:
-            droplist = self.db.query(DropList).filter(DropList.id == droplist_id).first()
-            if not droplist or droplist.is_deleted:
-                raise DropListNotFoundException(detail="Drop List not found or already deleted.")
+            status = self.db.query(Status).filter(Status.id == status_id).first()
+            if not status or status.is_deleted:
+                raise StatusNotFoundException(detail="Drop List not found or already deleted.")
 
-            droplist.is_deleted = True
+            status.is_deleted = True
             self.db.commit()
-            self.db.refresh(droplist)
-            return droplist
+            self.db.refresh(status)
+            return status
 
         except Exception as e:
-            raise DropListSoftDeleteException(detail=f"Error: {str(e)}")
+            raise StatusSoftDeleteException(detail=f"Error: {str(e)}")
 
 
-    def restore_droplist(self, droplist_id: UUID):
+    def restore_status(self, status_id: UUID):
         try:
-            droplist = self.db.query(DropList).filter(DropList.id == droplist_id).first()
-            if not droplist or not droplist.is_deleted:
-                raise DropListNotFoundException(detail="Drop List not found or already restored.")
+            status = self.db.query(Status).filter(Status.id == status_id).first()
+            if not status or not status.is_deleted:
+                raise StatusNotFoundException(detail="Drop List not found or already restored.")
 
-            droplist.is_deleted = False
+            status.is_deleted = False
             self.db.commit()
-            self.db.refresh(droplist)
-            return droplist
+            self.db.refresh(status)
+            return status
 
         except Exception as e:
-            raise DropListRestoreException(detail=f"Error: {str(e)}")
+            raise StatusRestoreException(detail=f"Error: {str(e)}")
 
 
 # These are the code for the business logic like calculation etc.
-class DropListService(AppService):
-    def create_droplist(self, item: DropListCreate):
+class StatusService(AppService):
+    def create_status(self, item: StatusCreate):
         try:
-            droplist_item = DropListCRUD(self.db).create_droplist(item)
+            status_item = StatusCRUD(self.db).create_status(item)
 
         except Exception as e:
-            raise DropListCreateException(detail=f"Error: {str(e)}")
+            raise StatusCreateException(detail=f"Error: {str(e)}")
 
 
-        return droplist_item
+        return status_item
 
-    def get_droplist(self):
+    def get_status(self):
         try:
-            droplist_item = DropListCRUD(self.db).get_droplist()
+            status_item = StatusCRUD(self.db).get_status()
 
         except Exception as e:
-            raise DropListNotFoundException(detail=f"Error: {str(e)}")
-        return droplist_item
+            raise StatusNotFoundException(detail=f"Error: {str(e)}")
+        return status_item
 
 
 
-    def get_status(self, name):
+    def get_status_by_name(self, name):
         try:
-            status_item = DropListCRUD(self.db).get_status(name)
+            status_item = StatusCRUD(self.db).get_status_by_name(name)
 
             if not status_item:
-                raise DropListNotFoundException(detail="Status not found.")
+                raise StatusNotFoundException(detail="Status not found.")
 
             # Filter only required fields
             filtered_status = {
@@ -143,33 +143,33 @@ class DropListService(AppService):
             return filtered_status
 
         except Exception as e:
-            raise DropListNotFoundException(detail=f"Error: {str(e)}")
+            raise StatusNotFoundException(detail=f"Error: {str(e)}")
 
     
     
-    def all_transformed_droplist(self):
+    def all_transformed_status(self):
         try:
-            warehouse_item = DropListCRUD(self.db).all_transformed_droplist()
+            warehouse_item = StatusCRUD(self.db).all_transformed_status()
 
         except Exception as e:
-            raise DropListNotFoundException(detail=f"Error: {str(e)}")
+            raise StatusNotFoundException(detail=f"Error: {str(e)}")
         return warehouse_item
 
     # This is the service/business logic in updating the status.
-    def update_droplist(self, droplist_id: UUID, droplist_update: DropListUpdate):
-        droplist = DropListCRUD(self.db).update_droplist(droplist_id, droplist_update)
-        return droplist
+    def update_status(self, status_id: UUID, status_update: StatusUpdate):
+        status = StatusCRUD(self.db).update_status(status_id, status_update)
+        return status
 
     # This is the service/business logic in soft deleting the status.
-    def soft_delete_droplist(self, droplist_id: UUID):
-        droplist = DropListCRUD(self.db).soft_delete_droplist(droplist_id)
-        return droplist
+    def soft_delete_status(self, status_id: UUID):
+        status = StatusCRUD(self.db).soft_delete_status(status_id)
+        return status
 
 
     # This is the service/business logic in soft restoring the status.
-    def restore_droplist(self, droplist_id: UUID):
-        droplist = DropListCRUD(self.db).restore_droplist(droplist_id)
-        return droplist
+    def restore_status(self, status_id: UUID):
+        status = StatusCRUD(self.db).restore_status(status_id)
+        return status
 
 
 

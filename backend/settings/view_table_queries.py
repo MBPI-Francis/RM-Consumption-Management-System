@@ -19,7 +19,7 @@ CREATE_BEGGINING_VIEW_QUERY = """
                FROM tbl_stock_on_hand soh
                  JOIN tbl_raw_materials rm ON soh.rm_code_id = rm.id
                  JOIN tbl_warehouses wh ON soh.warehouse_id = wh.id
-                 LEFT JOIN tbl_droplist status ON soh.status_id = status.id
+                 LEFT JOIN tbl_status status ON soh.status_id = status.id
             )
      SELECT rankedrecords.warehouseid,
         rankedrecords.warehousename,
@@ -61,7 +61,7 @@ CREATE_ENDING_VIEW_QUERY = """
                        FROM tbl_stock_on_hand soh
                          JOIN tbl_raw_materials rm ON soh.rm_code_id = rm.id
                          JOIN tbl_warehouses wh ON soh.warehouse_id = wh.id
-                         LEFT JOIN tbl_droplist status ON soh.status_id = status.id
+                         LEFT JOIN tbl_status status ON soh.status_id = status.id
                     )
              SELECT rankedrecords.warehouseid,
                 rankedrecords.warehousename,
@@ -93,7 +93,7 @@ CREATE_ENDING_VIEW_QUERY = """
                 status.id AS statusid
                FROM tbl_preparation_forms pf
                  JOIN tbl_warehouses wh ON pf.warehouse_id = wh.id
-                 JOIN tbl_droplist status ON pf.status_id = status.id
+                 JOIN tbl_status status ON pf.status_id = status.id
               WHERE (pf.is_cleared IS NULL OR pf.is_cleared = false) AND (pf.is_deleted IS NULL OR pf.is_deleted = false) AND pf.date_computed IS NULL
               GROUP BY pf.warehouse_id, pf.rm_code_id, pf.date_computed, status.name, status.id
             ), transferred_from AS (
@@ -105,7 +105,7 @@ CREATE_ENDING_VIEW_QUERY = """
                 status.name AS statusname
                FROM tbl_transfer_forms tf
                  JOIN tbl_warehouses wh_from ON tf.from_warehouse_id = wh_from.id
-                 LEFT JOIN tbl_droplist status ON tf.status_id = status.id
+                 LEFT JOIN tbl_status status ON tf.status_id = status.id
               WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
               GROUP BY tf.from_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
             ), transferred_to AS (
@@ -117,7 +117,7 @@ CREATE_ENDING_VIEW_QUERY = """
                 status.name AS statusname
                FROM tbl_transfer_forms tf
                  JOIN tbl_warehouses wh_to ON tf.to_warehouse_id = wh_to.id
-                 LEFT JOIN tbl_droplist status ON tf.status_id = status.id
+                 LEFT JOIN tbl_status status ON tf.status_id = status.id
               WHERE (tf.is_cleared IS NULL OR tf.is_cleared = false) AND (tf.is_deleted IS NULL OR tf.is_deleted = false) AND tf.date_computed IS NULL
               GROUP BY tf.to_warehouse_id, tf.rm_code_id, tf.date_computed, status.id, status.name
             ), rr_adjustments AS (
@@ -146,8 +146,8 @@ CREATE_ENDING_VIEW_QUERY = """
                 hf.date_computed AS datecomputed
                FROM tbl_held_forms hf
                  JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-                 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
-                 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+                 JOIN tbl_status current_status ON hf.current_status_id = current_status.id
+                 JOIN tbl_status new_status ON hf.new_status_id = new_status.id
               WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : under evaluation'::text OR current_status.name::text = 'held : under evaluation'::text)
               GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ), status_adjustments_conta AS (
@@ -167,8 +167,8 @@ CREATE_ENDING_VIEW_QUERY = """
                 hf.date_computed AS datecomputed
                FROM tbl_held_forms hf
                  JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-                 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
-                 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+                 JOIN tbl_status current_status ON hf.current_status_id = current_status.id
+                 JOIN tbl_status new_status ON hf.new_status_id = new_status.id
               WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : contaminated'::text OR current_status.name::text = 'held : contaminated'::text)
               GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ), status_adjustments_rejec AS (
@@ -188,8 +188,8 @@ CREATE_ENDING_VIEW_QUERY = """
                 hf.date_computed AS datecomputed
                FROM tbl_held_forms hf
                  JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-                 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
-                 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+                 JOIN tbl_status current_status ON hf.current_status_id = current_status.id
+                 JOIN tbl_status new_status ON hf.new_status_id = new_status.id
               WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'held : reject'::text OR current_status.name::text = 'held : reject'::text)
               GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ), status_adjustments_good AS (
@@ -208,8 +208,8 @@ CREATE_ENDING_VIEW_QUERY = """
                 hf.date_computed AS datecomputed
                FROM tbl_held_forms hf
                  JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-                 JOIN tbl_droplist current_status ON hf.current_status_id = current_status.id
-                 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+                 JOIN tbl_status current_status ON hf.current_status_id = current_status.id
+                 JOIN tbl_status new_status ON hf.new_status_id = new_status.id
               WHERE (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL AND (new_status.name::text = 'good'::text OR current_status.name::text = 'good'::text)
               GROUP BY hf.warehouse_id, hf.rm_code_id, hf.date_computed
             ), held_status_details AS (
@@ -225,7 +225,7 @@ CREATE_ENDING_VIEW_QUERY = """
                FROM tbl_held_forms hf
                  JOIN tbl_raw_materials rm ON hf.rm_code_id = rm.id
                  JOIN tbl_warehouses wh ON hf.warehouse_id = wh.id
-                 JOIN tbl_droplist new_status ON hf.new_status_id = new_status.id
+                 JOIN tbl_status new_status ON hf.new_status_id = new_status.id
               WHERE new_status.name::text ~~ 'held%'::text AND (hf.is_cleared IS NULL OR hf.is_cleared = false) AND (hf.is_deleted IS NULL OR hf.is_deleted = false) AND hf.date_computed IS NULL
               GROUP BY hf.rm_code_id, wh.wh_name, wh.wh_number, rm.rm_code, new_status.name, hf.date_computed, wh.id, hf.new_status_id
             ), computed_statement AS (

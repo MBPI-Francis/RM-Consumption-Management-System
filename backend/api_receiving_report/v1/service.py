@@ -20,7 +20,7 @@ class TempReceivingReportCRUD(AppCRUD):
     def create_receiving_report(self, receiving_report: TempReceivingReportCreate):
 
 
-        status_query = text(""" SELECT id FROM tbl_droplist WHERE name = 'good' """)
+        status_query = text(""" SELECT id FROM tbl_status WHERE name = 'good' """)
 
         status_record = self.db.execute(status_query).fetchone()  # or .fetchall() if expecting multiple rows
         status_result = status_record
@@ -112,7 +112,7 @@ class TempReceivingReportCRUD(AppCRUD):
     def update_receiving_report(self, receiving_report_id: UUID, receiving_report_update: TempReceivingReportUpdate):
 
         # Get the ID of the good status
-        status_query = text(""" SELECT id FROM tbl_droplist WHERE name = 'good' """)
+        status_query = text(""" SELECT id FROM tbl_status WHERE name = 'good' """)
         status_record = self.db.execute(status_query).fetchone()  # or .fetchall() if expecting multiple rows
         status_result = status_record
         if status_result:

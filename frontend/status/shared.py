@@ -4,7 +4,7 @@ from tkinter import messagebox
 
 
 
-def droplist_api():
+def status_api():
     url = server_ip + "/api/status/v1/transformed_list/"
     try:
         response = requests.get(url)
