@@ -336,7 +336,7 @@ def entry_fields(note_form_tab):
     btn_submit.grid(row=5, column=6, pady=10)
 
     # Calling the table
-    note_table = NoteTable(note_form_tab)
+    note_table = TransferFormTable(note_form_tab)
 
 
 def get_warehouse_api():

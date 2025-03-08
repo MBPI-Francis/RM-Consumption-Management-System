@@ -86,7 +86,6 @@ class TransferFormTable:
         self.refresh_table()
 
 
-
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
         url = server_ip + "/api/transfer_forms/v1/list/"
@@ -517,3 +516,4 @@ class TransferFormTable:
 
             except requests.exceptions.RequestException as e:
                 return False
+
