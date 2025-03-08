@@ -5,7 +5,7 @@ from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
-from frontend.rm_consumption_entry.transfer_form.table import NoteTable
+from frontend.rm_consumption_entry.transfer_form.table import TransferFormTable
 from frontend.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 from tkinter import StringVar
 from frontend.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation

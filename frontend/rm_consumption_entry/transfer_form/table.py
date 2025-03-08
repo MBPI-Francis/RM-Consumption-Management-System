@@ -11,12 +11,20 @@ from tkinter import simpledialog
 from ttkbootstrap.widgets import DateEntry
 from ttkbootstrap.dialogs import Messagebox
 from frontend.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation
+from frontend.rm_consumption_entry.shared import SharedFunctions
 from frontend.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 
 
-class NoteTable:
+class TransferFormTable:
     def __init__(self, root):
         self.root = root
+        # Instantiate the shared_function class
+        shared_functions = SharedFunctions()
+
+        self.get_warehouse_api = shared_functions.get_warehouse_api()
+        self.get_rm_code_api = shared_functions.get_rm_code_api()    # Instantiate the shared_function class
+        self.get_status_api = shared_functions.get_status_api()    # Instantiate the shared_function class
+
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
@@ -137,7 +145,7 @@ class NoteTable:
 
             if field == "Raw Material":
                 # Fetch Raw Material Data from API
-                rm_codes = self.get_rm_code_api()
+                rm_codes = self.get_rm_code_api
                 code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
                 rm_names = list(code_to_id.keys())
 
@@ -148,7 +156,7 @@ class NoteTable:
 
             elif field == "Warehouse (FROM)":
                 # Warehouse JSON-format choices (coming from the API)
-                warehouses = self.get_warehouse_api()
+                warehouses = self.get_warehouse_api
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
@@ -159,7 +167,7 @@ class NoteTable:
 
             elif field == "Warehouse (TO)":
                 # Warehouse JSON-format choices (coming from the API)
-                warehouses = self.get_warehouse_api()
+                warehouses = self.get_warehouse_api
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
@@ -170,7 +178,7 @@ class NoteTable:
 
             elif field == "Status":
                 # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api()
+                status = self.get_status_api
                 status_to_id = {item["name"]: item["id"] for item in status}
                 status_names = list(status_to_id.keys())
 
@@ -330,44 +338,8 @@ class NoteTable:
         self.tree.heading(col, command=lambda: self.sort_column(col, not reverse))
 
 
-
-    def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/v1/list/"
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            return []
-
-    def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-            return data
-        else:
-            return []
-
-    def get_status_api(self):
-        url = server_ip + "/api/status/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-
-            return data
-        else:
-            return []
-
     def check_raw_material(self, rm_id: UUID, warehouse_id: UUID, status_id: UUID = None):
-        url = f"{server_ip}/api/check/raw_material/"  # Replace with the actual URL of your FastAPI server
+        url = f"{server_ip}/api/check/raw_material/"
 
         # Construct the query parameters
         params = {
@@ -545,5 +517,3 @@ class NoteTable:
 
             except requests.exceptions.RequestException as e:
                 return False
-
-

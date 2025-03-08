@@ -5,14 +5,23 @@ from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
-from frontend.rm_consumption_entry.transfer_form.table import NoteTable
+
+from frontend.rm_consumption_entry.shared import SharedFunctions
+from frontend.rm_consumption_entry.transfer_form.table import TransferFormTable
 from frontend.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 from tkinter import StringVar
 from frontend.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation
 from uuid import  UUID
 
 def entry_fields(note_form_tab):
-    
+
+    # Instantiate the shared_function class
+    shared_functions = SharedFunctions()
+
+    get_warehouse_api = shared_functions.get_warehouse_api()
+    get_rm_code_api = shared_functions.get_rm_code_api()
+    get_status_api = shared_functions.get_status_api()
+
 
     def get_selected_warehouse_from_id():
         selected_name = warehouse_from_combobox.get()
@@ -153,7 +162,7 @@ def entry_fields(note_form_tab):
             if validatation_result:
                     # Send a POST request to the API
                 try:
-                    response = requests.post(f"{server_ip}/api/transfer_forms/temp/create/", json=data)
+                    response = requests.post(f"{server_ip}/api/transfer_forms/v1/create/", json=data)
                     if response.status_code == 200:  # Successfully created
                         clear_fields()
 
@@ -179,7 +188,7 @@ def entry_fields(note_form_tab):
 
 
     # Warehouse JSON-format choices (coming from the API)
-    warehouses = get_warehouse_api()
+    warehouses = get_warehouse_api
     warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
     warehouse_names = list(warehouse_to_id.keys())
 
@@ -240,7 +249,7 @@ def entry_fields(note_form_tab):
     ToolTip(lock_reference, text="Lock the reference number by clicking this")
 
     #RM CODE JSON-format choices (coming from the API)
-    rm_codes = get_rm_code_api()
+    rm_codes = get_rm_code_api
     code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
     rm_names = list(code_to_id.keys())
 
@@ -273,7 +282,7 @@ def entry_fields(note_form_tab):
 
 
     # Status JSON-format choices (coming from the API)
-    status = get_status_api()
+    status = get_status_api
     status_to_id = {item["name"]: item["id"] for item in status}
     status_names = list(status_to_id.keys())
 
@@ -336,45 +345,7 @@ def entry_fields(note_form_tab):
     btn_submit.grid(row=5, column=6, pady=10)
 
     # Calling the table
-    note_table = NoteTable(note_form_tab)
+    note_table = TransferFormTable(note_form_tab)
 
 
-def get_warehouse_api():
-    url = server_ip + "/api/warehouses/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-
-def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-def get_status_api():
-    url = server_ip + "/api/status/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
 

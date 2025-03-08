@@ -6,7 +6,7 @@ from backend.settings.database import server_ip
 from datetime import datetime
 
 
-class NoteTable:
+class TransferFormTable:
 
     def __init__(self, root):
         self.note_form_tab = root
