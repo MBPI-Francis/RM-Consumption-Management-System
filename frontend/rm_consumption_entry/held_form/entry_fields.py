@@ -10,9 +10,15 @@ from .validation import EntryValidation
 from ..preparation_form.validation import EntryValidation as PrepValidation
 from tkinter import StringVar
 
+from ..shared import SharedFunctions
+
 
 def entry_fields(note_form_tab):
-    
+    shared_functions = SharedFunctions()
+
+    get_status_api = shared_functions.get_status_api()
+    get_rm_code_api = shared_functions.get_rm_code_api()
+    get_warehouse_api = shared_functions.get_warehouse_api()
 
     def get_selected_warehouse_id():
         selected_name = warehouse_combobox.get()
@@ -130,7 +136,7 @@ def entry_fields(note_form_tab):
 
 
     # Warehouse JSON-format choices (coming from the API)
-    warehouses = get_warehouse_api()
+    warehouses = get_warehouse_api
     warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
     warehouse_names = list(warehouse_to_id.keys())
 
@@ -176,7 +182,7 @@ def entry_fields(note_form_tab):
     ToolTip(lock_reference, text="Lock the reference number by clicking this")
 
     #RM CODE JSON-format choices (coming from the API)
-    rm_codes = get_rm_code_api()
+    rm_codes = get_rm_code_api
     code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
     rm_names = list(code_to_id.keys())
 
@@ -206,9 +212,7 @@ def entry_fields(note_form_tab):
     ToolTip(rm_codes_combobox, text="Choose a raw material")
 
 
-
     # Quantity Entry Field
-
     # Register the validation command
     validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
 
@@ -241,9 +245,8 @@ def entry_fields(note_form_tab):
     ToolTip(change_status_date_entry, text="Choose a change status date.")
 
 
-
     # Warehouse JSON-format choices (coming from the API)
-    status = get_status_api()
+    status = get_status_api
     status_to_id = {item["name"]: item["id"] for item in status}
     status_names = list(status_to_id.keys())
 
@@ -261,7 +264,6 @@ def entry_fields(note_form_tab):
     ToolTip(current_status_combobox, text="Choose the current status")
 
 
-
     # Combobox for Warehouse Drop Down
     new_status_label = ttk.Label(form_frame, text="New Status", font=("Helvetica", 10, "bold"))
     new_status_label.grid(row=6, column=3, padx=5, pady=5, sticky=W)
@@ -273,7 +275,6 @@ def entry_fields(note_form_tab):
     )
     new_status_combobox.grid(row=7, column=3, columnspan=2, pady=10, padx=10)
     ToolTip(new_status_combobox, text="Choose a new status")
-
 
 
     # Add button to submit data
@@ -288,51 +289,4 @@ def entry_fields(note_form_tab):
 
     # Calling the table
     note_table = NoteTable(note_form_tab)
-
-
-def get_warehouse_api():
-    url = server_ip + "/api/warehouses/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-
-def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-def get_status_api():
-    url = server_ip + "/api/status/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-
-
-
-
-
 

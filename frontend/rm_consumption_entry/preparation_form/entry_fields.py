@@ -7,11 +7,16 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
-from tkinter import StringVar
-import psycopg2
+from frontend.rm_consumption_entry.shared import SharedFunctions
 
 
 def entry_fields(note_form_tab):
+
+    shared_functions = SharedFunctions()
+
+    get_status_api = shared_functions.get_status_api()
+    get_rm_code_api = shared_functions.get_rm_code_api()
+    get_warehouse_api = shared_functions.get_warehouse_api()
     
 
     def get_selected_warehouse_id():
@@ -104,7 +109,7 @@ def entry_fields(note_form_tab):
         if validatation_result:
             # Send a POST request to the API
             try:
-                response = requests.post(f"{server_ip}/api/preparation_forms/temp/create/", json=data)
+                response = requests.post(f"{server_ip}/api/preparation_forms/v1/create/", json=data)
                 if response.status_code == 200:  # Successfully created
                     clear_fields()
                     note_table.refresh_table()
@@ -137,7 +142,7 @@ def entry_fields(note_form_tab):
 
 
     # Warehouse JSON-format choices (coming from the API)
-    warehouses = get_warehouse_api()
+    warehouses = get_warehouse_api
     warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
     warehouse_names = list(warehouse_to_id.keys())
 
@@ -192,7 +197,7 @@ def entry_fields(note_form_tab):
     ToolTip(lock_reference, text="Lock the reference number by clicking this")
 
     #RM CODE JSON-format choices (coming from the API)
-    rm_codes = get_rm_code_api()
+    rm_codes = get_rm_code_api
     code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
     rm_names = list(code_to_id.keys())
 
@@ -222,7 +227,7 @@ def entry_fields(note_form_tab):
     ToolTip(rm_codes_combobox, text="Choose a raw material")
 
     # Status JSON-format choices (coming from the API)
-    status = get_status_api()
+    status = get_status_api
     status_to_id = {item["name"]: item["id"] for item in status}
     status_names = list(status_to_id.keys())
 
@@ -239,7 +244,6 @@ def entry_fields(note_form_tab):
     ToolTip(status_combobox, text="Choose the current status")
 
     # Register the validation command
-
     validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
 
     # Quantity (Prepared) Entry Field
@@ -266,8 +270,6 @@ def entry_fields(note_form_tab):
     ToolTip(qty_return_entry, text="Enter the Quantity(kg)")
 
 
-
-
     # Add button to submit data
     btn_submit = ttk.Button(
         form_frame,
@@ -278,54 +280,4 @@ def entry_fields(note_form_tab):
 
     # Calling the table
     note_table = NoteTable(note_form_tab)
-
-
-def get_warehouse_api():
-    url = server_ip + "/api/warehouses/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-
-        return data
-    else:
-        return []
-
-
-
-def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-
-        return data
-    else:
-        return []
-
-def get_status_api():
-    url = server_ip + "/api/status/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-
-
-
-
-
-
-
 

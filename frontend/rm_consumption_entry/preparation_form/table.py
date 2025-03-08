@@ -10,11 +10,18 @@ from uuid import UUID
 from datetime import datetime
 from ttkbootstrap.tooltip import ToolTip
 from .validation import EntryValidation
+from ..shared import SharedFunctions
 
 
 class NoteTable:
     def __init__(self, root):
         self.root = root
+        shared_functions = SharedFunctions()
+
+        self.get_status_api = shared_functions.get_status_api()
+        self.get_rm_code_api = shared_functions.get_rm_code_api()
+        self.get_warehouse_api = shared_functions.get_warehouse_api()
+
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
@@ -34,14 +41,6 @@ class NoteTable:
         )
         btn_clear.pack(side=RIGHT)
         ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
-
-        # self.tree = ttk.Treeview(root,
-        #                          columns=("Raw Material", "Warehouse", "Reference No.",
-        #                                   "Quantity (Prepared)", "Quantity (Return)",
-        #                                   "Preparation Date",
-        #                                   "Entry Date"),
-        #                          show='headings',
-        #                          style="Custom.Treeview")
 
         # Create a frame to hold the Treeview and Scrollbars
         tree_frame = ttk.Frame(self.root)
@@ -112,15 +111,6 @@ class NoteTable:
 
         self.tree.delete(*self.tree.get_children())
         for item in self.fetch_data():
-            # self.tree.insert("", END, values=(
-            #     item["raw_material"],
-            #     item["wh_name"],
-            #     item["ref_number"],
-            #     item["qty_prepared"],
-            #     item["qty_return"],
-            #     item["preparation_date"],
-            #     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
-            # ), iid=item["id"])
 
             record = (
                 item["id"],  # Store ID
@@ -178,7 +168,7 @@ class NoteTable:
 
             if field == "Raw Material":
                 # Fetch Raw Material Data from API
-                rm_codes = self.get_rm_code_api()
+                rm_codes = self.get_rm_code_api
                 code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
                 rm_names = list(code_to_id.keys())
 
@@ -189,7 +179,7 @@ class NoteTable:
 
             elif field == "Warehouse":
                 # Warehouse JSON-format choices (coming from the API)
-                warehouses = self.get_warehouse_api()
+                warehouses = self.get_warehouse_api
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
@@ -199,7 +189,7 @@ class NoteTable:
 
             elif field == "Status":
                 # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api()
+                status = self.get_status_api
                 status_to_id = {item["name"]: item["id"] for item in status}
                 status_names = list(status_to_id.keys())
 
@@ -345,43 +335,6 @@ class NoteTable:
 
         else:
             messagebox.showerror("Error", "Failed to delete record")
-
-    def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/v1/list/"
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            return []
-
-    def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-            return data
-        else:
-            return []
-
-
-    def get_status_api(self):
-        url = server_ip + "/api/status/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-
-            return data
-        else:
-            return []
-
 
 
     def search_data(self, event=None):

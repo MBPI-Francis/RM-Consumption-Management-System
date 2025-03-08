@@ -415,7 +415,7 @@ def create_soh_whse_excel(date_entry_value, data):
 
     # Fetch data from the API
     try:
-        api_url = f"{server_ip}/api/notes/temp/list/"
+        api_url = f"{server_ip}/api/notes/v1/list/"
         response = requests.get(api_url)
         response.raise_for_status()
         api_data = response.json()

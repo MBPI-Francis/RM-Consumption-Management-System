@@ -12,11 +12,17 @@ from ttkbootstrap.widgets import DateEntry
 from .validation import EntryValidation
 from ttkbootstrap.dialogs import Messagebox
 from ..preparation_form.validation import EntryValidation as PrepValidation
+from ..shared import SharedFunctions
 
 
 class NoteTable:
     def __init__(self, root):
         self.root = root
+        shared_functions = SharedFunctions()
+
+        self.get_status_api = shared_functions.get_status_api()
+        self.get_rm_code_api = shared_functions.get_rm_code_api()
+        self.get_warehouse_api = shared_functions.get_warehouse_api()
 
 
         # Frame for search
@@ -37,12 +43,6 @@ class NoteTable:
         btn_clear.pack(side=RIGHT)
         ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
 
-
-        # Create Treeview with custom style
-        # self.tree = ttk.Treeview(self.root, columns=(
-        #     "Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
-        #     "Current Status", "New Status", "Change Date", "Entry Date"
-        # ), show="headings", style="Custom.Treeview")
 
         # Create a frame to hold the Treeview and Scrollbars
         tree_frame = ttk.Frame(self.root)
@@ -95,17 +95,6 @@ class NoteTable:
             data = response.json()
             self.tree.delete(*self.tree.get_children())  # Clear existing data
             for item in data:
-                # self.tree.insert("", "end", values=(
-                #     item["raw_material"],
-                #     item["wh_name"],
-                #     item["ref_number"],
-                #     item["qty_kg"],
-                #     item["current_status"],
-                #     item["new_status"],
-                #     item["change_status_date"],
-                #     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
-                # ), iid=item["id"])
-
                 record = (
                     item["id"],  # Store ID
                     item["raw_material"],
@@ -152,7 +141,7 @@ class NoteTable:
 
             if field == "Raw Material":
                 # Fetch Raw Material Data from API
-                rm_codes = self.get_rm_code_api()
+                rm_codes = self.get_rm_code_api
                 code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
                 rm_names = list(code_to_id.keys())
 
@@ -163,7 +152,7 @@ class NoteTable:
 
             elif field == "Warehouse":
                 # Warehouse JSON-format choices (coming from the API)
-                warehouses = self.get_warehouse_api()
+                warehouses = self.get_warehouse_api
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
@@ -179,7 +168,7 @@ class NoteTable:
 
             elif field == "Current Status":
                 # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api()
+                status = self.get_status_api
                 status_to_id = {item["name"]: item["id"] for item in status}
                 status_names = list(status_to_id.keys())
 
@@ -190,7 +179,7 @@ class NoteTable:
 
             elif field == "New Status":
                 # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api()
+                status = self.get_status_api
                 status_to_id = {item["name"]: item["id"] for item in status}
                 status_names = list(status_to_id.keys())
 
@@ -325,41 +314,6 @@ class NoteTable:
         for index, (_, k) in enumerate(data):
             self.tree.move(k, "", index)
         self.tree.heading(col, command=lambda: self.sort_column(col, not reverse))
-
-
-    def get_rm_code_api(self):
-        url = server_ip + "/api/raw_materials/v1/list/"
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        else:
-            return []
-
-    def get_warehouse_api(self):
-        url = server_ip + "/api/warehouses/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-            return data
-        else:
-            return []
-
-    def get_status_api(self):
-        url = server_ip + "/api/status/v1/list/"
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-            return data
-        else:
-            return []
 
 
 
