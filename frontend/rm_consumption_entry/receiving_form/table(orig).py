@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 
-class NoteTable:
+class ReceivingFormTable:
 
     def __init__(self, root):
         self.note_form_tab = root

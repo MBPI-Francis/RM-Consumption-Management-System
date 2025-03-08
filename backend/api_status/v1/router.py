@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.api_status.v1.schemas import StatusCreate, StatusUpdate, StatusResponse, StatusResponse
+from backend.api_status.v1.schemas import StatusCreate, StatusUpdate, StatusResponse, StatusResponse, \
+    StatusSearchResponse
 from backend.api_status.v1.service import StatusService
 from backend.settings.database import get_db
 from uuid import UUID
@@ -41,7 +42,7 @@ async def delete_status(status_id: UUID, db: get_db = Depends()):
     return result
 
 
-@router.get("/search_status/", response_model=StatusResponse)
+@router.get("/search_status/", response_model=StatusSearchResponse)
 async def search_status(name: str = None, db: get_db = Depends()):
-    result = StatusService(db).get_status(name)
+    result = StatusService(db).get_status_by_name(name)
     return result

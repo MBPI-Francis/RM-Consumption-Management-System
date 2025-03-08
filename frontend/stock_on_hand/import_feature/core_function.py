@@ -31,7 +31,7 @@ class ImportData:
 
     def upload_file(self, file_path):
         """Uploads the file to the FastAPI backend."""
-        url = f"{server_ip}/api/rm_stock_on_hand/temp/import_stock_data/"
+        url = f"{server_ip}/api/rm_stock_on_hand/v1/import_stock_data/"
 
         try:
             with open(file_path, 'rb') as f:

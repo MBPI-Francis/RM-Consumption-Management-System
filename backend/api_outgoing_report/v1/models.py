@@ -31,11 +31,11 @@ class TempOutgoingReport(Base):
 
 
     # Relationships for created_by, updated_by, and deleted_by
-    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_outgoing_reports_temp")
-    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_outgoing_reports_temp")
-    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_outgoing_reports_temp")
-    rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_outgoing_reports_temp")
-    warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_outgoing_reports_temp")
+    created_by = relationship("User", foreign_keys=[created_by_id], backref="created_outgoing_reports")
+    updated_by = relationship("User", foreign_keys=[updated_by_id], backref="updated_outgoing_reports")
+    deleted_by = relationship("User", foreign_keys=[deleted_by_id], backref="deleted_outgoing_reports")
+    rm_code = relationship("RawMaterial", foreign_keys=[rm_code_id], backref="rm_outgoing_reports")
+    warehouse = relationship("Warehouse", foreign_keys=[warehouse_id], backref="warehouse_outgoing_reports")
 
 
 

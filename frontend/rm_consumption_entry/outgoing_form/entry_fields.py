@@ -5,13 +5,23 @@ from backend.settings.database import server_ip
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
-from .table import NoteTable
+from .table import OutgoingFormTable
 from .validation import EntryValidation
+from ..preparation_form.validation import EntryValidation as PrepValidation
+import psycopg2
 from tkinter import StringVar
+
+from ..shared import SharedFunctions
 
 
 def entry_fields(note_form_tab):
 
+    # Instantiate the shared_function class
+    shared_functions = SharedFunctions()
+
+    get_warehouse_api = shared_functions.get_warehouse_api()
+    get_rm_code_api = shared_functions.get_rm_code_api()
+    
 
     def get_selected_warehouse_id():
         selected_name = warehouse_combobox.get()
@@ -40,6 +50,18 @@ def entry_fields(note_form_tab):
         rm_codes_combobox.set("")
         qty_entry.delete(0, ttk.END)
 
+    def get_status_id():
+        url = server_ip + "/api/status/v1/search_status/"
+        params = {"name": "good"}  # Send name as a query parameter
+        response = requests.get(url, params=params)
+
+        if response.status_code == 200:
+            data = response.json()  # Parse JSON response
+            return data['id']
+        else:
+            return []
+
+
 
     def submit_data():
 
@@ -48,7 +70,8 @@ def entry_fields(note_form_tab):
         rm_code_id = get_selected_rm_code_id()
         ref_number = ref_number_entry.get()
         qty = qty_entry.get()
-        received_date = received_date_entry.entry.get()
+        outgoing_date = outgoing_date_entry.entry.get()
+        status_id = get_status_id()
 
         # Set focus to the Entry field
         rm_codes_combobox.focus_set()
@@ -56,17 +79,19 @@ def entry_fields(note_form_tab):
 
         # Convert date to YYYY-MM-DD
         try:
-            received_date = datetime.strptime(received_date, "%m/%d/%Y").strftime("%Y-%m-%d")
+            outgoing_date = datetime.strptime(outgoing_date, "%m/%d/%Y").strftime("%Y-%m-%d")
         except ValueError:
             Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
             return
+
+
 
         # Create a dictionary with the data
         data = {
             "rm_code_id": rm_code_id,
             "warehouse_id": warehouse_id,
             "ref_number": ref_number,
-            "receiving_date": received_date,
+            "outgoing_date": outgoing_date,
             "qty_kg": qty,
         }
 
@@ -77,17 +102,32 @@ def entry_fields(note_form_tab):
             Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
             return
 
+        # Validate if the entry value exceeds the stock
+        validatation_result = PrepValidation.validate_soh_value(
+            rm_code_id,
+            warehouse_id,
+            qty,
+            status_id
+        )
+
+        if validatation_result:
+
             # Send a POST request to the API
-        try:
-            response = requests.post(f"{server_ip}/api/receiving_reports/v1/create/", json=data)
-            if response.status_code == 200:  # Successfully created
-                clear_fields()
+            try:
+                response = requests.post(f"{server_ip}/api/outgoing_reports/v1/create/", json=data)
+                if response.status_code == 200:  # Successfully created
+                    clear_fields()
 
-                note_table.refresh_table()
-                # refresh_table()  # Refresh the table
-        except requests.exceptions.RequestException as e:
-            Messagebox.show_info(e, "Data Entry Error")
+                    outgoing_form_table.refresh_table()
+            except requests.exceptions.RequestException as e:
+                Messagebox.show_error(e, "Data Entry Error")
+                return
 
+        else:
+            Messagebox.show_error(
+                "The entered quantity in 'Quantity' exceeds the available stock in the database.",
+                "Data Entry Error")
+            return
 
 
     # Create a frame for the form inputs
@@ -96,7 +136,7 @@ def entry_fields(note_form_tab):
 
 
     # Warehouse JSON-format choices (coming from the API)
-    warehouses = get_warehouse_api()
+    warehouses = get_warehouse_api
     warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
     warehouse_names = list(warehouse_to_id.keys())
 
@@ -142,9 +182,10 @@ def entry_fields(note_form_tab):
     ToolTip(lock_reference, text="Lock the reference number by clicking this")
 
     #RM CODE JSON-format choices (coming from the API)
-    rm_codes = get_rm_code_api()
+    rm_codes = get_rm_code_api
     code_to_id = {item["rm_code"]: item["id"] for item in rm_codes}
     rm_names = list(code_to_id.keys())
+
 
     # Function to convert typed input to uppercase
     def on_combobox_key_release(event):
@@ -170,6 +211,7 @@ def entry_fields(note_form_tab):
     rm_codes_combobox.grid(row=5, column=0, columnspan=2, pady=10, padx=10)
     ToolTip(rm_codes_combobox, text="Choose a raw material")
 
+
     # Register the validation command
 
     validate_numeric_command = form_frame.register(EntryValidation.validate_numeric_input)
@@ -186,23 +228,23 @@ def entry_fields(note_form_tab):
     ToolTip(qty_entry, text="Enter the Quantity(kg)")
 
     # Date Entry field
-    date_label = ttk.Label(form_frame, text="Receiving Date:", font=("Helvetica", 10, "bold"))
+    date_label = ttk.Label(form_frame, text="Outgoing Date:", font=("Helvetica", 10, "bold"))
     date_label.grid(row=4, column=5, padx=5, pady=5, sticky=W)
 
     # Calculate yesterday's date
     yesterday_date = datetime.now() - timedelta(days=1)
 
     # Create the DateEntry widget with yesterday's date as the default value
-    received_date_entry = ttk.DateEntry(
+    outgoing_date_entry = ttk.DateEntry(
         form_frame,
         bootstyle=PRIMARY,
         dateformat="%m/%d/%Y",
         startdate=yesterday_date,  # Set yesterday's date
         width=30
     )
-    received_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
+    outgoing_date_entry.grid(row=5, column=5, padx=5, pady=5, sticky=W)
 
-    ToolTip(received_date_entry, text="This is the receiving date.")
+    ToolTip(outgoing_date_entry, text="This is the outgoing date.")
 
     # Add button to submit data
     btn_submit = ttk.Button(
@@ -213,49 +255,7 @@ def entry_fields(note_form_tab):
     btn_submit.grid(row=5, column=6, columnspan=2, pady=10)
 
     # Calling the table
-    note_table = NoteTable(note_form_tab)
-
-
-def get_product_kinds_api():
-    url = server_ip + "/api/product_kinds/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
-
-def get_warehouse_api():
-    url = server_ip + "/api/warehouses/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-
-        return data
-    else:
-        return []
-
-
-
-def get_rm_code_api():
-    url = server_ip + "/api/raw_materials/v1/list/"
-    response = requests.get(url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse JSON response
-        data = response.json()
-        return data
-    else:
-        return []
-
+    outgoing_form_table = OutgoingFormTable(note_form_tab)
 
 
 

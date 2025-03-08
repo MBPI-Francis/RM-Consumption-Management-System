@@ -4,6 +4,7 @@ from backend.settings.database import server_ip
 
 
 class EntryValidation:
+    @staticmethod
     def entry_validation(entries: dict):
         text_list = []
 
@@ -32,6 +33,7 @@ class EntryValidation:
         return text_list
 
     # Validation function for numeric input
+    @staticmethod
     def validate_numeric_input(input_value):
         """
         Validates that the input contains only numeric characters or a decimal point
@@ -53,7 +55,7 @@ class EntryValidation:
             return False  # Reject invalid inputs
 
 
-
+    @staticmethod
     def validate_soh_value(rm_id, warehouse_id, entered_qty: float, status_id=None):
         # Prepare parameters
         params = {
@@ -66,6 +68,8 @@ class EntryValidation:
         if status_id:
             params["status_id"] = status_id
         # Handle response
+
+        print(params)
         try:
             # Make the GET request
 
@@ -83,6 +87,7 @@ class EntryValidation:
         except requests.exceptions.RequestException as e:
             return None
 
+    @staticmethod
     def validate_soh_value_for_update(rm_id, warehouse_id, entered_qty: float, status_id=None):
         # Prepare parameters
         params = {

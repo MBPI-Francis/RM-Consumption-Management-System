@@ -1,7 +1,7 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .table import NoteTable
+from .table import ReceivingFormTable
 from .entry_fields import entry_fields
 
 

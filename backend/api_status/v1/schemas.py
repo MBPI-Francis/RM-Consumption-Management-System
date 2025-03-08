@@ -17,7 +17,7 @@ class StatusUpdate(StatusBase):
     description: Optional[str] = None
 
 
-class StatusResponse(BaseModel):
+class StatusSearchResponse(BaseModel):
     id: UUID
     name: str
 

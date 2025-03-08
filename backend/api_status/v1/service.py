@@ -35,7 +35,14 @@ class StatusCRUD(AppCRUD):
         )
 
         if status:
-            return status
+            # Filter only required fields
+            filtered_status = {
+                "id": status.id,
+                "name": status.name,
+            }
+
+            return filtered_status
+
 
         return []  # Return None if no match is found
 
@@ -126,7 +133,6 @@ class StatusService(AppService):
         return status_item
 
 
-
     def get_status_by_name(self, name):
         try:
             status_item = StatusCRUD(self.db).get_status_by_name(name)
@@ -134,13 +140,7 @@ class StatusService(AppService):
             if not status_item:
                 raise StatusNotFoundException(detail="Status not found.")
 
-            # Filter only required fields
-            filtered_status = {
-                "id": status_item.id,
-                "name": status_item.name,
-            }
-
-            return filtered_status
+            return status_item
 
         except Exception as e:
             raise StatusNotFoundException(detail=f"Error: {str(e)}")
