@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
-from backend.api_held_form.v1.schemas import TempHeldFormCreate, TempHeldFormUpdate, TempHeldFormResponse, TempHeldForm
-from backend.api_held_form.v1.service import TempHeldFormService
+from backend.api_change_status_form.v1.schemas import TempHeldFormCreate, TempHeldFormUpdate, TempHeldFormResponse, TempHeldForm
+from backend.api_change_status_form.v1.service import TempHeldFormService
 from backend.settings.database import get_db
 from uuid import UUID
 
-router = APIRouter(prefix="/api/held_forms/v1")
+router = APIRouter(prefix="/api/change_status_form/v1")
 
 @router.post("/create/", response_model=TempHeldForm)
 async def create_held_form(held_form: TempHeldFormCreate, db: get_db = Depends()):
@@ -14,6 +14,18 @@ async def create_held_form(held_form: TempHeldFormCreate, db: get_db = Depends()
 @router.get("/list/", response_model=list[TempHeldFormResponse])
 async def read_held_form(db: get_db = Depends()):
     result = TempHeldFormService(db).get_held_form()
+    return result
+
+
+@router.get("/list/deleted/", response_model=list[TempHeldFormResponse])
+async def read_deleted_held_form(db: get_db = Depends()):
+    result = TempHeldFormService(db).get_deleted_held_form()
+    return result
+
+
+@router.get("/list/historical/", response_model=list[TempHeldFormResponse])
+async def read_historical_held_form(db: get_db = Depends()):
+    result = TempHeldFormService(db).get_historical_held_form()
     return result
 
 @router.put("/update/{held_form_id}/", response_model=list[TempHeldFormResponse])

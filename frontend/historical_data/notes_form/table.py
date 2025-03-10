@@ -5,7 +5,6 @@ import requests
 from tkinter import Menu, Toplevel, Label, Entry, Button, messagebox
 import tkinter as tk
 from ttkbootstrap.dialogs import Messagebox
-from .validation import EntryValidation
 from backend.settings.database import server_ip
 from datetime import datetime
 from ttkbootstrap.tooltip import ToolTip
@@ -42,7 +41,7 @@ class NoteTable:
         # First, define self.tree before using it
         self.tree = ttk.Treeview(
             master=tree_frame,
-            columns=("Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date"),
+            columns=("Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date", "Date Computed"),
             show='headings',
             bootstyle=PRIMARY
         )
@@ -63,7 +62,7 @@ class NoteTable:
 
 
         # Define column headers
-        col_names = ["Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date"]
+        col_names = ["Product Code", "Lot No.", "Product Kind", "Consumption Date", "Entry Date", "Date Computed"]
         for col in col_names:
             self.tree.heading(col, text=col, command=lambda _col=col: self.sort_treeview(_col, False), anchor=W)
             self.tree.column(col, anchor=W)
@@ -77,7 +76,7 @@ class NoteTable:
 
     def load_data(self):
         """Fetch data from API and populate treeview."""
-        url = server_ip + "/api/notes/v1/list/"
+        url = server_ip + "/api/notes/v1/list/historical/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -94,6 +93,7 @@ class NoteTable:
                     item["product_kind_id"],
                     datetime.fromisoformat(item["stock_change_date"]).strftime("%m/%d/%Y"),
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
+                    datetime.fromisoformat(item["date_computed"]).strftime("%m/%d/%Y"),
                 )
                 self.original_data.append(record)  # Save record
                 self.tree.insert("", END, iid=record[0], values=record[1:])
@@ -131,17 +131,7 @@ class NoteTable:
         else:
             messagebox.showerror("Error", "Failed to delete record")
 
-    def get_product_kinds_api(self):
-        url = server_ip + "/api/product_kinds/v1/list/"
-        response = requests.get(url)
 
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Parse JSON response
-            data = response.json()
-            return data
-        else:
-            return []
 
 
     def search_data(self, event=None):

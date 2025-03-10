@@ -16,6 +16,16 @@ async def read_outgoing_report(db: get_db = Depends()):
     result = TempOutgoingReportService(db).get_outgoing_report()
     return result
 
+@router.get("/list/deleted/", response_model=list[TempOutgoingReportResponse])
+async def read_deleted_outgoing_report(db: get_db = Depends()):
+    result = TempOutgoingReportService(db).get_deleted_outgoing_report()
+    return result
+
+@router.get("/list/historical/", response_model=list[TempOutgoingReportResponse])
+async def read_historical_outgoing_report(db: get_db = Depends()):
+    result = TempOutgoingReportService(db).get_historical_outgoing_report()
+    return result
+
 @router.put("/update/{outgoing_report_id}/", response_model=list[TempOutgoingReportResponse])
 async def update_outgoing_report(outgoing_report_id: UUID, outgoing_report_update: TempOutgoingReportUpdate, db: get_db = Depends()):
     result = TempOutgoingReportService(db).update_outgoing_report(outgoing_report_id, outgoing_report_update)

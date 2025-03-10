@@ -69,7 +69,6 @@ class EntryValidation:
             params["status_id"] = status_id
         # Handle response
 
-        print(params)
         try:
             # Make the GET request
 

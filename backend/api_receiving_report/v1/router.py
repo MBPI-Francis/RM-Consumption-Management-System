@@ -13,9 +13,21 @@ async def create_receiving_report(receiving_report: TempReceivingReportCreate, d
     return result
 
 @router.get("/list/", response_model=list[TempReceivingReportResponse])
-async def read_receiving_report(db: get_db = Depends()):
+async def get_receiving_report(db: get_db = Depends()):
     result = TempReceivingReportService(db).get_receiving_report()
     return result
+
+@router.get("/list/deleted/", response_model=list[TempReceivingReportResponse])
+async def get_deleted_receiving_report(db: get_db = Depends()):
+    result = TempReceivingReportService(db).get_deleted_receiving_report()
+    return result
+
+
+@router.get("/list/historical/", response_model=list[TempReceivingReportResponse])
+async def get_historical_receiving_report(db: get_db = Depends()):
+    result = TempReceivingReportService(db).get_historical_receiving_report()
+    return result
+
 
 @router.put("/update/{receiving_report_id}/", response_model=list[TempReceivingReportResponse])
 async def update_receiving_report(receiving_report_id: UUID, receiving_report_update: TempReceivingReportUpdate, db: get_db = Depends()):

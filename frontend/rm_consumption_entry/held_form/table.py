@@ -86,7 +86,7 @@ class NoteTable:
 
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
-        url = server_ip + "/api/held_forms/v1/list/"
+        url = server_ip + "/api/change_status_form/v1/list/"
         self.original_data = []
 
         try:
@@ -274,7 +274,7 @@ class NoteTable:
             if validatation_result:
 
                 try:
-                    url = server_ip + f"/api/held_forms/v1/update/{item}/"
+                    url = server_ip + f"/api/change_status_form/v1/update/{item}/"
                     response = requests.put(url, json=data)
                     if response.status_code == 200:
                         self.refresh_table()
@@ -298,7 +298,7 @@ class NoteTable:
     def delete_entry(self, entry_id):
         """Delete selected entry via API."""
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this entry?"):
-            url = server_ip + f"/api/held_forms/v1/delete/{entry_id}/"
+            url = server_ip + f"/api/change_status_form/v1/delete/{entry_id}/"
             response = requests.delete(url)
             if response.status_code == 200:
                 self.tree.delete(entry_id)

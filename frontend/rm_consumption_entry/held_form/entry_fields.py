@@ -117,7 +117,7 @@ def entry_fields(note_form_tab):
 
             # Send a POST request to the API
             try:
-                response = requests.post(f"{server_ip}/api/held_forms/v1/create/", json=data)
+                response = requests.post(f"{server_ip}/api/change_status_form/v1/create/", json=data)
                 if response.status_code == 200:  # Successfully created
                     clear_fields()
                     note_table.refresh_table()

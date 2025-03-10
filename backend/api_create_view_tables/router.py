@@ -11,7 +11,7 @@ from backend.api_transfer_form.v1.models import TempTransferForm
 from backend.api_outgoing_report.v1.models import TempOutgoingReport
 from backend.api_receiving_report.v1.models import TempReceivingReport
 from backend.api_stock_on_hand.v1.models import StockOnHand
-from backend.api_held_form.v1.models import TempHeldForm
+from backend.api_change_status_form.v1.models import TempHeldForm
 from typing import Optional
 
 
@@ -116,7 +116,9 @@ def update_date_computed_for_table(table, db):
         # Create an update query
         stmt = (
             update(table)
-            .where(table.date_computed.is_(None))
+            .where(table.date_computed.is_(None),
+                   table.is_cleared == False,
+                   table.is_deleted == False)
             .values(date_computed=current_date)
         )
 

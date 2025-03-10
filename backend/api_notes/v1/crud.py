@@ -64,10 +64,9 @@ class TempNotesCRUD(AppCRUD):
     def get_historical_notes(self):
         # Query TempNotes with filters applied to is_cleared and is_deleted columns
         notes_item = self.db.query(TempNotes).filter(
-            or_(
-                TempNotes.is_cleared == True # False check for is_cleared
-
-            ),
+            # TempNotes.is_cleared == True, # False check for is_cleared
+            TempNotes.date_computed.is_not(None)
+            ,
             or_(
                 TempNotes.is_deleted.is_(None),  # NULL check for is_deleted
                 TempNotes.is_deleted == False  # False check for is_deleted

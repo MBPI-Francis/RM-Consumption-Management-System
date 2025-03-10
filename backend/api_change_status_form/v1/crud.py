@@ -1,23 +1,27 @@
-from backend.api_held_form.v1.exceptions import TempHeldFormCreateException, TempHeldFormNotFoundException, \
-    TempHeldFormUpdateException, TempHeldFormSoftDeleteException, TempHeldFormRestoreException
-from backend.api_held_form.v1.main import AppCRUD, AppService
-from backend.api_held_form.v1.models import TempHeldForm
-from backend.api_held_form.v1.schemas import TempHeldFormCreate, TempHeldFormUpdate
+from backend.api_change_status_form.v1.exceptions import (TempHeldFormNotFoundException,
+                                                          TempHeldFormUpdateException,
+                                                          TempHeldFormSoftDeleteException,
+                                                          TempHeldFormRestoreException
+                                                          )
+from backend.api_change_status_form.v1.main import AppCRUD
+from backend.api_change_status_form.v1.models import TempHeldForm
+from backend.api_change_status_form.v1.schemas import TempHeldFormCreate, TempHeldFormUpdate
 from uuid import UUID
 from backend.api_raw_materials.v1.models import RawMaterial
 from backend.api_warehouses.v1.models import Warehouse
 from backend.api_stock_on_hand.v1.models import StockOnHand
 from backend.api_status.v1.models import Status
-from sqlalchemy import desc, or_
+from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 from sqlalchemy import text
+
 
 # These are the code for the app to communicate to the database
 class TempHeldFormCRUD(AppCRUD):
 
     def create_held_form(self, held_form: TempHeldFormCreate):
-        
-        
+
+
         # Check if the status id is null
         query = text("""SELECT * FROM view_beginning_soh
                         WHERE warehouseid = :warehouse_id
@@ -84,7 +88,8 @@ class TempHeldFormCRUD(AppCRUD):
                 NewStatus.name.label("new_status"),
                 TempHeldForm.change_status_date,
                 TempHeldForm.created_at,
-                TempHeldForm.updated_at
+                TempHeldForm.updated_at,
+                TempHeldForm.date_computed
 
             )
             .join(RawMaterial, TempHeldForm.rm_code_id == RawMaterial.id)  # Join TempHeldForm with RawMaterial
@@ -122,6 +127,103 @@ class TempHeldFormCRUD(AppCRUD):
         # if held_form_item:
         #     return held_form_item
         # return []
+
+    def get_deleted_held_form(self):
+
+        """
+             Join StockOnHand, TempHeldForm, Warehouse, and RawMaterial tables.
+             """
+
+        # Create aliases for the Warehouse model
+        CurrentStatus = aliased(Status, name="current_status")
+        NewStatus = aliased(Status, name="new_status")
+
+        # Join tables
+        stmt = (
+            self.db.query(
+                TempHeldForm.id,
+                RawMaterial.rm_code.label("raw_material"),
+                TempHeldForm.qty_kg,
+                TempHeldForm.ref_number,
+                Warehouse.wh_name,
+                CurrentStatus.name.label("current_status"),
+                NewStatus.name.label("new_status"),
+                TempHeldForm.change_status_date,
+                TempHeldForm.created_at,
+                TempHeldForm.updated_at,
+                TempHeldForm.date_computed
+
+            )
+            .join(RawMaterial, TempHeldForm.rm_code_id == RawMaterial.id)  # Join TempHeldForm with RawMaterial
+            .join(Warehouse, TempHeldForm.warehouse_id == Warehouse.id)  # Join TempHeldForm with Warehouse
+            .join(CurrentStatus,
+                  TempHeldForm.current_status_id == CurrentStatus.id)  # Join TempHeldForm with CurrentStatus
+            .join(NewStatus, TempHeldForm.new_status_id == NewStatus.id)  # Join TempHeldForm with NewStatus
+            .filter(
+                    TempHeldForm.is_deleted == True  # False check for is_deleted
+            )
+
+        )
+
+        if stmt.all():
+            # Return All the result
+            return stmt.all()
+
+        else:
+            return []
+
+
+
+    def get_historical_held_form(self):
+
+        """
+             Join StockOnHand, TempHeldForm, Warehouse, and RawMaterial tables.
+             """
+
+        # Create aliases for the Warehouse model
+        CurrentStatus = aliased(Status, name="current_status")
+        NewStatus = aliased(Status, name="new_status")
+
+        # Join tables
+        stmt = (
+            self.db.query(
+                TempHeldForm.id,
+                RawMaterial.rm_code.label("raw_material"),
+                TempHeldForm.qty_kg,
+                TempHeldForm.ref_number,
+                Warehouse.wh_name,
+                CurrentStatus.name.label("current_status"),
+                NewStatus.name.label("new_status"),
+                TempHeldForm.change_status_date,
+                TempHeldForm.created_at,
+                TempHeldForm.updated_at,
+                TempHeldForm.date_computed
+
+            )
+            .join(RawMaterial, TempHeldForm.rm_code_id == RawMaterial.id)  # Join TempHeldForm with RawMaterial
+            .join(Warehouse, TempHeldForm.warehouse_id == Warehouse.id)  # Join TempHeldForm with Warehouse
+            .join(CurrentStatus,
+                  TempHeldForm.current_status_id == CurrentStatus.id)  # Join TempHeldForm with CurrentStatus
+            .join(NewStatus, TempHeldForm.new_status_id == NewStatus.id)  # Join TempHeldForm with NewStatus
+            .filter(
+                # Filter for records where is_cleared or is_deleted is NULL or False
+                #     TempHeldForm.is_cleared == True,  # False check for is_cleared
+                TempHeldForm.date_computed.is_not(None)
+                ,
+                or_(
+                    TempHeldForm.is_deleted.is_(None),  # NULL check for is_deleted
+                    TempHeldForm.is_deleted == False  # False check for is_deleted
+                )
+            )
+
+        )
+
+        if stmt.all():
+            # Return All the result
+            return stmt.all()
+
+        else:
+            return []
 
 
     def update_held_form(self, held_form_id: UUID, held_form_update: TempHeldFormUpdate):
@@ -167,45 +269,3 @@ class TempHeldFormCRUD(AppCRUD):
 
         except Exception as e:
             raise TempHeldFormRestoreException(detail=f"Error: {str(e)}")
-
-
-# These are the code for the business logic like calculation etc.
-class TempHeldFormService(AppService):
-    def create_held_form(self, item: TempHeldFormCreate):
-        try:
-            held_form_item = TempHeldFormCRUD(self.db).create_held_form(item)
-
-        except Exception as e:
-            raise TempHeldFormCreateException(detail=f"Error: {str(e)}")
-
-
-        return held_form_item
-
-    def get_held_form(self):
-        try:
-            held_form_item = TempHeldFormCRUD(self.db).get_held_form()
-
-        except Exception as e:
-            raise TempHeldFormNotFoundException(detail=f"Error: {str(e)}")
-        return held_form_item
-
-    # This is the service/business logic in updating the held_form.
-    def update_held_form(self, held_form_id: UUID, held_form_update: TempHeldFormUpdate):
-        held_form = TempHeldFormCRUD(self.db).update_held_form(held_form_id, held_form_update)
-        return held_form
-
-    # This is the service/business logic in soft deleting the held_form.
-    def soft_delete_held_form(self, held_form_id: UUID):
-        held_form = TempHeldFormCRUD(self.db).soft_delete_held_form(held_form_id)
-        return held_form
-
-
-    # This is the service/business logic in soft restoring the held_form.
-    def restore_held_form(self, held_form_id: UUID):
-        held_form = TempHeldFormCRUD(self.db).restore_held_form(held_form_id)
-        return held_form
-
-
-
-
-
