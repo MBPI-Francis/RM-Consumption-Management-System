@@ -1,7 +1,7 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .entry_fields import entry_fields
+from .table import ChangeStatusFormTable
 
 
 def held_form_tab(notebook):
@@ -16,7 +16,7 @@ def held_form_tab(notebook):
     )
     held_form_label.pack(pady=20, padx=20)
 
-    entry_fields(held_form_tab)
+    table = ChangeStatusFormTable(held_form_tab)
 
 
 

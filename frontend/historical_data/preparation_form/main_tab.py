@@ -1,7 +1,7 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .entry_fields import entry_fields
+from .table import PreparationFormTable
 
 
 
@@ -16,6 +16,7 @@ def preparation_form_tab(notebook):
         bootstyle=PRIMARY,
     )
     preparation_form_label.pack(pady=(10, 0), padx=20)
+    table = PreparationFormTable(preparation_form_tab)
 
-    entry_fields(preparation_form_tab)
+
 

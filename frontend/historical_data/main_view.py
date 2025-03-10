@@ -4,9 +4,8 @@ from .held_form.main_tab import held_form_tab
 from .notes_form.main_tab import notes_form_tab
 from .transfer_form.main_tab import transfer_form_tab
 from .preparation_form.main_tab import preparation_form_tab
-from .outgoing_report_form.main_tab import outgoing_form_tab
-from .receiving_report_form.main_tab import receiving_report_tab
-from .submit_entries.main_tab import submit_entries_tab
+from .outgoing_form.main_tab import outgoing_form_tab
+from .receiving_form.main_tab import receiving_report_tab
 
 class HistoricalDataView:
     def __init__(self, parent):
@@ -38,7 +37,6 @@ class HistoricalDataView:
         transfer_form_tab(notebook)
         preparation_form_tab(notebook)
         held_form_tab(notebook)
-        submit_entries_tab(notebook)
 
 
          # Configure rows and columns to be responsive

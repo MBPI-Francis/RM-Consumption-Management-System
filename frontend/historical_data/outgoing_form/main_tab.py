@@ -1,7 +1,7 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .entry_fields import entry_fields
+from .table import OutgoingFormTable
 
 
 def outgoing_form_tab(notebook):
@@ -16,6 +16,4 @@ def outgoing_form_tab(notebook):
     )
     outgoing_form_label.pack(pady=20, padx=20)
 
-    entry_fields(outgoing_form_tab)
-
-
+    table = OutgoingFormTable(outgoing_form_tab)

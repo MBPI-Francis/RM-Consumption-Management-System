@@ -2,7 +2,6 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from .table import NoteTable
-from .entry_fields import entry_fields
 
 
 def notes_form_tab(notebook):
@@ -17,11 +16,9 @@ def notes_form_tab(notebook):
     )
     note_form_label.pack(pady=20, padx=20)
 
-    # Call the entry fields function to show the table
-    entry_fields(note_form_tab)
 
     # Call the table function to show the table
-    # NoteTable(note_form_tab)
+    NoteTable(note_form_tab)
     # table(note_form_tab)
 
 

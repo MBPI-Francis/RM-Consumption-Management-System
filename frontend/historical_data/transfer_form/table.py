@@ -14,7 +14,7 @@ from frontend.rm_consumption_entry.preparation_form.validation import EntryValid
 from frontend.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
 
 
-class NoteTable:
+class TransferFormTable:
     def __init__(self, root):
         self.root = root
 
@@ -27,15 +27,15 @@ class NoteTable:
         self.search_entry.bind("<Return>", self.search_data)
 
 
-        # Add button to clear data
+        # Add button to restore data
         btn_clear = ttk.Button(
             search_frame,
-            text="Clear All Data",
-            command=self.confirmation_panel_clear,
-            bootstyle=WARNING,
+            text="Recycle Bin",
+            # command,
+            bootstyle=SECONDARY,
         )
         btn_clear.pack(side=RIGHT)
-        ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
+        ToolTip(btn_clear, text="Click the button to recycle deleted records.")
 
         # Create a frame to hold the Treeview and Scrollbars
         tree_frame = ttk.Frame(self.root)

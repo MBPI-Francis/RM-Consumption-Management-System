@@ -1,7 +1,7 @@
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from .entry_fields import entry_fields
+from .table import TransferFormTable
 
 
 def transfer_form_tab(notebook):
@@ -16,6 +16,9 @@ def transfer_form_tab(notebook):
     )
     transfer_form_label.pack(pady=20, padx=20)
 
-    entry_fields(transfer_form_tab)
+
+    table = TransferFormTable(transfer_form_tab)
+
+
 
 
