@@ -6,19 +6,17 @@ from backend.settings.database import server_ip
 from datetime import datetime
 
 
-class OutgoingFormTable:
+class HistoricalSOHTable:
 
     def __init__(self, root):
         self.note_form_tab = root
 
         self.coldata = [
-            {"text": "Raw Material", "stretch": True, "anchor": "w"},
+            {"text": "Raw Material Code", "stretch": True, "anchor": "w"},
             {"text": "Warehouse", "stretch": True},
-            {"text": "Reference No.", "stretch": True},
-            {"text": "Quantity(kg)", "stretch": True},
             {"text": "Beginning Balance", "stretch": True},
-            {"text": "Outgoing Date", "stretch": True},
-            {"text": "Entry Date", "stretch": True},
+            {"text": "Status", "stretch": True},
+            {"text": "Last Movement", "stretch": True},
         ]
         self.rowdata = self.fetch_and_format_data()
 
@@ -38,36 +36,27 @@ class OutgoingFormTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/outgoing_reports/v1/list/"
+        url = server_ip + "/api/get/beginning_balance/"
         try:
             response = requests.get(url)
             response.raise_for_status()
 
             data = response.json()
-            print(data)
 
             # Format data for the table
             rowdata = [
                 (
-                    item["raw_material"],
-                    item["wh_name"],
-                    item["ref_number"],
-                    item["qty_kg"],
-                    item["soh_and_date"],
-                    item["outgoing_date"],
-                    datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
+                    item["rmcode"],
+                    item["warehousename"],
+                    item["beginningbalance"],
+                    item["statusname"],
+                    datetime.fromisoformat(item["stockchangedate"]).strftime("%m/%d/%Y %I:%M %p")
                 )
                 for item in data
             ]
             return rowdata
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching data from API: {e}")
             return []
-
-
-        # Return both buttons as a tuple
-        return [update_button, delete_button]
-
 
     def refresh_table(self):
         """Refresh the table with updated data."""
@@ -77,4 +66,5 @@ class OutgoingFormTable:
             rowdata=self.rowdata
         )
         self.table.goto_last_page()
+
 

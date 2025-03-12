@@ -6,11 +6,11 @@ from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 
-from frontend.rm_consumption_entry.shared import SharedFunctions
-from frontend.rm_consumption_entry.transfer_form.table import TransferFormTable
-from frontend.rm_consumption_entry.transfer_form.validation import EntryValidation as TranferValidation
+from frontend.movements_data_entry.shared import SharedFunctions
+from frontend.movements_data_entry.transfer_form.table import TransferFormTable
+from frontend.movements_data_entry.transfer_form.validation import EntryValidation as TranferValidation
 from tkinter import StringVar
-from frontend.rm_consumption_entry.preparation_form.validation import EntryValidation as PrepValidation
+from frontend.movements_data_entry.preparation_form.validation import EntryValidation as PrepValidation
 from uuid import  UUID
 
 def entry_fields(note_form_tab):

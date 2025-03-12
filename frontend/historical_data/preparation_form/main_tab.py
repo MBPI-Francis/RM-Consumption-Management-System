@@ -15,7 +15,15 @@ def preparation_form_tab(notebook):
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    preparation_form_label.pack(pady=(10, 0), padx=20)
+    preparation_form_label.pack(pady=(20,0), padx=20)
+
+    preparation_label = ttk.Label(
+        preparation_form_tab,
+        text="The table contains the user's previous entries, showing historical data and past usage of raw materials.",
+        font=("Helvetica", 10)
+    )
+    preparation_label.pack(pady=0, padx=20)
+
     table = PreparationFormTable(preparation_form_tab)
 
 

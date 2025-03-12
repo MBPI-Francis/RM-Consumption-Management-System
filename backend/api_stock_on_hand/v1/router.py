@@ -19,13 +19,27 @@ async def read_rm_soh(db: get_db = Depends()):
     return result
 
 
-@router.get("/get/", response_model=StockOnHandResponse)
+# What is this about? Still identiying what is it for
+# @router.get("/get/", response_model=StockOnHandResponse)
+# async def get_rm_soh(
+#         warehouse_id: UUID,
+#         rm_code_id: UUID,
+#         db: get_db = Depends()):
+#     result = StockOnHandService(db).get_rm_soh(warehouse_id, rm_code_id)
+#     return result
+
+
+
+# What is this about? Still identiying what is it for
+@router.get("/list/historical/", response_model=StockOnHandResponse)
 async def get_rm_soh(
-        warehouse_id: UUID,
-        rm_code_id: UUID,
+        date_computed: str = None,
         db: get_db = Depends()):
-    result = StockOnHandService(db).get_rm_soh(warehouse_id, rm_code_id)
+    result = StockOnHandService(db).get_historical_soh(date_computed)
     return result
+
+
+
 
 
 @router.put("/update/{rm_soh_id}/", response_model=StockOnHandResponse)

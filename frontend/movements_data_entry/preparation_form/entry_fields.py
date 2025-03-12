@@ -7,7 +7,7 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import NoteTable
 from .validation import EntryValidation
-from frontend.rm_consumption_entry.shared import SharedFunctions
+from frontend.movements_data_entry.shared import SharedFunctions
 
 
 def entry_fields(note_form_tab):

@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from frontend.stock_on_hand.main_tab import beginning_balance_tab
+from frontend.stock_on_hand.historical_data.main_tab import historical_data_tab
 
 class StockOnHandView:
     def __init__(self, parent):
@@ -25,8 +26,7 @@ class StockOnHandView:
 
         # Create the frames for each tab
         beginning_balance_tab(notebook)
-        # rm_soh_tab(notebook)
-
+        historical_data_tab(notebook)
 
          # Configure rows and columns to be responsive
         soh_frame.grid_rowconfigure(0, weight=0)  # Label row does not resize

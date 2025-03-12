@@ -32,5 +32,8 @@ class StockOnHandResponse(StockOnHandBase):
     updated_by_id: Optional[UUID] = None
     description: Optional[str] = None
 
+
     class Config:
         from_attributes = True
+
+

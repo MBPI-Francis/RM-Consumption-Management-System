@@ -14,7 +14,14 @@ def receiving_report_tab(notebook):
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    receiving_report_label.pack(pady=20, padx=20)
+    receiving_report_label.pack(pady=(20,0), padx=20)
+
+    receiving_label = ttk.Label(
+        receiving_report_tab,
+        text="The table contains the user's previous entries, showing historical data and past entries of received raw materials.",
+        font=("Helvetica", 10)
+    )
+    receiving_label.pack(pady=0, padx=20)
 
 
     # Calling the table

@@ -14,7 +14,14 @@ def notes_form_tab(notebook):
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    note_form_label.pack(pady=20, padx=20)
+    note_form_label.pack(pady=(20,0), padx=20)
+
+    notes_label = ttk.Label(
+        note_form_tab,
+        text="The table contains the user's previous entries, showing historical data and past notes.",
+        font=("Helvetica", 10)
+    )
+    notes_label.pack(pady=0, padx=20)
 
 
     # Call the table function to show the table

@@ -6,7 +6,7 @@ from frontend.sidebar import Sidebar
 from frontend.warehouse.main_view import WarehouseView
 from frontend.user.user_view import UserView
 from frontend.raw_material.main_view import RawMaterialView
-from frontend.rm_consumption_entry.main_view import ConsumptionEntryView
+from frontend.movements_data_entry.main_view import ConsumptionEntryView
 from frontend.stock_on_hand.main_view import StockOnHandView
 from tkinter import StringVar, N, S, E, W, VERTICAL
 

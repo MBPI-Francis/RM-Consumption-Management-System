@@ -2,99 +2,21 @@ from pydantic_core import to_jsonable_python
 
 from backend.api_status.v1.models import Status
 from backend.api_raw_materials.v1.models import RawMaterial
-from backend.api_stock_on_hand.v1.exceptions import StockOnHandCreateException, StockOnHandNotFoundException, \
-    StockOnHandUpdateException, StockOnHandSoftDeleteException, StockOnHandRestoreException
-from backend.api_stock_on_hand.v1.main import AppCRUD, AppService
-from backend.api_stock_on_hand.v1.models import StockOnHand
-from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate, StockOnHandCreateBulk
+from backend.api_stock_on_hand.v1.exceptions import (StockOnHandCreateException,
+                                                     StockOnHandNotFoundException,
+                                                     StockOnHandUpdateException,
+                                                     StockOnHandSoftDeleteException,
+                                                     StockOnHandRestoreException
+                                                     )
+from backend.api_stock_on_hand.v1.main import AppService
+from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate
 from uuid import UUID
-from backend.api_receiving_report.v1.service import TempReceivingReportCRUD
-from sqlalchemy import desc
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import Depends, HTTPException
 import io
 import pandas as pd
 from backend.api_warehouses.v1.models import Warehouse
-from openpyxl import load_workbook
-
-# These are the code for the app to communicate to the database
-class StockOnHandCRUD(AppCRUD):
-
-    def create_rm_soh(self, rm_soh: StockOnHandCreate):
-        rm_soh_item = StockOnHand(rm_code_id=rm_soh.rm_code_id,
-                                  warehouse_id=rm_soh.warehouse_id,
-                                  rm_soh=rm_soh.rm_soh,
-                                  status_id = rm_soh.status_id,
-                                   description=rm_soh.description,
-                                   updated_by_id=rm_soh.updated_by_id,
-                                   created_by_id=rm_soh.created_by_id)
-        self.db.add(rm_soh_item)
-        self.db.commit()
-        self.db.refresh(rm_soh_item)
-        return rm_soh_item
-
-    def all_rm_soh(self):
-        rm_soh_item = self.db.query(StockOnHand).all()
-        if rm_soh_item:
-            return rm_soh_item
-        return []
-
-    def import_rm_soh(self, rm_code_id, total, status_id, warehouse_id):
-        # Insert data into the StockOnHand table
-        new_stock_on_hand = StockOnHand(
-            rm_code_id=rm_code_id,
-            rm_soh=total,
-            status_id=status_id,
-            warehouse_id=warehouse_id
-        )
-        self.db.add(new_stock_on_hand)
-        self.db.commit()
-        self.db.refresh(new_stock_on_hand)
+from backend.api_stock_on_hand.v1.crud import StockOnHandCRUD
 
 
-    def update_rm_soh(self, rm_soh_id: UUID, rm_soh_update: StockOnHandUpdate):
-        try:
-            rm_soh = self.db.query(StockOnHand).filter(StockOnHand.id == rm_soh_id).first()
-            if not rm_soh or rm_soh.is_deleted:
-                raise StockOnHandNotFoundException(detail="Raw Material's SOH not found or already deleted.")
-
-            for key, value in rm_soh_update.model_dump(exclude_unset=True).items():
-                setattr(rm_soh, key, value)
-            self.db.commit()
-            self.db.refresh(rm_soh)
-            return rm_soh
-
-        except Exception as e:
-            raise StockOnHandUpdateException(detail=f"Error: {str(e)}")
-
-    def soft_delete_rm_soh(self, rm_soh_id: UUID):
-        try:
-            rm_soh = self.db.query(StockOnHand).filter(StockOnHand.id == rm_soh_id).first()
-            if not rm_soh or rm_soh.is_deleted:
-                raise StockOnHandNotFoundException(detail="Raw Material's SOH not found or already deleted.")
-
-            rm_soh.is_deleted = True
-            self.db.commit()
-            self.db.refresh(rm_soh)
-            return rm_soh
-
-        except Exception as e:
-            raise StockOnHandSoftDeleteException(detail=f"Error: {str(e)}")
-
-
-    def restore_rm_soh(self, rm_soh_id: UUID):
-        try:
-            rm_soh = self.db.query(StockOnHand).filter(StockOnHand.id == rm_soh_id).first()
-            if not rm_soh or not rm_soh.is_deleted:
-                raise StockOnHandNotFoundException(detail="Raw Material's SOH not found or already restored.")
-
-            rm_soh.is_deleted = False
-            self.db.commit()
-            self.db.refresh(rm_soh)
-            return rm_soh
-
-        except Exception as e:
-            raise StockOnHandRestoreException(detail=f"Error: {str(e)}")
 
 
 # These are the code for the business logic like calculation etc.
@@ -116,13 +38,25 @@ class StockOnHandService(AppService):
             raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")
         return rm_soh_item
 
-    def get_rm_soh(self, warehouse_id: UUID, rm_code_id: UUID):
+    # Still not sure what is this about
+    def get_rm_soh(self, date_computed):
         try:
-            rm_soh_item = TempReceivingReportCRUD(self.db).get_latest_soh_record(warehouse_id, rm_code_id)
+            rm_soh_item = StockOnHandCRUD(self.db).get_historical_stock_on_hand(date_computed)
 
         except Exception as e:
             raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")
         return rm_soh_item
+
+
+
+    # Still not sure what is this about
+    # def get_rm_soh(self, warehouse_id: UUID, rm_code_id: UUID):
+    #     try:
+    #         rm_soh_item = TempReceivingReportCRUD(self.db).get_latest_soh_record(warehouse_id, rm_code_id)
+    #
+    #     except Exception as e:
+    #         raise StockOnHandNotFoundException(detail=f"Error: {str(e)}")
+    #     return rm_soh_item
 
     # This is the service/business logic in updating the rm_soh.
     def update_rm_soh(self, rm_soh_id: UUID, rm_soh_update: StockOnHandUpdate):
