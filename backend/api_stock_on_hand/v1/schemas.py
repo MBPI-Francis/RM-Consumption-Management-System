@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 from typing import List
 
 class StockOnHandBase(BaseModel):
@@ -36,4 +36,19 @@ class StockOnHandResponse(StockOnHandBase):
     class Config:
         from_attributes = True
 
+
+class HistoricalStockOnHandResponse(BaseModel):
+    wh_id: UUID
+    wh_name: str
+    wh_number: int
+    rm_id: UUID
+    rm_code: str
+    qty: float
+    stock_change_date: datetime
+    status_name: str
+    status_id: UUID
+    date_computed: date
+
+    class Config:
+        from_attributes = True
 

@@ -19,6 +19,7 @@ class StockOnHand(Base):
     rm_soh = Column(Numeric(10, 2), nullable=False)
     description = Column(String(300), nullable=True)
     is_deleted = Column(Boolean, default=False)
+    is_imported = Column(Boolean, default=False)
     stock_change_date = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("tbl_users.id"), nullable=True)

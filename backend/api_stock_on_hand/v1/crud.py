@@ -12,6 +12,7 @@ from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandU
 from uuid import UUID
 from backend.api_warehouses.v1.models import Warehouse
 from sqlalchemy import or_
+from datetime import date
 
 # These are the code for the app to communicate to the database
 class StockOnHandCRUD(AppCRUD):
@@ -43,15 +44,15 @@ class StockOnHandCRUD(AppCRUD):
         # Base query joining necessary tables
         stmt = (
             self.db.query(
-                StockOnHand.warehouse_id.label("warehouseid"),
-                Warehouse.wh_name.label("warehousename"),
-                Warehouse.wh_number.label("warehousenumber"),
-                StockOnHand.rm_code_id.label("rawmaterialid"),
-                RawMaterial.rm_code.label("rmcode"),
-                StockOnHand.rm_soh.label("beginningbalance"),
-                StockOnHand.stock_change_date.label("stockchangedate"),
-                Status.name.label("statusname"),
-                StockOnHand.status_id.label("statusid"),
+                StockOnHand.warehouse_id.label("wh_id"),
+                Warehouse.wh_name.label("wh_name"),
+                Warehouse.wh_number.label("wh_number"),
+                StockOnHand.rm_code_id.label("rm_id"),
+                RawMaterial.rm_code.label("rm_code"),
+                StockOnHand.rm_soh.label("qty"),
+                StockOnHand.stock_change_date.label("stock_change_date"),
+                Status.name.label("status_name"),
+                StockOnHand.status_id.label("status_id"),
                 StockOnHand.date_computed
             )
             .join(RawMaterial, StockOnHand.rm_code_id == RawMaterial.id)  # Join StockOnHand with RawMaterial
@@ -72,6 +73,7 @@ class StockOnHandCRUD(AppCRUD):
             if date_computed:
                 stmt = stmt.filter(StockOnHand.date_computed == date_computed)
 
+
             return stmt.all()
 
         else:
@@ -79,11 +81,16 @@ class StockOnHandCRUD(AppCRUD):
 
     def import_rm_soh(self, rm_code_id, total, status_id, warehouse_id):
         # Insert data into the StockOnHand table
+
+        current_date = date.today()  # Get current date and time
+
         new_stock_on_hand = StockOnHand(
             rm_code_id=rm_code_id,
             rm_soh=total,
             status_id=status_id,
-            warehouse_id=warehouse_id
+            warehouse_id=warehouse_id,
+            date_computed=current_date,
+            is_imported = True
         )
         self.db.add(new_stock_on_hand)
         self.db.commit()

@@ -17,6 +17,7 @@ class HistoricalSOHTable:
             {"text": "Beginning Balance", "stretch": True},
             {"text": "Status", "stretch": True},
             {"text": "Last Movement", "stretch": True},
+            {"text": "Date Computed", "stretch": True}
         ]
         self.rowdata = self.fetch_and_format_data()
 
@@ -36,7 +37,7 @@ class HistoricalSOHTable:
 
     def fetch_and_format_data(self):
         """Fetch data from API and format for table rowdata."""
-        url = server_ip + "/api/get/beginning_balance/"
+        url = server_ip + "/api/rm_stock_on_hand/v1/list/historical/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -46,11 +47,12 @@ class HistoricalSOHTable:
             # Format data for the table
             rowdata = [
                 (
-                    item["rmcode"],
-                    item["warehousename"],
-                    item["beginningbalance"],
-                    item["statusname"],
-                    datetime.fromisoformat(item["stockchangedate"]).strftime("%m/%d/%Y %I:%M %p")
+                    item["rm_code"],
+                    item["wh_name"],
+                    item["qty"],
+                    item["status_name"],
+                    datetime.fromisoformat(item["stock_change_date"]).strftime("%m/%d/%Y %I:%M %p"),
+                    item["date_computed"]
                 )
                 for item in data
             ]

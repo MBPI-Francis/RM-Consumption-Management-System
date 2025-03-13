@@ -19,7 +19,8 @@ class ImportData:
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
 
         if not file_path:
-            print("No file selected.")
+            messagebox.showwarning("Warning", "No file selected.")
+            # print("No file selected.")
             return
 
         # Show loader while uploading

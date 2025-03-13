@@ -1,10 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
-from backend.api_stock_on_hand.v1.schemas import StockOnHandCreate, StockOnHandUpdate, StockOnHandResponse
+from backend.api_stock_on_hand.v1.schemas import (StockOnHandCreate,
+                                                  StockOnHandUpdate,
+                                                  StockOnHandResponse,
+                                                  HistoricalStockOnHandResponse
+                                                  )
+
 from backend.api_stock_on_hand.v1.service import StockOnHandService
 from backend.settings.database import get_db
 from uuid import UUID
 from fastapi.responses import JSONResponse
+from typing import List
 
 router = APIRouter(prefix="/api/rm_stock_on_hand/v1")
 
@@ -30,15 +36,13 @@ async def read_rm_soh(db: get_db = Depends()):
 
 
 
-# What is this about? Still identiying what is it for
-@router.get("/list/historical/", response_model=StockOnHandResponse)
+# What is this about? Still identifying what is it for
+@router.get("/list/historical/", response_model=List[HistoricalStockOnHandResponse])
 async def get_rm_soh(
         date_computed: str = None,
         db: get_db = Depends()):
-    result = StockOnHandService(db).get_historical_soh(date_computed)
+    result = StockOnHandService(db).get_historical_stock_on_hand(date_computed)
     return result
-
-
 
 
 
@@ -60,7 +64,7 @@ async def delete_rm_soh(rm_soh_id: UUID, db: get_db = Depends()):
     return result
 
 
-@router.post("/import_stock_data/")
+@router.post("/import_stock_data/", response_model=HistoricalStockOnHandResponse)
 async def import_stock_data(file: UploadFile = File(...), db: get_db = Depends()):
     try:
         # Process the Excel file and insert data

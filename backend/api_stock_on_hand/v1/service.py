@@ -39,7 +39,7 @@ class StockOnHandService(AppService):
         return rm_soh_item
 
     # Still not sure what is this about
-    def get_rm_soh(self, date_computed):
+    def get_historical_stock_on_hand(self, date_computed):
         try:
             rm_soh_item = StockOnHandCRUD(self.db).get_historical_stock_on_hand(date_computed)
 
