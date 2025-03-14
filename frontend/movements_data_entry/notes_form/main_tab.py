@@ -15,7 +15,7 @@ def notes_form_tab(notebook):
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    note_form_label.pack(pady=20, padx=20)
+    note_form_label.pack(pady=(10, 0), padx=20)
 
     # Call the entry fields function to show the table
     entry_fields(note_form_tab)

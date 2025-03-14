@@ -31,6 +31,7 @@ class TempOutgoingReportResponse(BaseModel):
     updated_at: datetime
     created_by: Optional[UUID] = None
     updated_by: Optional[UUID] = None
+    date_computed: Optional[date] = None
 
     class Config:
         from_attributes = True

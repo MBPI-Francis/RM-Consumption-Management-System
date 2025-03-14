@@ -1,12 +1,10 @@
-import psycopg2
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import requests
 from ttkbootstrap.tooltip import ToolTip
-from tkinter import Toplevel, messagebox
+from tkinter import messagebox
 from backend.settings.database import server_ip
 from datetime import datetime
-from ttkbootstrap.widgets import DateEntry
 from ttkbootstrap.dialogs import Messagebox
 
 

@@ -15,7 +15,7 @@ def receiving_report_tab(notebook):
         font=("Helvetica", 14, "bold"),
         bootstyle=PRIMARY,
     )
-    receiving_report_label.pack(pady=20, padx=20)
+    receiving_report_label.pack(pady=(10,0), padx=20)
 
     # Call the entry fields function to show the table
     entry_fields(receiving_report_tab)

@@ -47,7 +47,7 @@ class ReceivingFormTable:
         # First, define self.tree before using it
         self.tree = ttk.Treeview(
             master=tree_frame,
-            columns=("Raw Material", "Warehouse", "Ref No.", "Quantity(kg)", "Receiving Date", "Entry Date"),
+            columns=("Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date", "Entry Date"),
             show='headings',
             bootstyle=PRIMARY
         )
@@ -76,7 +76,7 @@ class ReceivingFormTable:
         self.refresh_table()
 
         # Define column headers
-        col_names = ["Raw Material", "Warehouse", "Ref No.", "Quantity(kg)", "Receiving Date", "Entry Date"]
+        col_names = ["Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date", "Entry Date"]
         for col in col_names:
             self.tree.heading(col, text=col, command=lambda _col=col: self.sort_treeview(_col, False), anchor=W)
             self.tree.column(col, anchor=W)
@@ -136,7 +136,7 @@ class ReceivingFormTable:
         edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
 
-        fields = ["Raw Material", "Warehouse", "Ref No.", "Quantity(kg)", "Receiving Date"]
+        fields = ["Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date"]
         entries = {}
 
 

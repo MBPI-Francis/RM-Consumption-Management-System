@@ -88,47 +88,9 @@ def entry_fields(note_form_tab):
         # Convert the text to uppercase and set it back
         lot_number_var.set(lot_num_current_text.upper())
 
-
-    # Product Code Entry Field
-
-    product_code_var = ttk.StringVar(value="")
-    product_code_label = ttk.Label(form_frame, text="Product Code:", font=("Helvetica", 10, "bold"))
-    product_code_label.grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    product_code_entry = ttk.Entry(form_frame, width=30, textvariable=product_code_var)
-    product_code_entry.grid(row=1, column=0, padx=5, pady=5)
-    ToolTip(product_code_entry, text="Enter the product code")
-    # Bind the key release event to the combobox to trigger uppercase conversion
-    product_code_entry.bind("<KeyRelease>", on_key_release)
-
-    # Lot Number Entry Field
-    lot_number_var = ttk.StringVar(value="")
-    lot_number_label = ttk.Label(form_frame, text="Lot Number:", font=("Helvetica", 10, "bold"))
-    lot_number_label.grid(row=0, column=1, padx=5, pady=5, sticky=W)
-    lot_number_entry = ttk.Entry(form_frame, width=30, textvariable=lot_number_var)
-    lot_number_entry.grid(row=1, column=1, padx=5, pady=5)
-    ToolTip(lot_number_entry, text="Enter the lot number")
-    lot_number_entry.bind("<KeyRelease>", on_key_release)
-
-    # Product Kind JSON-format choices (coming from the API)
-    product_kinds = get_product_kinds_api()
-    name_to_id = {item["name"]: item["id"] for item in product_kinds}
-    product_kind_names = list(name_to_id.values())
-
-    # Combobox for Product Kind Drop Down
-    product_kind_label = ttk.Label(form_frame, text="Product Kind:", font=("Helvetica", 10, "bold"))
-    product_kind_label.grid(row=0, column=3, padx=5, pady=5, sticky=W)
-    product_kind_combobox = ttk.Combobox(
-        form_frame,
-        values=product_kind_names,
-        state="readonly",
-        width=20,
-    )
-    product_kind_combobox.grid(row=1, column=3, columnspan=2, pady=10, padx=10)
-    ToolTip(product_kind_combobox, text="Choose a product kind")
-
     # Date Entry field
-    date_label = ttk.Label(form_frame, text="Consumption Date:", font=("Helvetica", 10, "bold"))
-    date_label.grid(row=0, column=5, padx=5, pady=5, sticky=W)
+    date_label = ttk.Label(form_frame, text="Consumption Date", font=("Helvetica", 10, "bold"))
+    date_label.grid(row=0, column=0, padx=5, pady=(0,0), sticky=W)
 
     # Calculate yesterday's date
     yesterday_date = datetime.now() - timedelta(days=1)
@@ -138,19 +100,60 @@ def entry_fields(note_form_tab):
         bootstyle=PRIMARY,
         dateformat="%m/%d/%Y",
         startdate=yesterday_date,  # Set yesterday's date
-        width=30
+        width=25
     )
 
-    date_entry.grid(row=1, column=5, padx=5, pady=5, sticky=W)
+    date_entry.grid(row=1, column=0, padx=5, pady=(0, 10), sticky=W)
     ToolTip(date_entry, text="This is the date when raw materials stock moved")
+
+
+    # Product Code Entry Field
+
+    product_code_var = ttk.StringVar(value="")
+    product_code_label = ttk.Label(form_frame, text="Product Code", font=("Helvetica", 10, "bold"))
+    product_code_label.grid(row=2, column=0, padx=5, pady=(0,0), sticky=W)
+    product_code_entry = ttk.Entry(form_frame, width=30, textvariable=product_code_var)
+    product_code_entry.grid(row=3, column=0, padx=5, pady=(0,5), sticky=W)
+    ToolTip(product_code_entry, text="Enter the product code")
+    # Bind the key release event to the combobox to trigger uppercase conversion
+    product_code_entry.bind("<KeyRelease>", on_key_release)
+
+    # Lot Number Entry Field
+    lot_number_var = ttk.StringVar(value="")
+    lot_number_label = ttk.Label(form_frame, text="Lot Number", font=("Helvetica", 10, "bold"))
+    lot_number_label.grid(row=2, column=1, padx=5, pady=(0,0), sticky=W)
+    lot_number_entry = ttk.Entry(form_frame, width=30, textvariable=lot_number_var)
+    lot_number_entry.grid(row=3, column=1, padx=5, pady=(0,5))
+    ToolTip(lot_number_entry, text="Enter the lot number")
+    lot_number_entry.bind("<KeyRelease>", on_key_release)
+
+    # Product Kind JSON-format choices (coming from the API)
+    product_kinds = get_product_kinds_api()
+    name_to_id = {item["name"]: item["id"] for item in product_kinds}
+    product_kind_names = list(name_to_id.values())
+
+    # Combobox for Product Kind Drop Down
+    product_kind_label = ttk.Label(form_frame, text="Product Kind", font=("Helvetica", 10, "bold"))
+    product_kind_label.grid(row=2, column=3, padx=5, pady=(0,0), sticky=W)
+    product_kind_combobox = ttk.Combobox(
+        form_frame,
+        values=product_kind_names,
+        state="readonly",
+        width=15,
+    )
+    product_kind_combobox.grid(row=3, column=3, pady=(0,5), padx=5, sticky=W)
+    ToolTip(product_kind_combobox, text="Choose a product kind")
+
 
     # Add button to submit data
     btn_submit = ttk.Button(
         form_frame,
         text="+ Add",
         command=submit_data,
+        width=28
     )
-    btn_submit.grid(row=1, column=6, columnspan=2, pady=10)
+    btn_submit.grid(row=4, column=0, columnspan=2, padx=5, pady=(5,0), sticky=W)
+    ToolTip(btn_submit, text="Click this button to add your entry to the list")
 
 
     note_table = NoteTable(note_form_tab)

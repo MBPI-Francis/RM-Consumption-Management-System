@@ -27,7 +27,7 @@ class NotesResponse(BaseModel):
     created_at: datetime
     created_by_id: Optional[UUID] = None
     updated_by_id: Optional[UUID] = None
-    date_computed: date
+    date_computed: Optional[date] = None
     updated_at: datetime
 
     class Config:

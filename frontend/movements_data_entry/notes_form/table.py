@@ -17,7 +17,7 @@ class NoteTable:
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(fill=X, padx=10, pady=(15, 0))
+        search_frame.pack(fill=X, padx=10, pady=(10, 0))
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
         self.search_entry = ttk.Entry(search_frame, width=50)
         self.search_entry.pack(side=LEFT)
@@ -33,7 +33,6 @@ class NoteTable:
         )
         btn_clear.pack(side=RIGHT)
         ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
-
 
 
         # Create a frame to hold the Treeview and Scrollbars
