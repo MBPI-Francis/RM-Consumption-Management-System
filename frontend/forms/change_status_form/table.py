@@ -9,31 +9,29 @@ from datetime import datetime
 from uuid import UUID
 from tkinter import simpledialog
 from ttkbootstrap.widgets import DateEntry
+from .validation import EntryValidation
 from ttkbootstrap.dialogs import Messagebox
-from frontend.data_entry.preparation_form.validation import EntryValidation as PrepValidation
-from frontend.data_entry.shared import SharedFunctions
-from frontend.data_entry.transfer_form.validation import EntryValidation as TranferValidation
+from ..preparation_form.validation import EntryValidation as PrepValidation
+from ..shared import SharedFunctions
 
 
-class TransferFormTable:
+class NoteTable:
     def __init__(self, root):
         self.root = root
-        # Instantiate the shared_function class
         shared_functions = SharedFunctions()
 
+        self.get_status_api = shared_functions.get_status_api()
+        self.get_rm_code_api = shared_functions.get_rm_code_api()
         self.get_warehouse_api = shared_functions.get_warehouse_api()
-        self.get_rm_code_api = shared_functions.get_rm_code_api()    # Instantiate the shared_function class
-        self.get_status_api = shared_functions.get_status_api()    # Instantiate the shared_function class
 
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(fill=X, padx=10, pady=(15, 0))
+        search_frame.pack(fill=X, padx=10, pady=(10, 0))
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
         self.search_entry = ttk.Entry(search_frame, width=50)
         self.search_entry.pack(side=LEFT)
         self.search_entry.bind("<Return>", self.search_data)
-
 
         # Add button to clear data
         btn_clear = ttk.Button(
@@ -45,6 +43,7 @@ class TransferFormTable:
         btn_clear.pack(side=RIGHT)
         ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
 
+
         # Create a frame to hold the Treeview and Scrollbars
         tree_frame = ttk.Frame(self.root)
         tree_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
@@ -53,9 +52,8 @@ class TransferFormTable:
         self.tree = ttk.Treeview(
             master=tree_frame,
             columns=(
-                    "Raw Material", "Reference No.", "Quantity(kg)",
-                    "Warehouse (FROM)", "Warehouse (TO)", "Status",
-                    "Transfer Date", "Entry Date"),
+                    "Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
+                    "Current Status", "New Status", "Change Date", "Entry Date"),
             show='headings',
             bootstyle=PRIMARY
         )
@@ -75,6 +73,7 @@ class TransferFormTable:
         self.tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
 
 
+
         # Define column headings
         for col in self.tree["columns"]:
             self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c, False), anchor=W)
@@ -85,10 +84,9 @@ class TransferFormTable:
 
         self.refresh_table()
 
-
     def refresh_table(self):
         """Fetch data from API and populate Treeview."""
-        url = server_ip + "/api/transfer_forms/v1/list/"
+        url = server_ip + "/api/change_status_form/v1/list/"
         self.original_data = []
 
         try:
@@ -97,16 +95,15 @@ class TransferFormTable:
             data = response.json()
             self.tree.delete(*self.tree.get_children())  # Clear existing data
             for item in data:
-
                 record = (
                     item["id"],  # Store ID
                     item["raw_material"],
+                    item["wh_name"],
                     item["ref_number"],
                     item["qty_kg"],
-                    item["from_warehouse"],
-                    item["to_warehouse"],
-                    item["status"],
-                    item["transfer_date"],
+                    item["current_status"],
+                    item["new_status"],
+                    item["change_status_date"],
                     datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
                 )
                 self.original_data.append(record)  # Save record
@@ -127,15 +124,15 @@ class TransferFormTable:
     def edit_record(self, item):
         """Open edit form."""
         record = self.tree.item(item, 'values')
+
         if not record:
             return
 
         edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
 
-        fields = ["Raw Material", "Reference No.", "Quantity(kg)",
-            "Warehouse (FROM)", "Warehouse (TO)", "Status",
-            "Transfer Date"]
+        fields = ["Raw Material", "Warehouse", "Reference No.", "Quantity(kg)",
+            "Current Status", "New Status", "Change Date",]
         entries = {}
 
 
@@ -153,49 +150,46 @@ class TransferFormTable:
                 ToolTip(entry, text="Choose a raw material")  # Tooltip
 
 
-            elif field == "Warehouse (FROM)":
+            elif field == "Warehouse":
                 # Warehouse JSON-format choices (coming from the API)
                 warehouses = self.get_warehouse_api
                 warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
                 warehouse_names = list(warehouse_to_id.keys())
 
-                entry = ttk.Combobox(edit_window, values=warehouse_names, state="disabled", width=30)
+                entry = ttk.Combobox(edit_window, values=warehouse_names, state="readonly", width=30)
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
-
-            elif field == "Warehouse (TO)":
-                # Warehouse JSON-format choices (coming from the API)
-                warehouses = self.get_warehouse_api
-                warehouse_to_id = {item["wh_name"]: item["id"] for item in warehouses}
-                warehouse_names = list(warehouse_to_id.keys())
-
-                entry = ttk.Combobox(edit_window, values=warehouse_names, state="disabled", width=30)
-                entry.set(record[idx])  # Set current value in the combobox
-                ToolTip(entry, text="Select a warehouse")  # Tooltip
-
-
-            elif field == "Status":
-                # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api
-                status_to_id = {item["name"]: item["id"] for item in status}
-                status_names = list(status_to_id.keys())
-
-                entry = ttk.Combobox(edit_window, values=status_names, state="readonly", width=30,)
-                entry.set(record[idx])  # Set current value in the combobox
-                ToolTip(entry, text="Choose a status")  # Tooltip
-
-
-            elif field == "Transfer Date":
+            elif field == "Change Date":
                 entry = DateEntry(edit_window, dateformat="%m/%d/%Y", width=30)
                 entry.entry.delete(0, "end")
                 formatted_date = datetime.strptime(record[idx], "%Y-%m-%d").strftime("%m/%d/%Y")
                 entry.entry.insert(0, formatted_date)
 
+            elif field == "Current Status":
+                # Warehouse JSON-format choices (coming from the API)
+                status = self.get_status_api
+                status_to_id = {item["name"]: item["id"] for item in status}
+                status_names = list(status_to_id.keys())
+
+                entry = ttk.Combobox(edit_window, values=status_names, state="disabled", width=30,)
+                entry.set(record[idx])  # Set current value in the combobox
+                ToolTip(entry, text="You shouldn't update the current status")  # Tooltip
+
+
+            elif field == "New Status":
+                # Warehouse JSON-format choices (coming from the API)
+                status = self.get_status_api
+                status_to_id = {item["name"]: item["id"] for item in status}
+                status_names = list(status_to_id.keys())
+
+                entry = ttk.Combobox(edit_window, values=status_names, state="disabled", width=30,)
+                entry.set(record[idx])  # Set current value in the combobox
+                ToolTip(entry, text="You shouldn't update the new status")  # Tooltip
 
             elif field == "Quantity(kg)":
 
-                validate_numeric_command = edit_window.register(TranferValidation.validate_numeric_input)
+                validate_numeric_command = edit_window.register(EntryValidation.validate_numeric_input)
                 entry = ttk.Entry(edit_window,
                                       width=30,
                                       validate="key",  # Trigger validation on keystrokes
@@ -220,24 +214,25 @@ class TransferFormTable:
             selected_id = code_to_id.get(selected_name)
             return selected_id if selected_id else None
 
-        def get_selected_warehouse_from_id():
-            selected_name = entries["Warehouse (FROM)"].get()
+
+        def get_selected_warehouse_id():
+            selected_name = entries["Warehouse"].get()
             selected_id = warehouse_to_id.get(selected_name)  # Get the corresponding ID
             if selected_id:
                 return selected_id
             else:
                 return None
 
-        def get_selected_warehouse_to_id():
-            selected_name = entries["Warehouse (TO)"].get()
-            selected_id = warehouse_to_id.get(selected_name)  # Get the corresponding ID
+        def get_selected_current_status_id():
+            selected_name = entries["Current Status"].get()
+            selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
             if selected_id:
                 return selected_id
             else:
                 return None
 
-        def get_selected_status_id():
-            selected_name = entries["Status"].get()
+        def get_selected_new_status_id():
+            selected_name = entries["New Status"].get()
             selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
             if selected_id:
                 return selected_id
@@ -247,86 +242,70 @@ class TransferFormTable:
         def update_record():
             # Convert date to YYYY-MM-DD
             try:
-                transfer_date = datetime.strptime(entries["Transfer Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
+                change_status_date = datetime.strptime(entries["Change Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
             except ValueError:
                 Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
                 return
-
-            # Create a dictionary with the data
             data = {
                 "rm_code_id": get_selected_rm_code_id(),
-                "from_warehouse_id": get_selected_warehouse_from_id(),
-                "to_warehouse_id": get_selected_warehouse_to_id(),
+                "warehouse_id": get_selected_warehouse_id(),
+                "current_status_id": get_selected_current_status_id(),
+                "new_status_id": get_selected_new_status_id(),
                 "ref_number": entries["Reference No."].get(),
-                "status_id": get_selected_status_id(),
-                "transfer_date": transfer_date,
+                "change_status_date":  change_status_date,
                 "qty_kg": entries["Quantity(kg)"].get(),
             }
 
             # Validate the data entries in front-end side
-            if TranferValidation.entry_validation(data):
-                error_text = TranferValidation.entry_validation(data)
+            if EntryValidation.entry_validation(data):
+                error_text = EntryValidation.entry_validation(data)
                 Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
                 return
 
-                # Check if the record is existing in the inventory
-                # Call the check_raw_material function
-            result = self.check_raw_material(get_selected_rm_code_id(),
-                                             get_selected_warehouse_from_id(),
-                                             get_selected_status_id())
-            # Display the result in the GUI
-            if result:
+            # Validate if the entry value exceeds the stock
+            validatation_result = PrepValidation.validate_soh_value(
+                get_selected_rm_code_id(),
+                get_selected_warehouse_id(),
+                float(entries["Quantity(kg)"].get()),
+                get_selected_current_status_id()
 
-                # Validate if the entry value exceeds the stock
-                validatation_result = PrepValidation.validate_soh_value(
-                    get_selected_rm_code_id(),
-                    get_selected_warehouse_from_id(),
-                    float(entries["Quantity(kg)"].get()),
-                    get_selected_status_id()
+            )
 
-                )
+            if validatation_result:
 
-                if validatation_result:
+                try:
+                    url = server_ip + f"/api/change_status_form/v1/update/{item}/"
+                    response = requests.put(url, json=data)
+                    if response.status_code == 200:
+                        self.refresh_table()
+                        edit_window.destroy()
+                        messagebox.showinfo("Success", "Record updated successfully")
 
-                    try:
-                        url = server_ip + f"/api/transfer_forms/v1/update/{item}/"
-                        response = requests.put(url, json=data)
-                        if response.status_code == 200:
-                            self.refresh_table()
-                            edit_window.destroy()
-                            messagebox.showinfo("Success", "Record updated successfully")
-
-                        else:
-                            messagebox.showerror("Error", f"Failed to update record - {response.status_code}")
-                    except requests.exceptions.RequestException as e:
-                        messagebox.showerror("Error", f"Failed to update: {e}")
-
-                else:
-                    Messagebox.show_error(
-                        "The entered quantity in 'Quantity' exceeds the available stock in the database.",
-                        "Data Entry Error")
-                    return
+                    else:
+                        messagebox.showerror("Error", f"Failed to update record - {response.status_code}")
+                except requests.exceptions.RequestException as e:
+                    messagebox.showerror("Error", f"Failed to update: {e}")
 
             else:
-                Messagebox.show_error(f"The raw material record is not existing in the database.", "Failed Transfer.", alert=True)
+                Messagebox.show_error(
+                    "The entered quantity in 'Quantity' exceeds the available stock in the database.",
+                    "Data Entry Error")
                 return
 
-        save_button = ttk.Button(edit_window,
-                                 text="Save",
-                                 command=update_record,
-                                 width=20)
-        save_button.grid(row=len(fields), column=0, columnspan=2,pady=10)
+        ttk.Button(edit_window, text="Save", command=update_record, width=30).grid(row=len(fields), column=0, columnspan=2,
+                                                                         pady=10)
 
     def delete_entry(self, entry_id):
         """Delete selected entry via API."""
         if messagebox.askyesno("Confirm", "Are you sure you want to delete this entry?"):
-            url = server_ip + f"/api/transfer_forms/v1/delete/{entry_id}/"
+            url = server_ip + f"/api/change_status_form/v1/delete/{entry_id}/"
             response = requests.delete(url)
             if response.status_code == 200:
                 self.tree.delete(entry_id)
                 messagebox.showinfo("Success", "Entry deleted successfully.")
             else:
                 messagebox.showerror("Error", "Failed to delete entry.")
+
 
     def sort_column(self, col, reverse):
         """Sort Treeview column in ascending/descending order."""
@@ -337,35 +316,6 @@ class TransferFormTable:
         self.tree.heading(col, command=lambda: self.sort_column(col, not reverse))
 
 
-    def check_raw_material(self, rm_id: UUID, warehouse_id: UUID, status_id: UUID = None):
-        url = f"{server_ip}/api/check/raw_material/"
-
-        # Construct the query parameters
-        params = {
-            "rm_id": str(rm_id),  # Convert UUID to string for query parameter
-            "warehouse_id": str(warehouse_id),
-        }
-
-        # Include status_id only if it's not None
-        if status_id:
-            params["status_id"] = status_id
-        # Handle response
-
-        try:
-            # Send the GET request
-            response = requests.get(url, params=params)
-
-            # Check if the response was successful
-            if response.status_code == 200:
-                # Parse the response data (True or False)
-                return response.json()  # This will return either True or False
-            else:
-                # Handle errors
-                print(f"Error: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return False
 
     def search_data(self, event=None):
         """Filter and display only matching records in the Treeview."""
@@ -502,7 +452,7 @@ class TransferFormTable:
         def clear_all_notes_form_data():
             """Fetch data from API and format for table rowdata."""
             url = f"{server_ip}/api/clear-table-data"
-            params = {"tbl": "transfer forms"}  # Send tbl as a query parameter
+            params = {"tbl": "change status forms"}  # Send tbl as a query parameter
             try:
                 # Send another POST request to clear data
                 response = requests.post(url, params=params)
@@ -516,4 +466,3 @@ class TransferFormTable:
 
             except requests.exceptions.RequestException as e:
                 return False
-

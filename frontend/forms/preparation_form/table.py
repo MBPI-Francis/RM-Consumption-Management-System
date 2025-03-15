@@ -1,3 +1,4 @@
+import psycopg2
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import requests
@@ -9,21 +10,22 @@ from uuid import UUID
 from datetime import datetime
 from ttkbootstrap.tooltip import ToolTip
 from .validation import EntryValidation
-from frontend.data_entry.shared import SharedFunctions
+from ..shared import SharedFunctions
 
 
-class ReceivingFormTable:
+class NoteTable:
     def __init__(self, root):
         self.root = root
-        # Instantiate the shared_function class
-        self.shared_functions = SharedFunctions()
+        shared_functions = SharedFunctions()
 
-        self.get_warehouse_api = self.shared_functions.get_warehouse_api()
-        self.get_rm_code_api = self.shared_functions.get_rm_code_api()
+        self.get_status_api = shared_functions.get_status_api()
+        self.get_rm_code_api = shared_functions.get_rm_code_api()
+        self.get_warehouse_api = shared_functions.get_warehouse_api()
+
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(fill=X, padx=10, pady=(15, 0))
+        search_frame.pack(fill=X, padx=10, pady=(10, 0))
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
         self.search_entry = ttk.Entry(search_frame, width=50)
         self.search_entry.pack(side=LEFT)
@@ -47,7 +49,10 @@ class ReceivingFormTable:
         # First, define self.tree before using it
         self.tree = ttk.Treeview(
             master=tree_frame,
-            columns=("Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date", "Entry Date"),
+            columns=("Raw Material", "Warehouse", "Status", "Reference No.",
+                  "Quantity (Prepared)", "Quantity (Return)",
+                  "Preparation Date",
+                  "Entry Date"),
             show='headings',
             bootstyle=PRIMARY
         )
@@ -66,6 +71,7 @@ class ReceivingFormTable:
         # Configure the Treeview to use the scrollbars
         self.tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
 
+
         # Define columns
         for col in self.tree['columns']:
             self.tree.heading(col, text=col)
@@ -76,14 +82,21 @@ class ReceivingFormTable:
         self.refresh_table()
 
         # Define column headers
-        col_names = ["Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date", "Entry Date"]
+        col_names = [   "Raw Material",
+                        "Warehouse",
+                        "Status",
+                        "Reference No.",
+                        "Quantity (Prepared)",
+                        "Quantity (Return)",
+                        "Preparation Date",
+                        "Entry Date"]
         for col in col_names:
             self.tree.heading(col, text=col, command=lambda _col=col: self.sort_treeview(_col, False), anchor=W)
             self.tree.column(col, anchor=W)
 
     def fetch_data(self):
         """Fetch data from API."""
-        url = server_ip + "/api/receiving_reports/v1/list/"
+        url = server_ip + "/api/preparation_forms/v1/list/"
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -93,17 +106,21 @@ class ReceivingFormTable:
 
     def refresh_table(self):
         """Refresh Treeview with data."""
-        self.tree.delete(*self.tree.get_children())
-        self.original_data = []  # Store all records
 
+        self.original_data = []
+
+        self.tree.delete(*self.tree.get_children())
         for item in self.fetch_data():
+
             record = (
                 item["id"],  # Store ID
                 item["raw_material"],
                 item["wh_name"],
+                item["status"],
                 item["ref_number"],
-                item["qty_kg"],
-                item["receiving_date"],
+                item["qty_prepared"],
+                item["qty_return"],
+                item["preparation_date"],
                 datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
             )
             self.original_data.append(record)  # Save record
@@ -136,9 +153,14 @@ class ReceivingFormTable:
         edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
 
-        fields = ["Raw Material", "Warehouse", "RR no.#", "Quantity(kg)", "Receiving Date"]
+        fields = [ "Raw Material",
+                    "Warehouse",
+                    "Status",
+                    "Reference No.",
+                    "Quantity (Prepared)",
+                    "Quantity (Return)",
+                    "Preparation Date"]
         entries = {}
-
 
 
         for idx, field in enumerate(fields):
@@ -165,14 +187,37 @@ class ReceivingFormTable:
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
-            elif field == "Receiving Date":
+            elif field == "Status":
+                # Warehouse JSON-format choices (coming from the API)
+                status = self.get_status_api
+                status_to_id = {item["name"]: item["id"] for item in status}
+                status_names = list(status_to_id.keys())
+
+                entry = ttk.Combobox(edit_window, values=status_names, state="readonly", width=30, )
+                entry.set(record[idx])  # Set current value in the combobox
+                ToolTip(entry, text="Choose a status")  # Tooltip
+
+
+            elif field == "Preparation Date":
                 entry = DateEntry(edit_window, dateformat="%m/%d/%Y", width=30)
                 entry.entry.delete(0, "end")
                 formatted_date = datetime.strptime(record[idx], "%Y-%m-%d").strftime("%m/%d/%Y")
                 entry.entry.insert(0, formatted_date)
 
 
-            elif field == "Quantity(kg)":
+            elif field == "Quantity (Prepared)":
+                validate_numeric_command = edit_window.register(EntryValidation.validate_numeric_input)
+                entry = ttk.Entry(edit_window,
+                                      width=30,
+                                      validate="key",  # Trigger validation on keystrokes
+                                      validatecommand=(validate_numeric_command, "%P")
+                                      # Pass the current widget content ("%P")
+                                      )
+                entry.insert(0, record[idx])
+                ToolTip(entry, text="Enter the Quantity (Prepared)")
+
+
+            elif field == "Quantity (Return)":
 
                 validate_numeric_command = edit_window.register(EntryValidation.validate_numeric_input)
                 entry = ttk.Entry(edit_window,
@@ -182,7 +227,7 @@ class ReceivingFormTable:
                                       # Pass the current widget content ("%P")
                                       )
                 entry.insert(0, record[idx])
-                ToolTip(entry, text="Enter the Quantity(kg)")
+                ToolTip(entry, text="Enter the Quantity (Return)")
 
 
             else:
@@ -208,19 +253,35 @@ class ReceivingFormTable:
             else:
                 return None
 
+
+        def get_selected_status_id():
+            selected_name = entries["Status"].get()
+            selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
+            if selected_id:
+                return selected_id
+            else:
+                return None
+
         def update_record():
+            qty_return = entries["Quantity (Return)"].get()
+
+            if qty_return == None or qty_return == '':
+                qty_return = float(0.00)
+
             # Convert date to YYYY-MM-DD
             try:
-                receiving_date = datetime.strptime(entries["Receiving Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
+                preparation_date = datetime.strptime(entries["Preparation Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
             except ValueError:
                 Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
                 return
             data = {
                 "rm_code_id": get_selected_rm_code_id(),
                 "warehouse_id": get_selected_warehouse_id(),
-                "ref_number": entries["Ref No."].get(),
-                "receiving_date":  receiving_date,
-                "qty_kg": entries["Quantity(kg)"].get(),
+                "ref_number": entries["Reference No."].get(),
+                "status_id": get_selected_status_id(),
+                "preparation_date":  preparation_date,
+                "qty_prepared": entries["Quantity (Prepared)"].get(),
+                "qty_return": qty_return,
             }
 
             # Validate the data entries in front-end side
@@ -229,17 +290,33 @@ class ReceivingFormTable:
                 Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
                 return
 
-            url = server_ip + f"/api/receiving_reports/v1/update/{item}/"
-            try:
-                response = requests.put(url, json=data)
-                if response.status_code == 200:
-                    messagebox.showinfo("Success", "Record updated successfully")
-                    self.refresh_table()
-                    edit_window.destroy()
-                else:
-                    messagebox.showerror("Error", "Failed to update record - ",response.status_code)
-            except requests.exceptions.RequestException as e:
-                messagebox.showerror("Error", f"Failed to update: {e}")
+            validatation_result = EntryValidation.validate_soh_value(
+                get_selected_rm_code_id(),
+                get_selected_warehouse_id(),
+                entries["Quantity (Prepared)"].get(),
+                get_selected_status_id()
+            )
+
+            if validatation_result:
+                try:
+                    url = server_ip + f"/api/preparation_forms/v1/update/{item}/"
+                    response = requests.put(url, json=data)
+                    if response.status_code == 200:
+                        self.refresh_table()
+                        edit_window.destroy()
+                        messagebox.showinfo("Success", "Record updated successfully")
+
+
+                    else:
+                        messagebox.showerror("Error", "Failed to update record - ",response.status_code)
+                except requests.exceptions.RequestException as e:
+                    messagebox.showerror("Error", f"Failed to update: {e}")
+
+            else:
+                Messagebox.show_error(
+                    "The entered quantity in 'Quantity (Prepared)' exceeds the available stock in the database.",
+                    "Data Entry Error")
+                return
 
         ttk.Button(edit_window, text="Save", command=update_record, width=30).grid(row=len(fields), column=0, columnspan=2,
                                                                          pady=10)
@@ -250,7 +327,7 @@ class ReceivingFormTable:
 
     def delete_record(self, item_id):
         """Send DELETE request to API."""
-        url = server_ip + f"/api/receiving_reports/v1/delete/{item_id}/"
+        url = server_ip + f"/api/preparation_forms/v1/delete/{item_id}/"
         response = requests.delete(url)
         if response.status_code == 200:
             self.refresh_table()
@@ -289,10 +366,7 @@ class ReceivingFormTable:
             self.tree.insert("", END, iid=record[0], values=record[1:])
 
     def confirmation_panel_clear(self):
-        # confirmation_window = ttk.Toplevel(form_frame)
-        # confirmation_window.title("Confirm Action")
-        # confirmation_window.geometry("450x410")
-        # confirmation_window.resizable(True, True)
+
 
         confirmation_window = ttk.Toplevel(self.root)
         confirmation_window.title("Confirm Action")
@@ -395,7 +469,7 @@ class ReceivingFormTable:
         def clear_all_notes_form_data():
             """Fetch data from API and format for table rowdata."""
             url = f"{server_ip}/api/clear-table-data"
-            params = {"tbl": "receiving forms"}  # Send tbl as a query parameter
+            params = {"tbl": "preparation forms"}  # Send tbl as a query parameter
             try:
                 # Send another POST request to clear data
                 response = requests.post(url, params=params)

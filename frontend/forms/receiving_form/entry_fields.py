@@ -7,7 +7,7 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from datetime import datetime, timedelta
 from .table import ReceivingFormTable
 from .validation import EntryValidation
-from frontend.data_entry.shared import SharedFunctions
+from frontend.forms.shared import SharedFunctions
 from tkinter import StringVar
 
 

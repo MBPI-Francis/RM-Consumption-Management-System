@@ -2,30 +2,31 @@ import psycopg2
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import requests
-from backend.settings.database import server_ip
-from tkinter import Toplevel, messagebox, StringVar
-from ttkbootstrap.dialogs import Querybox, Messagebox
-from ttkbootstrap.widgets import DateEntry
-from uuid import UUID
-from datetime import datetime
 from ttkbootstrap.tooltip import ToolTip
+from tkinter import Toplevel, messagebox, StringVar
+from backend.settings.database import server_ip
+from datetime import datetime
+from uuid import UUID
+from tkinter import simpledialog
+from ttkbootstrap.widgets import DateEntry
 from .validation import EntryValidation
+from ttkbootstrap.dialogs import Messagebox
+from ..preparation_form.validation import EntryValidation as PrepValidation
 from ..shared import SharedFunctions
 
 
-class NoteTable:
+class OutgoingFormTable:
     def __init__(self, root):
         self.root = root
-        shared_functions = SharedFunctions()
+        # Instantiate the shared_function class
+        self.shared_functions = SharedFunctions()
 
-        self.get_status_api = shared_functions.get_status_api()
-        self.get_rm_code_api = shared_functions.get_rm_code_api()
-        self.get_warehouse_api = shared_functions.get_warehouse_api()
-
+        self.get_warehouse_api = self.shared_functions.get_warehouse_api()
+        self.get_rm_code_api = self.shared_functions.get_rm_code_api()
 
         # Frame for search
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(fill=X, padx=10, pady=(15, 0))
+        search_frame.pack(fill=X, padx=10, pady=(10, 0))
         ttk.Label(search_frame, text="Search:").pack(side=LEFT, padx=5)
         self.search_entry = ttk.Entry(search_frame, width=50)
         self.search_entry.pack(side=LEFT)
@@ -40,7 +41,7 @@ class NoteTable:
             bootstyle=WARNING,
         )
         btn_clear.pack(side=RIGHT)
-        ToolTip(btn_clear, text="Click the button to clear all the Note Form data.")
+        ToolTip(btn_clear, text="Click the button to clear all the Outgoing Form data.")
 
         # Create a frame to hold the Treeview and Scrollbars
         tree_frame = ttk.Frame(self.root)
@@ -49,10 +50,7 @@ class NoteTable:
         # First, define self.tree before using it
         self.tree = ttk.Treeview(
             master=tree_frame,
-            columns=("Raw Material", "Warehouse", "Status", "Reference No.",
-                  "Quantity (Prepared)", "Quantity (Return)",
-                  "Preparation Date",
-                  "Entry Date"),
+            columns=("Raw Material", "Warehouse", "Reference No.", "Quantity(kg)", "Outgoing Date", "Entry Date"),
             show='headings',
             bootstyle=PRIMARY
         )
@@ -72,94 +70,66 @@ class NoteTable:
         self.tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
 
 
-        # Define columns
-        for col in self.tree['columns']:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=150)
+        # Define column headings
+        for col in self.tree["columns"]:
+            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c, False), anchor=W)
+            self.tree.column(col, width=150, anchor=W)
 
         self.tree.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-        self.tree.bind("<Button-3>", self.show_context_menu)
+        self.tree.bind("<Button-3>", self.show_context_menu)  # Right-click menu
+
         self.refresh_table()
 
-        # Define column headers
-        col_names = [   "Raw Material",
-                        "Warehouse",
-                        "Status",
-                        "Reference No.",
-                        "Quantity (Prepared)",
-                        "Quantity (Return)",
-                        "Preparation Date",
-                        "Entry Date"]
-        for col in col_names:
-            self.tree.heading(col, text=col, command=lambda _col=col: self.sort_treeview(_col, False), anchor=W)
-            self.tree.column(col, anchor=W)
-
-    def fetch_data(self):
-        """Fetch data from API."""
-        url = server_ip + "/api/preparation_forms/v1/list/"
+    def refresh_table(self):
+        """Fetch data from API and populate Treeview."""
+        url = server_ip + "/api/outgoing_reports/v1/list/"
+        self.original_data = []  # Store all records
         try:
             response = requests.get(url)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            self.tree.delete(*self.tree.get_children())  # Clear existing data
+            for item in data:
+
+                record = (
+                    item["id"],  # Store ID
+                    item["raw_material"],
+                    item["wh_name"],
+                    item["ref_number"],
+                    item["qty_kg"],
+                    item["outgoing_date"],
+                    datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
+                )
+                self.original_data.append(record)  # Save record
+                self.tree.insert("", END, iid=record[0], values=record[1:])
+
         except requests.exceptions.RequestException as e:
             return []
 
-    def refresh_table(self):
-        """Refresh Treeview with data."""
-
-        self.original_data = []
-
-        self.tree.delete(*self.tree.get_children())
-        for item in self.fetch_data():
-
-            record = (
-                item["id"],  # Store ID
-                item["raw_material"],
-                item["wh_name"],
-                item["status"],
-                item["ref_number"],
-                item["qty_prepared"],
-                item["qty_return"],
-                item["preparation_date"],
-                datetime.fromisoformat(item["created_at"]).strftime("%m/%d/%Y %I:%M %p"),
-            )
-            self.original_data.append(record)  # Save record
-            self.tree.insert("", END, iid=record[0], values=record[1:])
-
-    def sort_treeview(self, col, reverse):
-        """Sort treeview column data."""
-        items = [(self.tree.set(k, col), k) for k in self.tree.get_children('')]
-        items.sort(reverse=reverse)
-        for index, (val, k) in enumerate(items):
-            self.tree.move(k, "", index)
-        self.tree.heading(col, command=lambda: self.sort_treeview(col, not reverse))
-
-
     def show_context_menu(self, event):
-        """Show right-click menu."""
+        """Show right-click menu with Edit/Delete options."""
         item = self.tree.identify_row(event.y)
         if item:
             menu = ttk.Menu(self.root, tearoff=0)
             menu.add_command(label="Edit", command=lambda: self.edit_record(item))
-            menu.add_command(label="Delete", command=lambda: self.confirm_delete(item))
+            # menu.add_command(label="Delete", command=lambda: self.confirm_delete(item))
+            menu.add_command(label="Delete", command=lambda: self.delete_entry(item))
             menu.post(event.x_root, event.y_root)
 
     def edit_record(self, item):
         """Open edit form."""
         record = self.tree.item(item, 'values')
+
+        # Remove "Beginning Balance" (index 4) and "Entry Date" (index 6)
+        record = (record[0], record[1], record[2], record[3], record[4])
+
         if not record:
             return
 
         edit_window = Toplevel(self.root)
         edit_window.title("Edit Record")
 
-        fields = [ "Raw Material",
-                    "Warehouse",
-                    "Status",
-                    "Reference No.",
-                    "Quantity (Prepared)",
-                    "Quantity (Return)",
-                    "Preparation Date"]
+        fields = ["Raw Material", "Warehouse", "Ref No.", "Quantity(kg)", "Outgoing Date"]
         entries = {}
 
 
@@ -187,37 +157,14 @@ class NoteTable:
                 entry.set(record[idx])  # Set current value in the combobox
                 ToolTip(entry, text="Select a warehouse")  # Tooltip
 
-            elif field == "Status":
-                # Warehouse JSON-format choices (coming from the API)
-                status = self.get_status_api
-                status_to_id = {item["name"]: item["id"] for item in status}
-                status_names = list(status_to_id.keys())
-
-                entry = ttk.Combobox(edit_window, values=status_names, state="readonly", width=30, )
-                entry.set(record[idx])  # Set current value in the combobox
-                ToolTip(entry, text="Choose a status")  # Tooltip
-
-
-            elif field == "Preparation Date":
+            elif field == "Outgoing Date":
                 entry = DateEntry(edit_window, dateformat="%m/%d/%Y", width=30)
                 entry.entry.delete(0, "end")
                 formatted_date = datetime.strptime(record[idx], "%Y-%m-%d").strftime("%m/%d/%Y")
                 entry.entry.insert(0, formatted_date)
 
 
-            elif field == "Quantity (Prepared)":
-                validate_numeric_command = edit_window.register(EntryValidation.validate_numeric_input)
-                entry = ttk.Entry(edit_window,
-                                      width=30,
-                                      validate="key",  # Trigger validation on keystrokes
-                                      validatecommand=(validate_numeric_command, "%P")
-                                      # Pass the current widget content ("%P")
-                                      )
-                entry.insert(0, record[idx])
-                ToolTip(entry, text="Enter the Quantity (Prepared)")
-
-
-            elif field == "Quantity (Return)":
+            elif field == "Quantity(kg)":
 
                 validate_numeric_command = edit_window.register(EntryValidation.validate_numeric_input)
                 entry = ttk.Entry(edit_window,
@@ -227,7 +174,7 @@ class NoteTable:
                                       # Pass the current widget content ("%P")
                                       )
                 entry.insert(0, record[idx])
-                ToolTip(entry, text="Enter the Quantity (Return)")
+                ToolTip(entry, text="Enter the Quantity(kg)")
 
 
             else:
@@ -253,35 +200,19 @@ class NoteTable:
             else:
                 return None
 
-
-        def get_selected_status_id():
-            selected_name = entries["Status"].get()
-            selected_id = status_to_id.get(selected_name)  # Get the corresponding ID
-            if selected_id:
-                return selected_id
-            else:
-                return None
-
         def update_record():
-            qty_return = entries["Quantity (Return)"].get()
-
-            if qty_return == None or qty_return == '':
-                qty_return = float(0.00)
-
             # Convert date to YYYY-MM-DD
             try:
-                preparation_date = datetime.strptime(entries["Preparation Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
+                outgoing_date = datetime.strptime(entries["Outgoing Date"].entry.get(), "%m/%d/%Y").strftime("%Y-%m-%d")
             except ValueError:
                 Messagebox.show_error("Error", "Invalid date format. Please use MM/DD/YYYY.")
                 return
             data = {
                 "rm_code_id": get_selected_rm_code_id(),
                 "warehouse_id": get_selected_warehouse_id(),
-                "ref_number": entries["Reference No."].get(),
-                "status_id": get_selected_status_id(),
-                "preparation_date":  preparation_date,
-                "qty_prepared": entries["Quantity (Prepared)"].get(),
-                "qty_return": qty_return,
+                "ref_number": entries["Ref No."].get(),
+                "outgoing_date":  outgoing_date,
+                "qty_kg": entries["Quantity(kg)"].get(),
             }
 
             # Validate the data entries in front-end side
@@ -290,52 +221,72 @@ class NoteTable:
                 Messagebox.show_error(f"There is no data in these fields {error_text}.", "Data Entry Error", alert=True)
                 return
 
-            validatation_result = EntryValidation.validate_soh_value(
+            # Validate if the entry value exceeds the stock
+            validatation_result = PrepValidation.validate_soh_value(
                 get_selected_rm_code_id(),
                 get_selected_warehouse_id(),
-                entries["Quantity (Prepared)"].get(),
-                get_selected_status_id()
+                entries["Quantity(kg)"].get(),
+                self.get_status_id()
+
             )
 
             if validatation_result:
+
                 try:
-                    url = server_ip + f"/api/preparation_forms/v1/update/{item}/"
+                    url = server_ip + f"/api/outgoing_reports/v1/update/{item}/"
                     response = requests.put(url, json=data)
                     if response.status_code == 200:
+                        messagebox.showinfo("Success", "Record updated successfully")
                         self.refresh_table()
                         edit_window.destroy()
-                        messagebox.showinfo("Success", "Record updated successfully")
-
 
                     else:
-                        messagebox.showerror("Error", "Failed to update record - ",response.status_code)
+                        messagebox.showerror("Error", f"Failed to update record - {response.status_code}")
                 except requests.exceptions.RequestException as e:
                     messagebox.showerror("Error", f"Failed to update: {e}")
 
             else:
                 Messagebox.show_error(
-                    "The entered quantity in 'Quantity (Prepared)' exceeds the available stock in the database.",
+                    "The entered quantity in 'Quantity' exceeds the available stock in the database.",
                     "Data Entry Error")
                 return
 
+
+
+
         ttk.Button(edit_window, text="Save", command=update_record, width=30).grid(row=len(fields), column=0, columnspan=2,
                                                                          pady=10)
-    def confirm_delete(self, item_id):
-        """Show confirmation before deleting record."""
-        if messagebox.askyesno("Confirm", "Are you sure you want to delete this record?"):
-            self.delete_record(item_id)
 
-    def delete_record(self, item_id):
-        """Send DELETE request to API."""
-        url = server_ip + f"/api/preparation_forms/v1/delete/{item_id}/"
-        response = requests.delete(url)
+    def delete_entry(self, entry_id):
+        """Delete selected entry via API."""
+        if messagebox.askyesno("Confirm", "Are you sure you want to delete this entry?"):
+            url = server_ip + f"/api/outgoing_reports/v1/delete/{entry_id}/"
+            response = requests.delete(url)
+            if response.status_code == 200:
+                self.tree.delete(entry_id)
+                messagebox.showinfo("Success", "Entry deleted successfully.")
+            else:
+                messagebox.showerror("Error", "Failed to delete entry.")
+
+    def sort_column(self, col, reverse):
+        """Sort Treeview column in ascending/descending order."""
+        data = [(self.tree.set(k, col), k) for k in self.tree.get_children("")]
+        data.sort(reverse=reverse)
+        for index, (_, k) in enumerate(data):
+            self.tree.move(k, "", index)
+        self.tree.heading(col, command=lambda: self.sort_column(col, not reverse))
+
+
+    def get_status_id(self):
+        url = server_ip + "/api/status/v1/search_status/"
+        params = {"name": "good"}  # Send name as a query parameter
+        response = requests.get(url, params=params)
+
         if response.status_code == 200:
-            self.refresh_table()
-            messagebox.showinfo("Success", "Record deleted successfully")
-
+            data = response.json()  # Parse JSON response
+            return data['id']
         else:
-            messagebox.showerror("Error", "Failed to delete record")
-
+            return []
 
     def search_data(self, event=None):
         """Filter and display only matching records in the Treeview."""
@@ -366,7 +317,10 @@ class NoteTable:
             self.tree.insert("", END, iid=record[0], values=record[1:])
 
     def confirmation_panel_clear(self):
-
+        # confirmation_window = ttk.Toplevel(form_frame)
+        # confirmation_window.title("Confirm Action")
+        # confirmation_window.geometry("450x410")
+        # confirmation_window.resizable(True, True)
 
         confirmation_window = ttk.Toplevel(self.root)
         confirmation_window.title("Confirm Action")
@@ -469,7 +423,7 @@ class NoteTable:
         def clear_all_notes_form_data():
             """Fetch data from API and format for table rowdata."""
             url = f"{server_ip}/api/clear-table-data"
-            params = {"tbl": "preparation forms"}  # Send tbl as a query parameter
+            params = {"tbl": "outgoing forms"}  # Send tbl as a query parameter
             try:
                 # Send another POST request to clear data
                 response = requests.post(url, params=params)
